@@ -133,6 +133,7 @@ __pycache__/
 
 # C extensions
 *.so
+/Cython/*
 
 # Distribution / packaging
 build/

@@ -9,10 +9,10 @@ Created on 22/11/2018
 import traceback, os, shutil
 
 
-from Base.Evaluation.Evaluator import EvaluatorHoldout, EvaluatorNegativeItemSample
+from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorNegativeItemSample
 from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
 from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
-from Base.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
+from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
 
 
 def write_log_string(log_file, string):
@@ -113,22 +113,22 @@ def run_recommender(recommender_class):
 
 
 import multiprocessing
-from Base.NonPersonalizedRecommender import Random, TopPop, GlobalEffects
-from GraphBased.P3alphaRecommender import P3alphaRecommender
-from GraphBased.RP3betaRecommender import RP3betaRecommender
+from Recommenders.NonPersonalizedRecommender import Random, TopPop, GlobalEffects
+from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
+from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 
-from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
-from KNN.UserKNNCFRecommender import UserKNNCFRecommender
+from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
+from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
 
-from MatrixFactorization.PureSVDRecommender import PureSVDRecommender
-from MatrixFactorization.IALSRecommender import IALSRecommender
-from MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
+from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
+from Recommenders.MatrixFactorization.IALSRecommender import IALSRecommender
+from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
 
-from SLIM_BPR.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
-from SLIM_ElasticNet.SLIMElasticNetRecommender import SLIMElasticNetRecommender
-from EASE_R.EASE_R_Recommender import EASE_R_Recommender
+from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
+from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
+from Recommenders.EASE_R.EASE_R_Recommender import EASE_R_Recommender
 
-from KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
+from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 
 
 if __name__ == '__main__':
