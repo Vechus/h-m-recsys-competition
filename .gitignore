@@ -148,3 +148,6 @@ pycydemo/version.py
 
 #PyCharm
 .idea
+
+SourcesData/
+
