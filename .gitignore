@@ -150,4 +150,6 @@ pycydemo/version.py
 .idea
 
 SourcesData/
+dataset/*.csv
+dataset/*.csv.zip
 
