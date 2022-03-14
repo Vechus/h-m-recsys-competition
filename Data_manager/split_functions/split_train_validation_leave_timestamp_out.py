@@ -109,11 +109,13 @@ def split_train_validation_leave_timestamp_out(URM, timestamp_df, user_id_mappin
     validation_interactions.drop_duplicates()
 
     # Create COO matrices and populate with data
+    # Could use a function to do this
 
     train_users = []
     train_items = []
     train_data = []
     for index, row in train_interactions.iterrows():
+        # Use dictionary to retrieve corresponding user id
         train_users.append(user_id_mapping[row[userid_column]])
         train_items.append(item_id_mapping[row[itemid_column]])
         train_data.append(1)
@@ -139,7 +141,7 @@ def split_train_validation_leave_timestamp_out(URM, timestamp_df, user_id_mappin
             items.append(item_id_mapping[row[itemid_column]])
             data.append(1)
         validation_URM = sps.coo_matrix((data, (users, items)))
-        validation_URM = test_URM.tocsr()
+        validation_URM = validation_URM.tocsr()
         return train_URM, test_URM, validation_URM
 
     return train_URM, test_URM
