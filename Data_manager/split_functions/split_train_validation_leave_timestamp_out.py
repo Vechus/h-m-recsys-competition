@@ -76,7 +76,6 @@ def split_train_validation_leave_timestamp_out(URM, timestamp_df, user_id_mappin
     :param validation_ts_tuple: tuples with starting timestamp and ending timestamps included
     :param test_ts_tuple:
     :param use_validation_set:
-    :param leave_random_out:
     :return:
         """
 
@@ -119,8 +118,13 @@ def split_train_validation_leave_timestamp_out(URM, timestamp_df, user_id_mappin
         train_users.append(user_id_mapping[row[userid_column]])
         train_items.append(item_id_mapping[row[itemid_column]])
         train_data.append(1)
-    train_URM = sps.coo_matrix((train_data, (train_users, train_items)))
-    train_URM = train_URM.tocsr()
+
+    URM_train_builder.add_data_lists(train_users, train_items,
+                                     train_data)
+
+    train_URM = URM_train_builder.get_SparseMatrix()
+    # train_URM = sps.coo_matrix((train_data, (train_users, train_items)))
+    # train_URM = train_URM.tocsr()
 
     users = []
     items = []
@@ -129,8 +133,11 @@ def split_train_validation_leave_timestamp_out(URM, timestamp_df, user_id_mappin
         users.append(user_id_mapping[row[userid_column]])
         items.append(item_id_mapping[row[itemid_column]])
         data.append(1)
-    test_URM = sps.coo_matrix((data, (users, items)))
-    test_URM = test_URM.tocsr()
+
+    URM_test_builder.add_data_lists(users, items, data)
+    test_URM = URM_test_builder.get_SparseMatrix()
+    # test_URM = sps.coo_matrix((data, (users, items)))
+    # test_URM = test_URM.tocsr()
 
     if use_validation_set:
         users = []
@@ -140,8 +147,11 @@ def split_train_validation_leave_timestamp_out(URM, timestamp_df, user_id_mappin
             users.append(user_id_mapping[row[userid_column]])
             items.append(item_id_mapping[row[itemid_column]])
             data.append(1)
-        validation_URM = sps.coo_matrix((data, (users, items)))
-        validation_URM = validation_URM.tocsr()
+
+        URM_validation_builder.add_data_lists(users, items, data)
+        validation_URM = URM_validation_builder.get_SparseMatrix()
+        # validation_URM = sps.coo_matrix((data, (users, items)))
+        # validation_URM = validation_URM.tocsr()
         return train_URM, test_URM, validation_URM
 
     return train_URM, test_URM
