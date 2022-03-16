@@ -72,7 +72,7 @@ def articles_func(root_dir, is_detailDesc_NAdropped, is_flg_stemmed, is_flg_lemm
 
 
 # Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    root_dir = 'D:/Polimi/M2-S2/'
-    df_articles_cleaned = articles_func(root_dir, True, True, True)
-    print(df_articles_cleaned.head())
+# if __name__ == '__main__':
+#     root_dir = 'D:/Polimi/M2-S2/'
+#     df_articles_cleaned = articles_func(root_dir, True, True, True)
+#     print(df_articles_cleaned.head())

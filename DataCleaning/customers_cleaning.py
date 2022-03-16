@@ -17,10 +17,10 @@ df_transactions = pd.read_csv(os.path.join(path, dataset_dict["transactions"]))
 
 def clean_FN(df_customers_to_clean, strategy='Delete_Feature'):
 
-    if strategy is 'Delete_Feature':
+    if strategy == 'Delete_Feature':
         # Deleted the FN Active Columns
         df_customers_to_clean.drop(columns=['FN'], inplace=True)
-    elif strategy is 'Impute_Zero':
+    elif strategy == 'Impute_Zero':
         df_customers_to_clean['FN'] = df_customers_to_clean['FN'].fillna(0)
 
     return df_customers_to_clean
@@ -28,17 +28,17 @@ def clean_FN(df_customers_to_clean, strategy='Delete_Feature'):
 
 def clean_Active(df_customers_to_clean, strategy='Delete_Feature'):
 
-    if strategy is 'Delete_Feature':
+    if strategy == 'Delete_Feature':
         # Deleted the FN Active Columns
         df_customers_to_clean.drop(columns=['Active'],  inplace=True)
-    elif strategy is 'Impute_Zero':
+    elif strategy == 'Impute_Zero':
         df_customers_to_clean['Active'] = df_customers_to_clean['Active'].fillna(0)
     return df_customers_to_clean
 
 
 def clean_club_member_status(df_customers_to_clean, strategy='Impute_Mode_Active'):
     # Impute the club_member_status with Mode - Active
-    if strategy is 'Impute_Mode_Active':
+    if strategy == 'Impute_Mode_Active':
         # Impute club_member_status by majority vote value which is "Active".
         df_customers_to_clean['club_member_status'].fillna('ACTIVE', inplace=True)
 
@@ -50,7 +50,7 @@ def clean_fashion_news_frequency(df_customers_to_clean, strategy='Impute_Mode_NO
     df_customers_to_clean.loc[mask, 'fashion_news_frequency'] = 'NONE'
 
     # Impute the fashion_news_frequency with Mode - None
-    if strategy is 'Impute_Mode_NONE':
+    if strategy == 'Impute_Mode_NONE':
         # Impute fashion_news_frequency by majority vote value which is "NONE".
         df_customers_to_clean['fashion_news_frequency'].fillna('NONE', inplace=True)
 
@@ -58,7 +58,7 @@ def clean_fashion_news_frequency(df_customers_to_clean, strategy='Impute_Mode_NO
 
 
 def clean_Age(df_customers_to_clean, strategy='Mean_Age_of_club_member_status'):
-    if strategy is 'Mean_Age_of_club_member_status':
+    if strategy == 'Mean_Age_of_club_member_status':
         # Impute the Age with the mean age of club_member_status
         df_customers_to_clean_ = df_customers_to_clean.copy()
         map_means = df_customers_to_clean_.groupby('club_member_status')['age'].mean().to_dict()
@@ -70,7 +70,7 @@ def clean_Age(df_customers_to_clean, strategy='Mean_Age_of_club_member_status'):
         for i in tqdm(range(len(is_nan_age))):
             df_customers_to_clean.loc[is_nan_age[i], 'age'] = age_values[i]
 
-    elif strategy is 'Mean_Age_of_fashion_news_frequency':
+    elif strategy == 'Mean_Age_of_fashion_news_frequency':
 
         # Impute the Age with the mean age of fashion_news_frequency
         map_means = df_customers_to_clean.groupby('fashion_news_frequency')['age'].mean().to_dict()
