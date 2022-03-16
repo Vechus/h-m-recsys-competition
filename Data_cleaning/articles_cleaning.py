@@ -3,7 +3,9 @@ import pandas as pd
 import numpy as np
 import re
 import nltk
+
 nltk.download('popular')
+
 
 def preprocess_text(text, flg_stemm=False, flg_lemm=True):
     lst_stopwords = nltk.corpus.stopwords.words("english")
@@ -29,20 +31,20 @@ def preprocess_text(text, flg_stemm=False, flg_lemm=True):
         lst_text = [lem.lemmatize(word) for word in lst_text]
 
     ## back to string from list
-    # text = " ".join(lst_text)
-    text = lst_text
+    text = " ".join(lst_text)
+    #text = lst_text
     return text
 
 
 # param1:whether the Na value of detail_desc are dropped or not, True or False
 # param2:word stemming is used or not, Ture or False
 # param3:word lematisation is used or not, True or False
-def articles_func(root_dir, is_detailDesc_NAdropped, is_flg_stemmed, is_flg_lemmed):
-    df_articles_raw = pd.read_csv(root_dir + '/articles.csv')
+def articles_func(df_articles_raw,is_detailDesc_NAdropped=False, is_flg_stemmed=True, is_flg_lemmed=True):
+    # df_articles_raw = pd.read_csv(root_dir + '/articles.csv')
     df_articles = df_articles_raw.copy()
 
     # if drop the rows in which detail_desc is na, or not
-    if (is_detailDesc_NAdropped is True):
+    if is_detailDesc_NAdropped is True:
         df_articles = df_articles.dropna().reset_index()
         df_articles.drop('index', axis=1, inplace=True)
         print("detail_desc dropped!")
@@ -70,8 +72,6 @@ def articles_func(root_dir, is_detailDesc_NAdropped, is_flg_stemmed, is_flg_lemm
     print("articles cleaning done!")
     return df_articles
 
-
-# Press the green button in the gutter to run the script.
 # if __name__ == '__main__':
 #     root_dir = 'D:/Polimi/M2-S2/'
 #     df_articles_cleaned = articles_func(root_dir, True, True, True)

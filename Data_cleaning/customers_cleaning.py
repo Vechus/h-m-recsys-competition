@@ -7,7 +7,7 @@ import scipy.stats as ss
 from tqdm import tqdm
 
 
-def initial_all_mission_values(df_customers_to_clean):
+def initial_all_missing_values(df_customers_to_clean):
     return df_customers_to_clean.fillna(-1)
 
 
@@ -76,4 +76,3 @@ def clean_Age(df_customers_to_clean, strategy='Mean_Age_of_club_member_status'):
             df_customers_to_clean.loc[is_nan_age[i], 'age'] = age_values[i]
 
     return df_customers_to_clean
-
