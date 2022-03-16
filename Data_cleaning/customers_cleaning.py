@@ -6,14 +6,6 @@ import seaborn as sns
 import scipy.stats as ss
 from tqdm import tqdm
 
-dataset_dict = {"articles": "articles.csv", "customers": "customers.csv", "transactions": "transactions_train.csv"}
-
-path = '../dataset'
-
-df_articles = pd.read_csv(os.path.join(path, dataset_dict["articles"]))
-df_customers = pd.read_csv(os.path.join(path, dataset_dict["customers"]))
-df_transactions = pd.read_csv(os.path.join(path, dataset_dict["transactions"]))
-
 
 def initial_all_mission_values(df_customers_to_clean):
     return df_customers_to_clean.fillna(-1)
