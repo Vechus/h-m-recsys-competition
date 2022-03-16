@@ -8,11 +8,15 @@ from tqdm import tqdm
 
 dataset_dict = {"articles": "articles.csv", "customers": "customers.csv", "transactions": "transactions_train.csv"}
 
-path = '../SourcesData'
+path = '../dataset'
 
 df_articles = pd.read_csv(os.path.join(path, dataset_dict["articles"]))
 df_customers = pd.read_csv(os.path.join(path, dataset_dict["customers"]))
 df_transactions = pd.read_csv(os.path.join(path, dataset_dict["transactions"]))
+
+
+def initial_all_mission_values(df_customers_to_clean):
+    return df_customers_to_clean.fillna(-1)
 
 
 def clean_FN(df_customers_to_clean, strategy='Delete_Feature'):
@@ -20,8 +24,6 @@ def clean_FN(df_customers_to_clean, strategy='Delete_Feature'):
     if strategy == 'Delete_Feature':
         # Deleted the FN Active Columns
         df_customers_to_clean.drop(columns=['FN'], inplace=True)
-    elif strategy == 'Impute_Zero':
-        df_customers_to_clean['FN'] = df_customers_to_clean['FN'].fillna(0)
 
     return df_customers_to_clean
 
@@ -31,8 +33,7 @@ def clean_Active(df_customers_to_clean, strategy='Delete_Feature'):
     if strategy == 'Delete_Feature':
         # Deleted the FN Active Columns
         df_customers_to_clean.drop(columns=['Active'],  inplace=True)
-    elif strategy == 'Impute_Zero':
-        df_customers_to_clean['Active'] = df_customers_to_clean['Active'].fillna(0)
+
     return df_customers_to_clean
 
 
@@ -83,3 +84,4 @@ def clean_Age(df_customers_to_clean, strategy='Mean_Age_of_club_member_status'):
             df_customers_to_clean.loc[is_nan_age[i], 'age'] = age_values[i]
 
     return df_customers_to_clean
+
