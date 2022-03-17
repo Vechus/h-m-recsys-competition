@@ -152,4 +152,4 @@ pycydemo/version.py
 SourcesData/
 dataset/*.csv
 dataset/*.csv.zip
-
+processed/*.zip
