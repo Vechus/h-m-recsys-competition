@@ -321,6 +321,26 @@ class Dataset(object):
 
             print("\n")
 
+    def print_statistics_global(self):
+        for URM_name, URM_object in self.AVAILABLE_URM.items():
+            n_items, n_features = URM_object.shape
+
+            min_value = np.min(URM_object.data)
+            max_value = np.max(URM_object.data)
+
+            format_string = "2E" if np.max([np.abs(min_value), np.abs(max_value)]) > 100 else "2f"
+
+            statistics_string = "\tURM name: {}, Value range: {:.{format_string}} / {:.{format_string}}, Num features: {}, feature occurrences: {}, density {:.2E}".format(
+                URM_name,
+                min_value, max_value,
+                n_features,
+                URM_object.nnz,
+                compute_density(URM_object),
+                format_string=format_string
+            )
+
+            print(statistics_string)
+
     #########################################################################################################
     ##########                                                                                     ##########
     ##########                                CLONE                                                ##########
