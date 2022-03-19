@@ -154,3 +154,4 @@ SourceData/
 dataset/*.csv
 dataset/*.csv.zip
 processed/*
+!processed/README.md
