@@ -41,6 +41,7 @@ class HMDatasetReader(DataReader):
         # All URMs and ICMs must be extracted here
         # ICM_genre_path = dataFile.extract("ml-1m/movies.dat", path=zipFile_path + "decompressed/")
         # UCM_path = dataFile.extract("ml-1m/users.dat", path=zipFile_path + "decompressed/")
+        """This part should be changed to use Luca scripts to correctly create the dataset folder"""
         URM_train_path = dataFile.extract(DATASET_ZIP_NAME + "/URM_train.npz", path=zipFile_path + "decompressed/")
         URM_test_path = dataFile.extract(DATASET_ZIP_NAME + "/URM_test.npz", path=zipFile_path + "decompressed/")
 
