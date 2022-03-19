@@ -242,8 +242,10 @@ class Dataset(object):
     def print_statistics(self):
 
         self._assert_is_initialized()
-
-        URM_all = self.get_URM_all()
+        try:
+            URM_all = self.get_URM_all()
+        except KeyError:
+            URM_all = self.get_URM_from_name("URM_train")
 
         n_users, n_items = URM_all.shape
 
@@ -405,7 +407,11 @@ class Dataset(object):
 
         print_preamble = "{} consistency check: ".format(self.DATASET_NAME)
 
-        URM_all = self.get_URM_all()
+        try:
+            URM_all = self.get_URM_all()
+        except KeyError:
+            URM_all = self.get_URM_from_name("URM_train")
+
         n_interactions = URM_all.nnz
 
         assert n_interactions != 0, print_preamble + "Number of interactions in URM is 0"
