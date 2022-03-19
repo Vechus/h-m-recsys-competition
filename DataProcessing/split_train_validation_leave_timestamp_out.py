@@ -71,7 +71,7 @@ def retrieve_timeframe_interactions(timestamp_df, validation_ts_tuple, test_ts_t
     return interactions
 
 
-def split_train_validation_leave_timestamp_out(timestamp_df, test_ts_tuple, validation_ts_tuple=(0, 0),
+def split_train_validation_leave_timestamp_out(manager, timestamp_df, test_ts_tuple, validation_ts_tuple=(0, 0),
                                                use_validation_set=True):
     """
         The function splits an URM in two matrices selecting on the base of timestamp
@@ -84,9 +84,6 @@ def split_train_validation_leave_timestamp_out(timestamp_df, test_ts_tuple, vali
     :param use_validation_set:
     :return:
         """
-
-    # create dataset manager
-    manager = DatasetMapperManager()
 
     # Retrieve which users fall in the wanted timeframe
     timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
@@ -124,47 +121,5 @@ def split_train_validation_leave_timestamp_out(timestamp_df, test_ts_tuple, vali
         validation_interactions.drop_duplicates(inplace=True)
         manager.add_URM(validation_interactions, 'URM_validation')
 
-    # generate dataset with URM (Implicit=True)
-    dataset = manager.generate_Dataset(DATASET_NAME, True)
-    dataset.save_data('./processed/{}/'.format(DATASET_NAME))
-    dataset.print_statistics_global()
-    # print(dataset.get_URM_all())
-    # train_URM = sps.coo_matrix((train_data, (train_users, train_items)))
-    # train_URM = train_URM.tocsr()
-
-    """users = []
-    items = []
-    data = []
-    for index, row in test_interactions.iterrows():
-        users.append(user_id_mapping[row[userid_column]])
-        items.append(item_id_mapping[row[itemid_column]])
-        data.append(1)
-
-    URM_test_builder.add_data_lists(users, items, data)
-    test_URM = URM_test_builder.get_SparseMatrix()
-    # test_URM = sps.coo_matrix((data, (users, items)))
-    # test_URM = test_URM.tocsr()
-
-    if use_validation_set:
-        users = []
-        items = []
-        data = []
-        for index, row in validation_interactions.iterrows():
-            users.append(user_id_mapping[row[userid_column]])
-            items.append(item_id_mapping[row[itemid_column]])
-            data.append(1)
-
-        URM_validation_builder.add_data_lists(users, items, data)
-        validation_URM = URM_validation_builder.get_SparseMatrix()
-        # validation_URM = sps.coo_matrix((data, (users, items)))
-        # validation_URM = validation_URM.tocsr()
-        return train_URM, test_URM, validation_URM"""
-
     return 0
 
-
-if __name__ == "__main__":
-    transactions = pd.read_csv('./dataset/transactions_train.csv')
-    print("Loaded data into memory...")
-    split_train_validation_leave_timestamp_out(transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
-                                               (0, 0), False)
