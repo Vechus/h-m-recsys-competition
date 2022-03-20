@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout
 import traceback, os
 
-dataset_name = "hm-temporal"
+dataset_name = "hm"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset ibrary
     URM_train = dataset_object.get_URM_from_name('URM_train')
     URM_test = dataset_object.get_URM_from_name('URM_test')  # Temporary solution, this should use cross-validation
-    ICM_all = []
+    ICM_all = [dataset_object.get_ICM_from_name('ICM_prod_type')]
     UCM_all = []
 
     recommender_class_list = [
