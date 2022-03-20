@@ -55,7 +55,7 @@ def customers_feature_engineering(df_customers, df_transactions):
 
     df_result = pd.merge(df_customers, df_result, on='customer_id', how='outer')
 
-    print('New features already added into df_customers')
+    print('New features already added into df_customers!')
 
     return df_result
 
@@ -93,6 +93,6 @@ def articles_feature_engineering(df_articles, df_transactions):
     df_result = df_result.fillna(0)
     df_result = pd.merge(df_articles, df_result, on='article_id', how='outer')
 
-    print('New features already added into df_articles')
+    print('New features already added into df_articles!')
 
     return df_result
