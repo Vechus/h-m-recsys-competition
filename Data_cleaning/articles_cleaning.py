@@ -36,11 +36,11 @@ def preprocess_text(text, flg_stemm=False, flg_lemm=True):
     return text
 
 
-# param1:whether the Na value of detail_desc are dropped or not, True or False
-# param2:word stemming is used or not, Ture or False
-# param3:word lematisation is used or not, True or False
 def articles_func(df_articles_raw,is_detailDesc_NAdropped=False, is_flg_stemmed=True, is_flg_lemmed=True):
-    # df_articles_raw = pd.read_csv(root_dir + '/articles.csv')
+    # param1:whether the Na value of detail_desc are dropped or not, True or False
+    # param2:word stemming is used or not, Ture or False
+    # param3:word lematisation is used or not, True or False
+
     df_articles = df_articles_raw.copy()
 
     # if drop the rows in which detail_desc is na, or not
