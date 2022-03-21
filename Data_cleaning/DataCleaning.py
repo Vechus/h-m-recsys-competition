@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-import os
-import pandas as pd
 
-=======
->>>>>>> 64e24a9c3741760b698c81c5f9fe83d10fc2386b
 from Data_cleaning.customers_cleaning import *
 from Data_cleaning.articles_cleaning import *
 from Data_cleaning.transactions_cleaning import *
