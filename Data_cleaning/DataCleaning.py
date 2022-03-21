@@ -1,7 +1,3 @@
-import os
-import pandas as pd
-
-import Data_cleaning
 from Data_cleaning.customers_cleaning import *
 from Data_cleaning.articles_cleaning import *
 from Data_cleaning.transactions_cleaning import *
