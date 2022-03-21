@@ -9,6 +9,12 @@ import pandas as pd
 from Data_manager.DataReader import DataReader
 from Data_manager.DataReader_utils import download_from_URL
 from Data_manager.DatasetMapperManager import DatasetMapperManager
+from DataProcessing.extract_URM import generate_URM_all
+from DataProcessing.extract_ICMs import gen_ICM_product_type_name
+from DataProcessing.split_train_validation_leave_timestamp_out import split_train_validation_leave_timestamp_out
+
+
+DATASET_NAME = 'hm'
 
 DATASET_SOURCE = "hm-temporal/"
 DATASET_ZIP_NAME = "dataset_URM.zip"
@@ -28,45 +34,32 @@ class HMDatasetReader(DataReader):
 
     def _load_from_original_file(self):
         # Load data from original
-        zipFile_path = self.DATASET_SPLIT_ROOT_FOLDER + self.DATASET_SUBFOLDER
-
+        print("Processed dataset not found, loading from original csv...")
+        # Code taken from process_data_script.py to gracefully handle errors
         try:
-
-            dataFile = zipfile.ZipFile(zipFile_path + DATASET_ZIP_NAME)
-
-        except (FileNotFoundError, zipfile.BadZipFile):
-            print("No dataset in path: {}".format(zipFile_path + DATASET_ZIP_NAME))
+            transactions = pd.read_csv('../dataset/transactions_train.csv')
+            articles = pd.read_csv('../dataset/articles.csv')
+        except FileNotFoundError:
+            print("ERROR: dataset csv files are missing in ./dataset/")
             return
 
-        # All URMs and ICMs must be extracted here
-        # ICM_genre_path = dataFile.extract("ml-1m/movies.dat", path=zipFile_path + "decompressed/")
-        # UCM_path = dataFile.extract("ml-1m/users.dat", path=zipFile_path + "decompressed/")
-        """This part should be changed to use Luca scripts to correctly create the dataset folder"""
-        URM_train_path = dataFile.extract(DATASET_ZIP_NAME + "/URM_train.npz", path=zipFile_path + "decompressed/")
-        URM_test_path = dataFile.extract(DATASET_ZIP_NAME + "/URM_test.npz", path=zipFile_path + "decompressed/")
+        manager = DatasetMapperManager()
 
-        self._print("Loading URMs...")
-        URM_train = np.load(URM_train_path)
-        URM_test = np.load(URM_test_path)
+        # URM ALL
+        generate_URM_all(manager, transactions)
+        # ICM product type name
+        gen_ICM_product_type_name(manager, articles)
+        # URM split
+        print("Splitting URM in train and test...")
+        split_train_validation_leave_timestamp_out(manager, transactions,
+                                                   (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
+                                                   (0, 0), False)
 
-        self._print("Converting into dataframes...")
-        train_df = pd.DataFrame(data=URM_train,
-                                columns=["UserID", "ItemID", "Data"])
-        test_df = pd.DataFrame(data=URM_test, columns=["UserID", "ItemID", "Data"])
+        # generate dataset with URM (Implicit=True)
+        print("Creating dataset object...")
+        dataset = manager.generate_Dataset(DATASET_NAME, True)
+        dataset.save_data('../processed/{}/'.format(DATASET_NAME))
+        dataset.print_statistics()
+        dataset.print_statistics_global()
+        return dataset
 
-        # For each user a list of features
-
-        dataset_manager = DatasetMapperManager()
-        dataset_manager.add_URM(train_df, "URM_train")
-        dataset_manager.add_URM(test_df, "URM_test")
-
-        loaded_dataset = dataset_manager.generate_Dataset(dataset_name=self._get_dataset_name(),
-                                                          is_implicit=self.IS_IMPLICIT)
-
-        self._print("Cleaning Temporary Files")
-
-        shutil.rmtree(zipFile_path + "decompressed", ignore_errors=True)
-
-        self._print("Loading Complete")
-
-        return loaded_dataset
