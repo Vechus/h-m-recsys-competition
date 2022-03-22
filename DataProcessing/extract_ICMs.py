@@ -9,15 +9,22 @@ DATASET_NAME = 'hm_ICMs'
 
 # TODO: for all functions, take input the object of the dataset manager to append the ICMs to
 
-def gen_ICM_product_type_name(manager, articles):
-    print('Creating ICM product type name')
+ICM_list = [
+    'product_type_name',
+    'product_type_no',
+    'product_group_name',
+    'graphical_appearance_name',
+    'colour_group_name'
+]
 
-    icm_df = articles[['article_id', 'product_type_name']]
-    print(icm_df)
-    icm_df.rename(columns={"product_type_name": "FeatureID", "article_id": "ItemID"}, inplace=True)
-    icm_df['ItemID'] = icm_df['ItemID'].astype(str)
-    icm_df['Data'] = 1.0
-    print(icm_df)
+def gen_ICM_list(manager, articles):
+    for column in ICM_list:
+        # TODO fai la roba
+        print('Creating ICM for column {}'.format(column))
 
-    manager.add_ICM(icm_df, 'ICM_prod_type')
-
+        icm_df = articles[['article_id', column]]
+        icm_df.rename(columns={column: "FeatureID", "article_id": "ItemID"}, inplace=True)
+        icm_df['ItemID'] = icm_df['ItemID'].astype(str)
+        icm_df['FeatureID'] = icm_df['FeatureID'].astype(str)
+        icm_df['Data'] = 1.0
+        manager.add_ICM(icm_df, 'ICM_{}'.format(column))
