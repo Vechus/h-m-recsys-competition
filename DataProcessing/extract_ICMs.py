@@ -5,10 +5,6 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 from Data_manager.Dataset import Dataset
 
 
-DATASET_NAME = 'hm_ICMs'
-
-# TODO: for all functions, take input the object of the dataset manager to append the ICMs to
-
 ICM_list = [
     'product_type_name',
     'product_type_no',
@@ -19,7 +15,6 @@ ICM_list = [
 
 def gen_ICM_list(manager, articles):
     for column in ICM_list:
-        # TODO fai la roba
         print('Creating ICM for column {}'.format(column))
 
         icm_df = articles[['article_id', column]]
