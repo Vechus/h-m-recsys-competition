@@ -14,7 +14,7 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 timestamp_column = 't_dat'
 userid_column = 'customer_id'
 itemid_column = 'article_id'
-DATASET_NAME = 'hm-temporal'
+DATASET_NAME = 'hm-big-validation'
 
 
 def retrieve_timeframe_interactions(timestamp_df, validation_ts_tuple, test_ts_tuple, use_validation_set):
@@ -75,10 +75,8 @@ def split_train_validation_leave_timestamp_out(manager, timestamp_df, test_ts_tu
                                                use_validation_set=True):
     """
         The function splits an URM in two matrices selecting on the base of timestamp
-    :param URM:
+    :param manager:
     :param timestamp_df:
-    :param user_id_mapping: dictionary used to map user - user_id association
-    :param item_id_mapping:
     :param validation_ts_tuple: tuples with starting timestamp and ending timestamps included
     :param test_ts_tuple:
     :param use_validation_set:
@@ -123,3 +121,68 @@ def split_train_validation_leave_timestamp_out(manager, timestamp_df, test_ts_tu
 
     return 0
 
+
+def merge_splits(timestamp_df: pd.DataFrame, timestamp_array, columns_name=None):
+    """
+    :param timestamp_df: The entire timestamp dataframe
+    :param timestamp_array: The array of tuples of time intervals that will create the test set
+    :param columns_name:
+    """
+    if columns_name is None:
+        columns_name = ["UserID", "ItemID", "Data"]
+
+    final_df = pd.DataFrame(columns=columns_name)
+    i = 1
+    for timeframe in timestamp_array:
+        print("Processing interval {}...".format(i))
+        i += 1
+        t1 = timestamp_df[timestamp_column].searchsorted(timeframe[0])
+        t2 = timestamp_df[timestamp_column].searchsorted(timeframe[1])
+        cutout = timestamp_df.iloc[t1:t2 - 1]
+        timestamp_df.drop(timestamp_df.index[[t1, t2-1]], inplace=True)
+        final_df = pd.concat([final_df, cutout])
+
+    return timestamp_df, final_df
+
+
+def split_train_test_multiple_intervals(manager, timestamp_df, timestamp_array):
+    # Retrieve which users fall in the wanted list of time frames
+    print("Preprocessing dataframe...")
+    timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
+    timestamp_df.drop('price', inplace=True, axis=1)
+    timestamp_df.drop('sales_channel_id', inplace=True, axis=1)
+    timestamp_df.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
+    timestamp_df['ItemID'] = timestamp_df['ItemID'].astype(str)
+    timestamp_df['Data'] = 1.0
+
+    # Create test/train splits
+    train_interactions, test_interactions = merge_splits(timestamp_df, timestamp_array)
+
+    print(train_interactions.head())
+    print(test_interactions.head())
+
+    train_interactions.drop(timestamp_column, inplace=True, axis=1)
+    test_interactions.drop(timestamp_column, inplace=True, axis=1)
+
+    train_interactions.drop_duplicates(inplace=True)
+    test_interactions.drop_duplicates(inplace=True)
+    manager.add_URM(train_interactions, 'URM_train')
+    manager.add_URM(test_interactions, 'URM_test')
+
+
+if __name__ == "__main__":
+    timestamp_list = [("2018-09-20", "2018-10-1"), ("2019-09-01", "2019-10-01"),
+                      ("2020-09-01", "2020-09-23")]
+    transactions = pd.read_csv('../dataset/transactions_train.csv')
+    print("Loaded transaction csv...")
+
+    manager = DatasetMapperManager()
+    split_train_test_multiple_intervals(manager, transactions, timestamp_list)
+
+    # generate dataset with URM (Implicit=True)
+    dataset = manager.generate_Dataset(DATASET_NAME, True)
+    print("Done! Saving dataset in processed/{}/".format(DATASET_NAME))
+    dataset.save_data('./processed/{}/'.format(DATASET_NAME))
+    print("Dataset stats:")
+    dataset.print_statistics()
+    dataset.print_statistics_global()

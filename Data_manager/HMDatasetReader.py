@@ -10,7 +10,7 @@ from Data_manager.DataReader import DataReader
 from Data_manager.DataReader_utils import download_from_URL
 from Data_manager.DatasetMapperManager import DatasetMapperManager
 from DataProcessing.extract_URM import generate_URM_all
-from DataProcessing.extract_ICMs import gen_ICM_product_type_name
+from DataProcessing.extract_ICMs import gen_ICM_list
 from DataProcessing.split_train_validation_leave_timestamp_out import split_train_validation_leave_timestamp_out
 
 
@@ -48,7 +48,7 @@ class HMDatasetReader(DataReader):
         # URM ALL
         generate_URM_all(manager, transactions)
         # ICM product type name
-        gen_ICM_product_type_name(manager, articles)
+        gen_ICM_list(manager, articles)
         # URM split
         print("Splitting URM in train and test...")
         split_train_validation_leave_timestamp_out(manager, transactions,
