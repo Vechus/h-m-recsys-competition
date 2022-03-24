@@ -20,9 +20,9 @@ if __name__ == '__main__':
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
 
-    transactions = pd.read_csv('./dataset/transactions_train.csv')
-    articles = pd.read_csv('./dataset/articles.csv')
-    customers = pd.read_csv('./dataset/customers.csv')
+    transactions = pd.read_csv('{}/transactions_train.csv'.format(DATASET_PATH))
+    articles = pd.read_csv('{}/articles.csv'.format(DATASET_PATH))
+    customers = pd.read_csv('{}/customers.csv'.format(DATASET_PATH))
 
     print('Loaded all files')
 
