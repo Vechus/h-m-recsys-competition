@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 
+import os
+from dotenv import load_dotenv
+
 from Data_manager.DatasetMapperManager import DatasetMapperManager
 from Data_manager.Dataset import Dataset
 
@@ -13,6 +16,10 @@ DATASET_NAME = 'hm'
 
 
 if __name__ == '__main__':
+    # load .env file
+    load_dotenv()
+    DATASET_PATH = os.getenv('DATASET_PATH')
+
     transactions = pd.read_csv('./dataset/transactions_train.csv')
     articles = pd.read_csv('./dataset/articles.csv')
     customers = pd.read_csv('./dataset/customers.csv')
