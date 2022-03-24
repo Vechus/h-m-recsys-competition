@@ -39,12 +39,12 @@ if __name__ == '__main__':
     UCM_all = []
 
     recommender_class_list = [
-        Random,
-        TopPop,
-        UserKNNCFRecommender,
+        # Random,
+        # TopPop,
+        # UserKNNCFRecommender,
         P3alphaRecommender,
-        RP3betaRecommender,
-        PureSVDRecommender
+        # RP3betaRecommender,
+        # PureSVDRecommender,
     ]
 
     evaluator = EvaluatorHoldout(URM_test, [5, 20], exclude_seen=True)
