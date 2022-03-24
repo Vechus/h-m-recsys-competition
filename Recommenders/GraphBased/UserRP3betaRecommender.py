@@ -20,4 +20,4 @@ class UserRP3betaRecommender(BaseUserSimilarityMatrixRecommender):
     def fit(self, topK=100, alpha=1., beta=0.6, min_rating=0, implicit=False, normalize_similarity=False):
         calculator = RP3betaRecommender(self.URM_train.T, verbose=self.verbose)
         calculator.fit(topK=topK, alpha=alpha, beta=beta, min_rating=min_rating, implicit=implicit, normalize_similarity=normalize_similarity)
-        self.W_sparse = calculator.
+        self.W_sparse = calculator.W_sparse
