@@ -1,4 +1,3 @@
-from Recommenders.GraphBased.UserRP3betaRecommender import UserRP3betaRecommender
 from Recommenders.Recommender_import_list import *
 
 from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
@@ -43,10 +42,9 @@ if __name__ == '__main__':
         # Random,
         # TopPop,
         # UserKNNCFRecommender,
-        # P3alphaRecommender,
+        P3alphaRecommender,
         # RP3betaRecommender,
         # PureSVDRecommender,
-        UserRP3betaRecommender
     ]
 
     evaluator = EvaluatorHoldout(URM_test, [5, 20], exclude_seen=True)
