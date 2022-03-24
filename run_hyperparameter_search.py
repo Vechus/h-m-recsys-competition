@@ -19,6 +19,7 @@ from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
 from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
 from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSearch_Collaborative, runHyperparameterSearch_Content, runHyperparameterSearch_Hybrid
+from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
 
 def read_data_split_and_search():
