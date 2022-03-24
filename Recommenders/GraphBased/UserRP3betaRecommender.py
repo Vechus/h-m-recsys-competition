@@ -6,7 +6,7 @@ Created on 01/12/2020
 """
 
 from ..BaseSimilarityMatrixRecommender import BaseUserSimilarityMatrixRecommender
-from RP3betaRecommender import RP3betaRecommender
+from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 
 class UserRP3betaRecommender(BaseUserSimilarityMatrixRecommender):
     """ Recommender based on random walks"""
