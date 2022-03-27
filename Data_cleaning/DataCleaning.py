@@ -1,4 +1,3 @@
-
 from Data_cleaning.customers_cleaning import *
 from Data_cleaning.articles_cleaning import *
 from Data_cleaning.transactions_cleaning import *
@@ -9,9 +8,9 @@ if __name__ == '__main__':
 
     path = '../dataset'
 
-    df_articles_raw = pd.read_csv(os.path.join(path, dataset_dict["articles"]))
+    df_articles_raw = pd.read_csv(os.path.join(path, dataset_dict["articles"]), dtype={'article_id': str})
     df_customers_raw = pd.read_csv(os.path.join(path, dataset_dict["customers"]))
-    df_transactions_raw = pd.read_csv(os.path.join(path, dataset_dict["transactions"]))
+    df_transactions_raw = pd.read_csv(os.path.join(path, dataset_dict["transactions"]), dtype={'article_id': str})
 
     # Clean the dataset by assigning different parameters
     df_customers = initial_all_missing_values(df_customers_raw)
