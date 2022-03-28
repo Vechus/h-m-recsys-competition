@@ -58,17 +58,17 @@ def read_data_split_and_search():
 
 
     collaborative_algorithm_list = [
-        Random,
-        TopPop,
-        P3alphaRecommender,
+        # Random,
+        # TopPop,
+        # P3alphaRecommender,
         RP3betaRecommender,
-        ItemKNNCFRecommender,
-        UserKNNCFRecommender,
-        MatrixFactorization_BPR_Cython,
-        MatrixFactorization_FunkSVD_Cython,
-        PureSVDRecommender,
-        SLIM_BPR_Cython,
-        SLIMElasticNetRecommender
+        # ItemKNNCFRecommender,
+        # UserKNNCFRecommender,
+        # MatrixFactorization_BPR_Cython,
+        # MatrixFactorization_FunkSVD_Cython,
+        # PureSVDRecommender,
+        # SLIM_BPR_Cython,
+        # SLIMElasticNetRecommender
     ]
 
 
@@ -127,59 +127,59 @@ def read_data_split_and_search():
 
     ################################################################################################
     ###### Content Baselines
-
-    for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
-
-        try:
-
-            runHyperparameterSearch_Content(ItemKNNCBFRecommender,
-                                        URM_train = URM_train,
-                                        URM_train_last_test = URM_train + URM_validation,
-                                        metric_to_optimize = metric_to_optimize,
-                                        cutoff_to_optimize = cutoff_to_optimize,
-                                        evaluator_validation = evaluator_validation,
-                                        evaluator_test = evaluator_test,
-                                        output_folder_path = output_folder_path,
-                                        parallelizeKNN = True,
-                                        allow_weighting = True,
-                                        resume_from_saved = True,
-                                        similarity_type_list = None, # all
-                                        ICM_name = ICM_name,
-                                        ICM_object = ICM_object.copy(),
-                                        n_cases = n_cases,
-                                        n_random_starts = n_random_starts)
-
-        except Exception as e:
-
-            print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
-            traceback.print_exc()
-
-
-        try:
-
-            runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
-                                        URM_train = URM_train,
-                                        URM_train_last_test = URM_train + URM_validation,
-                                        metric_to_optimize = metric_to_optimize,
-                                        cutoff_to_optimize = cutoff_to_optimize,
-                                        evaluator_validation = evaluator_validation,
-                                        evaluator_test = evaluator_test,
-                                        output_folder_path = output_folder_path,
-                                        parallelizeKNN = True,
-                                        allow_weighting = True,
-                                        resume_from_saved = True,
-                                        similarity_type_list = None, # all
-                                        ICM_name = ICM_name,
-                                        ICM_object = ICM_object.copy(),
-                                        n_cases = n_cases,
-                                        n_random_starts = n_random_starts)
-
-
-        except Exception as e:
-
-            print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
-            traceback.print_exc()
-
+    #
+    # for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
+    #
+    #     try:
+    #
+    #         runHyperparameterSearch_Content(ItemKNNCBFRecommender,
+    #                                     URM_train = URM_train,
+    #                                     URM_train_last_test = URM_train + URM_validation,
+    #                                     metric_to_optimize = metric_to_optimize,
+    #                                     cutoff_to_optimize = cutoff_to_optimize,
+    #                                     evaluator_validation = evaluator_validation,
+    #                                     evaluator_test = evaluator_test,
+    #                                     output_folder_path = output_folder_path,
+    #                                     parallelizeKNN = True,
+    #                                     allow_weighting = True,
+    #                                     resume_from_saved = True,
+    #                                     similarity_type_list = None, # all
+    #                                     ICM_name = ICM_name,
+    #                                     ICM_object = ICM_object.copy(),
+    #                                     n_cases = n_cases,
+    #                                     n_random_starts = n_random_starts)
+    #
+    #     except Exception as e:
+    #
+    #         print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
+    #         traceback.print_exc()
+    #
+    #
+    #     try:
+    #
+    #         runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
+    #                                     URM_train = URM_train,
+    #                                     URM_train_last_test = URM_train + URM_validation,
+    #                                     metric_to_optimize = metric_to_optimize,
+    #                                     cutoff_to_optimize = cutoff_to_optimize,
+    #                                     evaluator_validation = evaluator_validation,
+    #                                     evaluator_test = evaluator_test,
+    #                                     output_folder_path = output_folder_path,
+    #                                     parallelizeKNN = True,
+    #                                     allow_weighting = True,
+    #                                     resume_from_saved = True,
+    #                                     similarity_type_list = None, # all
+    #                                     ICM_name = ICM_name,
+    #                                     ICM_object = ICM_object.copy(),
+    #                                     n_cases = n_cases,
+    #                                     n_random_starts = n_random_starts)
+    #
+    #
+    #     except Exception as e:
+    #
+    #         print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
+    #         traceback.print_exc()
+    #
 
 
 

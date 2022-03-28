@@ -35,8 +35,8 @@ if __name__ == '__main__':
     # URM split
     # split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
     #                                            (0, 0), False)
-    timestamp_list_train = [("2018-09-20", "2018-10-1")]
-    timestamp_list_validation = [("2018-09-20", "2018-10-1")]
+    timestamp_list_train = [("2019-06-22", "2019-09-23")]
+    timestamp_list_validation = [("2019-09-23", "2019-09-30")]
     split_train_validation_multiple_intervals(manager,transactions,timestamp_list_train,timestamp_list_validation)
 
 
