@@ -33,8 +33,8 @@ if __name__ == '__main__':
     # generate all ICMs
     gen_ICM_list(manager, articles)
     # URM split
-    split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-15"), pd.Timestamp("2019-09-30")),
-                                               (0, 0), True)
+    split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
+                                               (pd.Timestamp("2019-09-15"), pd.Timestamp("2019-09-23")), True)
     # generate UCMs
     gen_UCM_list(manager, customers)
 
