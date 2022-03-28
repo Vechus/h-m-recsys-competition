@@ -12,6 +12,7 @@ import traceback
 
 import os, multiprocessing
 from dotenv import load_dotenv
+from Data_manager.HMDatasetReader import HMDatasetReader
 from functools import partial
 
 from Utils.Logger import Logger
@@ -38,7 +39,7 @@ def read_data_split_and_search():
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
 
-    dataReader = DataReader()
+    dataReader = HMDatasetReader()
     dataset = dataReader.load_data(save_folder_path=DATASET_PATH)
 
     # get URM_train, URM_test, URM_validation
