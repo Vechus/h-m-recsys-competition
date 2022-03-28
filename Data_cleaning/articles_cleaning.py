@@ -1,6 +1,3 @@
-import os
-import pandas as pd
-import numpy as np
 import re
 import nltk
 
@@ -36,7 +33,7 @@ def preprocess_text(text, flg_stemm=False, flg_lemm=True):
     return text
 
 
-def articles_func(df_articles_raw,is_detailDesc_NAdropped=False, is_flg_stemmed=True, is_flg_lemmed=True):
+def articles_cleaning(df_articles_raw,is_detailDesc_NAdropped=False, is_flg_stemmed=True, is_flg_lemmed=True):
     # param1:whether the Na value of detail_desc are dropped or not, True or False
     # param2:word stemming is used or not, Ture or False
     # param3:word lematisation is used or not, True or False
@@ -71,8 +68,3 @@ def articles_func(df_articles_raw,is_detailDesc_NAdropped=False, is_flg_stemmed=
     df_articles = df_articles.filter(regex='cleaned|no$|code$|id$')
     print("articles cleaning done!")
     return df_articles
-
-# if __name__ == '__main__':
-#     root_dir = 'D:/Polimi/M2-S2/'
-#     df_articles_cleaned = articles_func(root_dir, True, True, True)
-#     print(df_articles_cleaned.head())
