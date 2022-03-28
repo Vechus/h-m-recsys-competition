@@ -170,6 +170,57 @@ def split_train_test_multiple_intervals(manager, timestamp_df, timestamp_array):
     manager.add_URM(test_interactions, 'URM_test')
 
 
+def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, timestamp_array, columns_name=None):
+    """
+    :param timestamp_df: The entire timestamp dataframe
+    :param timestamp_array: The array of tuples of time intervals that will create the test set
+    :param columns_name:
+    """
+    if columns_name is None:
+        columns_name = ["UserID", "ItemID", "Data"]
+
+    final_df = pd.DataFrame(columns=columns_name)
+
+    dropped_timestamp_df = timestamp_df.copy()
+    i = 1
+    for timeframe in timestamp_array:
+        print("Processing interval {}...".format(i))
+        i += 1
+        t1 = timestamp_df[timestamp_column].searchsorted(timeframe[0])
+        t2 = timestamp_df[timestamp_column].searchsorted(timeframe[1])
+        cutout = timestamp_df.iloc[t1:t2 - 1]
+        dropped_timestamp_df.drop(timestamp_df.index[[t1, t2 - 1]], inplace=True)
+        final_df = pd.concat([final_df, cutout])
+
+    return dropped_timestamp_df, final_df
+
+
+def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation):
+    # Retrieve which users fall in the wanted list of time frames
+    print("Preprocessing dataframe...")
+    timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
+    timestamp_df.drop('price', inplace=True, axis=1)
+    timestamp_df.drop('sales_channel_id', inplace=True, axis=1)
+    timestamp_df.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
+    timestamp_df['ItemID'] = timestamp_df['ItemID'].astype(str)
+    timestamp_df['Data'] = 1.0
+
+    # Create test/train splits
+    rest_interactions, train_interactions = merge_splits_without_overwrite_origin_dataset(timestamp_df, timestamp_array_train)
+    rest_interactions2, validation_interactions = merge_splits_without_overwrite_origin_dataset(timestamp_df, timestamp_array_validation)
+
+    print(train_interactions.head())
+    print(validation_interactions.head())
+
+    train_interactions.drop(timestamp_column, inplace=True, axis=1)
+    validation_interactions.drop(timestamp_column, inplace=True, axis=1)
+
+    train_interactions.drop_duplicates(inplace=True)
+    validation_interactions.drop_duplicates(inplace=True)
+    manager.add_URM(train_interactions, 'URM_train')
+    manager.add_URM(validation_interactions, 'URM_validation')
+
+
 if __name__ == "__main__":
     timestamp_list = [("2018-09-20", "2018-10-1"), ("2019-09-01", "2019-10-01"),
                       ("2020-09-01", "2020-09-23")]

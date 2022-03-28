@@ -9,7 +9,7 @@ from Data_manager.Dataset import Dataset
 
 from DataProcessing.extract_URM import generate_URM_all
 from DataProcessing.extract_ICMs import gen_ICM_list
-from DataProcessing.split_train_validation_leave_timestamp_out import split_train_validation_leave_timestamp_out
+from DataProcessing.split_train_validation_leave_timestamp_out import *
 from DataProcessing.extract_UCMs import gen_UCM_list
 
 DATASET_NAME = 'hm'
@@ -33,8 +33,13 @@ if __name__ == '__main__':
     # generate all ICMs
     gen_ICM_list(manager, articles)
     # URM split
-    split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
-                                               (0, 0), False)
+    # split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
+    #                                            (0, 0), False)
+    timestamp_list_train = [("2018-09-20", "2018-10-1")]
+    timestamp_list_validation = [("2018-09-20", "2018-10-1")]
+    split_train_validation_multiple_intervals(manager,transactions,timestamp_list_train,timestamp_list_validation)
+
+
     # generate UCMs
     gen_UCM_list(manager, customers)
 
