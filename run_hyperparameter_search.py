@@ -39,8 +39,14 @@ def read_data_split_and_search():
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
 
-    dataReader = HMDatasetReader()
-    dataset = dataReader.load_data(save_folder_path=DATASET_PATH)
+    # dataReader = HMDatasetReader()
+    # dataset = dataReader.load_data(save_folder_path=DATASET_PATH)
+
+    dataset_name = "hm"
+    reader = HMDatasetReader(False)
+    dataset = reader.load_data("./processed/{}/".format(dataset_name))
+    print("Loaded dataset into memory...")
+
 
     # get URM_train, URM_test, URM_validation
     URM_train = dataset.get_URM_from_name('URM_train')
