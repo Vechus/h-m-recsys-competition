@@ -191,10 +191,14 @@ def read_data_split_and_search():
 if __name__ == '__main__':
 
     logger = Logger('HPS-test')
-    logger.log('Started Hyper-parameter tuning')
+    # logger.log('Started Hyper-parameter tuning')
+    print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
     except Exception as e:
-        logger.log('We got an exception! Check log and turn off the machine.')
-        logger.log('Exception: \n{}'.format(str(e)))
-    logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+        # logger.log('We got an exception! Check log and turn off the machine.')
+        # logger.log('Exception: \n{}'.format(str(e)))
+        print('We got an exception! Check log and turn off the machine.')
+        print('Exception: \n{}'.format(str(e)))
+    # logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+    print('Hyper parameter search finished! Check results and turn off the machine.')
