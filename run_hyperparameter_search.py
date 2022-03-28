@@ -11,14 +11,16 @@ from Recommenders.Recommender_import_list import *
 import traceback
 
 import os, multiprocessing
+from dotenv import load_dotenv
 from functools import partial
-from Data_manager.HMDatasetReader import HMDatasetReader
+
+from Utils.Logger import Logger
+
+from Data_manager.DataReader import DataReader
 from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
 from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSearch_Collaborative, runHyperparameterSearch_Content, runHyperparameterSearch_Hybrid
-from Recommenders.SLIM import SLIMElasticNetRecommender
-
-DATASET_NAME = "hm"
+from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
 
 def read_data_split_and_search():
@@ -33,17 +35,19 @@ def read_data_split_and_search():
         - A _best_result_test file which contains a dictionary with the results, on the test set, of the best solution chosen using the validation set
     """
 
-    reader = HMDatasetReader(False)
-    dataset_object = reader.load_data("./processed/{}/".format(DATASET_NAME))
-    print("Loaded dataset into memory...")
+    load_dotenv()
+    DATASET_PATH = os.getenv('DATASET_PATH')
 
-    # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset library
-    URM_train = dataset_object.get_URM_from_name('URM_train')
-    URM_test = dataset_object.get_URM_from_name('URM_test')  # Temporary solution, this should use cross-validation
-    ICM_all = [dataset_object.get_ICM_from_name('ICM_prod_type')]
-    dataset = reader.load_data()
+    dataReader = DataReader()
+    dataset = dataReader.load_data(save_folder_path=DATASET_PATH)
 
-    URM_validation = URM_test
+    # get URM_train, URM_test, URM_validation
+    URM_train = dataset.get_URM_from_name('URM_train')
+    URM_test = dataset.get_URM_from_name('URM_test')
+    URM_validation = dataset.get_URM_from_name('URM_validation')
+
+    #URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
+    #URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
     output_folder_path = "result_experiments/"
 
@@ -54,17 +58,17 @@ def read_data_split_and_search():
 
 
     collaborative_algorithm_list = [
-        Random,
-        TopPop,
-        P3alphaRecommender,
+        # Random,
+        # TopPop,
+        # P3alphaRecommender,
         RP3betaRecommender,
-        ItemKNNCFRecommender,
-        UserKNNCFRecommender,
-        MatrixFactorization_BPR_Cython,
-        MatrixFactorization_FunkSVD_Cython,
-        PureSVDRecommender,
-        SLIM_BPR_Cython,
-        SLIMElasticNetRecommender
+        # ItemKNNCFRecommender,
+        # UserKNNCFRecommender,
+        # MatrixFactorization_BPR_Cython,
+        # MatrixFactorization_FunkSVD_Cython,
+        # PureSVDRecommender,
+        # SLIM_BPR_Cython,
+        # SLIMElasticNetRecommender
     ]
 
 
@@ -72,15 +76,15 @@ def read_data_split_and_search():
 
     from Evaluation.Evaluator import EvaluatorHoldout
 
-    cutoff_list = [5, 10, 20]
+    cutoff_list = [6, 12, 24]
     metric_to_optimize = "MAP"
-    cutoff_to_optimize = 10
+    cutoff_to_optimize = 12
 
     n_cases = 10
     n_random_starts = int(n_cases/3)
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list = cutoff_list)
-    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list = cutoff_list)
+    evaluator_test = None #EvaluatorHoldout(URM_test, cutoff_list = cutoff_list)
 
 
     runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
@@ -94,7 +98,7 @@ def read_data_split_and_search():
                                                        evaluator_test = evaluator_test,
                                                        output_folder_path = output_folder_path,
                                                        resume_from_saved = True,
-                                                       similarity_type_list = ["cosine"],
+                                                       similarity_type_list = None, # all
                                                        parallelizeKNN = False)
 
 
@@ -123,64 +127,70 @@ def read_data_split_and_search():
 
     ################################################################################################
     ###### Content Baselines
-
-    for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
-
-        try:
-
-            runHyperparameterSearch_Content(ItemKNNCBFRecommender,
-                                        URM_train = URM_train,
-                                        URM_train_last_test = URM_train + URM_validation,
-                                        metric_to_optimize = metric_to_optimize,
-                                        cutoff_to_optimize = cutoff_to_optimize,
-                                        evaluator_validation = evaluator_validation,
-                                        evaluator_test = evaluator_test,
-                                        output_folder_path = output_folder_path,
-                                        parallelizeKNN = True,
-                                        allow_weighting = True,
-                                        resume_from_saved = True,
-                                        similarity_type_list = ["cosine"],
-                                        ICM_name = ICM_name,
-                                        ICM_object = ICM_object.copy(),
-                                        n_cases = n_cases,
-                                        n_random_starts = n_random_starts)
-
-        except Exception as e:
-
-            print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
-            traceback.print_exc()
-
-
-        try:
-
-            runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
-                                        URM_train = URM_train,
-                                        URM_train_last_test = URM_train + URM_validation,
-                                        metric_to_optimize = metric_to_optimize,
-                                        cutoff_to_optimize = cutoff_to_optimize,
-                                        evaluator_validation = evaluator_validation,
-                                        evaluator_test = evaluator_test,
-                                        output_folder_path = output_folder_path,
-                                        parallelizeKNN = True,
-                                        allow_weighting = True,
-                                        resume_from_saved = True,
-                                        similarity_type_list = ["cosine"],
-                                        ICM_name = ICM_name,
-                                        ICM_object = ICM_object.copy(),
-                                        n_cases = n_cases,
-                                        n_random_starts = n_random_starts)
-
-
-        except Exception as e:
-
-            print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
-            traceback.print_exc()
-
+    #
+    # for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
+    #
+    #     try:
+    #
+    #         runHyperparameterSearch_Content(ItemKNNCBFRecommender,
+    #                                     URM_train = URM_train,
+    #                                     URM_train_last_test = URM_train + URM_validation,
+    #                                     metric_to_optimize = metric_to_optimize,
+    #                                     cutoff_to_optimize = cutoff_to_optimize,
+    #                                     evaluator_validation = evaluator_validation,
+    #                                     evaluator_test = evaluator_test,
+    #                                     output_folder_path = output_folder_path,
+    #                                     parallelizeKNN = True,
+    #                                     allow_weighting = True,
+    #                                     resume_from_saved = True,
+    #                                     similarity_type_list = None, # all
+    #                                     ICM_name = ICM_name,
+    #                                     ICM_object = ICM_object.copy(),
+    #                                     n_cases = n_cases,
+    #                                     n_random_starts = n_random_starts)
+    #
+    #     except Exception as e:
+    #
+    #         print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
+    #         traceback.print_exc()
+    #
+    #
+    #     try:
+    #
+    #         runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
+    #                                     URM_train = URM_train,
+    #                                     URM_train_last_test = URM_train + URM_validation,
+    #                                     metric_to_optimize = metric_to_optimize,
+    #                                     cutoff_to_optimize = cutoff_to_optimize,
+    #                                     evaluator_validation = evaluator_validation,
+    #                                     evaluator_test = evaluator_test,
+    #                                     output_folder_path = output_folder_path,
+    #                                     parallelizeKNN = True,
+    #                                     allow_weighting = True,
+    #                                     resume_from_saved = True,
+    #                                     similarity_type_list = None, # all
+    #                                     ICM_name = ICM_name,
+    #                                     ICM_object = ICM_object.copy(),
+    #                                     n_cases = n_cases,
+    #                                     n_random_starts = n_random_starts)
+    #
+    #
+    #     except Exception as e:
+    #
+    #         print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
+    #         traceback.print_exc()
+    #
 
 
 
 
 if __name__ == '__main__':
 
-
-    read_data_split_and_search()
+    logger = Logger('HPS-test')
+    logger.log('Started Hyper-parameter tuning')
+    try:
+        read_data_split_and_search()
+    except Exception as e:
+        logger.log('We got an exception! Check log and turn off the machine.')
+        logger.log('Exception: \n{}'.format(str(e)))
+    logger.log('Hyper parameter search finished! Check results and turn off the machine.')

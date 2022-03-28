@@ -1,4 +1,5 @@
-
+from Recommenders.FactorizationMachines.LightFMRecommender import LightFMCFRecommender, LightFMUserHybridRecommender, \
+    LightFMItemHybridRecommender
 from Recommenders.Recommender_import_list import *
 
 from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
@@ -7,6 +8,8 @@ from Recommenders.Incremental_Training_Early_Stopping import Incremental_Trainin
 from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFRecommender
 from Evaluation.Evaluator import EvaluatorHoldout
 import traceback, os
+
+from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
 
 def _get_instance(recommender_class, URM_train, ICM_all, UCM_all):

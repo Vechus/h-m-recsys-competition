@@ -1,21 +1,28 @@
 import numpy as np
 import pandas as pd
 
+import os
+from dotenv import load_dotenv
+
 from Data_manager.DatasetMapperManager import DatasetMapperManager
 from Data_manager.Dataset import Dataset
 
 from DataProcessing.extract_URM import generate_URM_all
 from DataProcessing.extract_ICMs import gen_ICM_list
-from DataProcessing.split_train_validation_leave_timestamp_out import split_train_validation_leave_timestamp_out
+from DataProcessing.split_train_validation_leave_timestamp_out import *
 from DataProcessing.extract_UCMs import gen_UCM_list
 
 DATASET_NAME = 'hm'
 
 
 if __name__ == '__main__':
-    transactions = pd.read_csv('./dataset/transactions_train.csv')
-    articles = pd.read_csv('./dataset/articles.csv')
-    customers = pd.read_csv('./dataset/customers.csv')
+    # load .env file
+    load_dotenv()
+    DATASET_PATH = os.getenv('DATASET_PATH')
+
+    transactions = pd.read_csv('{}/transactions_train.csv'.format(DATASET_PATH))
+    articles = pd.read_csv('{}/articles.csv'.format(DATASET_PATH))
+    customers = pd.read_csv('{}/customers.csv'.format(DATASET_PATH))
 
     print('Loaded all files')
 
@@ -26,8 +33,13 @@ if __name__ == '__main__':
     # generate all ICMs
     gen_ICM_list(manager, articles)
     # URM split
-    split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
-                                               (0, 0), False)
+    # split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
+    #                                            (0, 0), False)
+    timestamp_list_train = [("2019-06-22", "2019-09-23")]
+    timestamp_list_validation = [("2019-09-23", "2019-09-30")]
+    split_train_validation_multiple_intervals(manager,transactions,timestamp_list_train,timestamp_list_validation)
+
+
     # generate UCMs
     gen_UCM_list(manager, customers)
 
