@@ -61,6 +61,12 @@ def retrieve_timeframe_interactions(timestamp_df, validation_ts_tuple, test_ts_t
     # Create interaction list with TRAIN, TEST, VALIDATION
     print(train_interactions.columns)
     print(train_interactions.head())
+    print(train_interactions.size)
+
+    print(test_interactions.columns)
+    print(test_interactions.head())
+    print(test_interactions.size)
+
     interactions.append(train_interactions)
     interactions.append(test_interactions)
     if use_validation_set:

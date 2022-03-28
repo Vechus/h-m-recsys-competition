@@ -34,9 +34,11 @@ if __name__ == '__main__':
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset ibrary
     URM_train = dataset_object.get_URM_from_name('URM_train')
     URM_test = dataset_object.get_URM_from_name('URM_test')  # Temporary solution, this should use cross-validation
-    dataset_object.print_statistics_global()
     ICM_all = [dataset_object.get_ICM_from_name('ICM_prod_type')]
     UCM_all = []
+    print(URM_train.shape)
+    print(URM_test.shape)
+    dataset_object.print_statistics_global()
 
     recommender_class_list = [
         Random,

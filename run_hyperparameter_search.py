@@ -12,13 +12,13 @@ import traceback
 
 import os, multiprocessing
 from functools import partial
-
-
-
-from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
+from Data_manager.HMDatasetReader import HMDatasetReader
 from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
 from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSearch_Collaborative, runHyperparameterSearch_Content, runHyperparameterSearch_Hybrid
+from Recommenders.SLIM import SLIMElasticNetRecommender
+
+DATASET_NAME = "hm"
 
 
 def read_data_split_and_search():
@@ -33,13 +33,17 @@ def read_data_split_and_search():
         - A _best_result_test file which contains a dictionary with the results, on the test set, of the best solution chosen using the validation set
     """
 
+    reader = HMDatasetReader(False)
+    dataset_object = reader.load_data("./processed/{}/".format(DATASET_NAME))
+    print("Loaded dataset into memory...")
 
+    # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset library
+    URM_train = dataset_object.get_URM_from_name('URM_train')
+    URM_test = dataset_object.get_URM_from_name('URM_test')  # Temporary solution, this should use cross-validation
+    ICM_all = [dataset_object.get_ICM_from_name('ICM_prod_type')]
+    dataset = reader.load_data()
 
-    dataReader = Movielens1MReader()
-    dataset = dataReader.load_data()
-
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
-    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
+    URM_validation = URM_test
 
     output_folder_path = "result_experiments/"
 
