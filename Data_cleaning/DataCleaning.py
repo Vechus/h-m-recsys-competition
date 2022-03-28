@@ -3,10 +3,14 @@ from Data_cleaning.articles_cleaning import *
 from Data_cleaning.transactions_cleaning import *
 from FeatureEngineering import *
 
+import os
+from dotenv import load_dotenv
+
 if __name__ == '__main__':
+    load_dotenv()
     dataset_dict = {"articles": "articles.csv", "customers": "customers.csv", "transactions": "transactions_train.csv"}
 
-    path = '../dataset'
+    path = os.getenv('DATASET_PATH')
 
     df_articles_raw = pd.read_csv(os.path.join(path, dataset_dict["articles"]), dtype={'article_id': str})
     df_customers_raw = pd.read_csv(os.path.join(path, dataset_dict["customers"]))
