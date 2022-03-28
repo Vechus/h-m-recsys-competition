@@ -11,11 +11,12 @@ from Recommenders.Recommender_import_list import *
 import traceback
 
 import os, multiprocessing
+from dotenv import load_dotenv
 from functools import partial
 
+from Utils.Logger import Logger
 
-
-from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
+from Data_manager.DataReader import DataReader
 from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
 
 from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSearch_Collaborative, runHyperparameterSearch_Content, runHyperparameterSearch_Hybrid
@@ -34,13 +35,19 @@ def read_data_split_and_search():
         - A _best_result_test file which contains a dictionary with the results, on the test set, of the best solution chosen using the validation set
     """
 
+    load_dotenv()
+    DATASET_PATH = os.getenv('DATASET_PATH')
 
+    dataReader = DataReader()
+    dataset = dataReader.load_data(save_folder_path=DATASET_PATH)
 
-    dataReader = Movielens1MReader()
-    dataset = dataReader.load_data()
+    # get URM_train, URM_test, URM_validation
+    URM_train = dataset.get_URM_from_name('URM_train')
+    URM_test = dataset.get_URM_from_name('URM_test')
+    URM_validation = dataset.get_URM_from_name('URM_validation')
 
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
-    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
+    #URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
+    #URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
     output_folder_path = "result_experiments/"
 
@@ -69,9 +76,9 @@ def read_data_split_and_search():
 
     from Evaluation.Evaluator import EvaluatorHoldout
 
-    cutoff_list = [5, 10, 20]
+    cutoff_list = [6, 12, 24]
     metric_to_optimize = "MAP"
-    cutoff_to_optimize = 10
+    cutoff_to_optimize = 12
 
     n_cases = 10
     n_random_starts = int(n_cases/3)
@@ -91,7 +98,7 @@ def read_data_split_and_search():
                                                        evaluator_test = evaluator_test,
                                                        output_folder_path = output_folder_path,
                                                        resume_from_saved = True,
-                                                       similarity_type_list = ["cosine"],
+                                                       similarity_type_list = None, # all
                                                        parallelizeKNN = False)
 
 
@@ -136,7 +143,7 @@ def read_data_split_and_search():
                                         parallelizeKNN = True,
                                         allow_weighting = True,
                                         resume_from_saved = True,
-                                        similarity_type_list = ["cosine"],
+                                        similarity_type_list = None, # all
                                         ICM_name = ICM_name,
                                         ICM_object = ICM_object.copy(),
                                         n_cases = n_cases,
@@ -161,7 +168,7 @@ def read_data_split_and_search():
                                         parallelizeKNN = True,
                                         allow_weighting = True,
                                         resume_from_saved = True,
-                                        similarity_type_list = ["cosine"],
+                                        similarity_type_list = None, # all
                                         ICM_name = ICM_name,
                                         ICM_object = ICM_object.copy(),
                                         n_cases = n_cases,
@@ -179,5 +186,11 @@ def read_data_split_and_search():
 
 if __name__ == '__main__':
 
-
-    read_data_split_and_search()
+    logger = Logger('HPS-test')
+    logger.log('Started Hyper-parameter tuning')
+    try:
+        read_data_split_and_search()
+    except Exception as e:
+        logger.log('We got an exception! Check log and turn off the machine.')
+        logger.log('Exception: \n{}'.format(str(e)))
+    logger.log('Hyper parameter search finished! Check results and turn off the machine.')

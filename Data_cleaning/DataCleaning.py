@@ -21,13 +21,19 @@ if __name__ == '__main__':
     df_articles = articles_func(df_articles_raw)
     df_transactions = transactions_cleaning(df_transactions_raw)
     df_transactions.to_csv(os.path.join(path, "processed_" + dataset_dict["transactions"]))
+    print('saved transactions csv...')
+    del df_transactions
 
     # Add new features into df_customers
     df_customers_final = customers_feature_engineering(df_customers, df_transactions)
     print(df_customers_final)
     df_customers_final.to_csv(os.path.join(path, "processed_" + dataset_dict["customers"]))
+    print('saved customers csv...')
+    del df_customers_final
 
     # Add new features into df_articles
     df_articles_final = articles_feature_engineering(df_articles, df_transactions)
     print(df_articles_final)
     df_articles_final.to_csv(os.path.join(path, "processed_" + dataset_dict["articles"]))
+    print('saved articles csv...')
+    del df_articles_final
