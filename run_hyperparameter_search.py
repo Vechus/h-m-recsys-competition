@@ -84,7 +84,7 @@ def read_data_split_and_search():
     n_random_starts = int(n_cases/3)
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list = cutoff_list)
-    evaluator_test = EvaluatorHoldout(URM_test, cutoff_list = cutoff_list)
+    evaluator_test = None #EvaluatorHoldout(URM_test, cutoff_list = cutoff_list)
 
 
     runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
