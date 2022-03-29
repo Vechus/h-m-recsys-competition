@@ -24,7 +24,6 @@ def cal_inactive_months(x):
 def customers_feature_engineering(df_customers, df_transactions):
     print("New features generation of customers start.")
     # generate some new features from the transaction behaviours for each year
-    global df_result_accumulated
     years = df_transactions.year.unique()
 
     total_months_in_training_data = 0
@@ -40,15 +39,19 @@ def customers_feature_engineering(df_customers, df_transactions):
                                            how='outer')
 
         # new feature 1: number of months which don't have any transactions for each customer in the certain year
-        df_month_avg_item_per_u['num_missing_months' + '_' + year_str] = df_month_avg_item_per_u.isnull().sum(axis=1)
+        df_month_avg_item_per_u['num_missing_months' + '_' + year_str] = df_month_avg_item_per_u.isnull().sum(
+            axis=1)
+
+        df_month_avg_item_per_u['num_sale_months' + '_' + year_str] = df_month_avg_item_per_u.notnull().sum(
+            axis=1)-2
         df_month_avg_item_per_u = df_month_avg_item_per_u.fillna(0)
 
         # get the total month of the certain year
-        total_months = df_month_avg_item_per_u.count(axis=1) - 2
+        total_months = df_month_avg_item_per_u.count(axis=1) - 3
         total_months_in_training_data = total_months_in_training_data + total_months
         # new feature 2: the percent of missing months in the certain year
         df_month_avg_item_per_u['num_missing_months_perc' + '_' + year_str] = df_month_avg_item_per_u[
-                                                                                   'num_missing_months' + '_' + year_str] / total_months
+                                                                                  'num_missing_months' + '_' + year_str] / total_months
         # new feature 3: number of the latest continuous months don't have any transactions for each customer in 2020
         if year == 2020:
             df_month_avg_item_per_u['latest_continuous_inactive_months' + '_' + year_str] = df_month_avg_item_per_u[
@@ -58,18 +61,21 @@ def customers_feature_engineering(df_customers, df_transactions):
         # new feature 4: number of transactions of the certain year
         df_avg_item_per_u = df.groupby(['customer_id'])['price'].count().reset_index()
         df_avg_item_per_u.columns = ['customer_id', 'num_transactions' + '_' + year_str]
-        df_month_avg_item_per_u = pd.merge(df_month_avg_item_per_u, df_avg_item_per_u, on='customer_id', how='outer')
+        df_month_avg_item_per_u = pd.merge(df_month_avg_item_per_u, df_avg_item_per_u, on='customer_id',
+                                           how='outer')
 
         # new feature 5: average number of transactions each active month
-        df_month_avg_item_per_u['avg_transactions_in_active_month' + '_' + year_str] = df_month_avg_item_per_u.apply(
-            lambda x: x['num_transactions' + '_' + year_str] / (
-                    total_months - x['num_missing_months' + '_' + year_str]) if x['num_transactions' + '_' + year_str] > 0 else None,
+        df_month_avg_item_per_u[
+            'avg_transactions_in_active_month' + '_' + year_str] = df_month_avg_item_per_u.apply(
+            lambda x: x['num_transactions' + '_' + year_str] / x['num_sale_months' + '_' + year_str] if x[
+                                                                                                            'num_transactions' + '_' + year_str] > 0 else None,
             axis=1)
 
         df_result = df_month_avg_item_per_u.fillna(0)
 
         final_columns = ['customer_id', 'num_missing_months_' + year_str, 'num_missing_months_perc_' + year_str,
-                         'num_transactions_' + year_str, 'avg_transactions_in_active_month_' + year_str]
+                         'num_sale_months_' + year_str, 'num_transactions_' + year_str,
+                         'avg_transactions_in_active_month_' + year_str]
         if index == 0:
             df_result_accumulated = df_result[final_columns]
         else:
@@ -77,11 +83,15 @@ def customers_feature_engineering(df_customers, df_transactions):
                 final_columns.append('latest_continuous_inactive_months' + '_' + year_str)
             df_result = df_result[final_columns]
             df_result_accumulated = pd.merge(df_result_accumulated, df_result, on='customer_id', how='outer')
+
         print("New feathers of " + year_str + " generation finished.")
 
     df_result_accumulated['num_missing_months_total'] = df_result_accumulated[
-        ['num_missing_months_' + i for i in years]].sum(axis=1)
+        ['num_missing_months_' + str(i) for i in years]].sum(axis=1)
     print("New feather 2:num_missing_months_total generation finished.")
+
+    df_result_accumulated['num_sale_months_total'] = df_result_accumulated[
+        ['num_sale_months_' + str(i) for i in years]].sum(axis=1)
 
     df_result_accumulated['num_missing_months_perc_total'] = df_result_accumulated[
                                                                  'num_missing_months_total'] / total_months_in_training_data
@@ -92,8 +102,7 @@ def customers_feature_engineering(df_customers, df_transactions):
 
     print("New feather 4:num_transactions_total generation finished.")
     df_result_accumulated['avg_transactions_in_active_month_total'] = df_result_accumulated.apply(
-        lambda x: x['num_transactions_total'] / (
-                total_months - x['num_missing_months_total']) if x['num_transactions_total'] > 0 else 0,
+        lambda x: x['num_transactions_total'] / x['num_sale_months_total'] if x['num_transactions_total'] > 0 else 0,
         axis=1)
 
     print("New feather 5:avg_transactions_in_active_month_total generation finished.")
@@ -103,6 +112,7 @@ def customers_feature_engineering(df_customers, df_transactions):
     print('All new features added into df_customers!')
 
     return df_result
+    # df_result
 
 
 def articles_feature_engineering(df_articles, df_transactions):

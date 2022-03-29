@@ -12,15 +12,15 @@ if __name__ == '__main__':
 
     path = os.getenv('DATASET_PATH')
 
-    df_articles_raw = pd.read_csv(os.path.join(path, dataset_dict["articles"]), dtype={'article_id': str})
-    df_customers_raw = pd.read_csv(os.path.join(path, dataset_dict["customers"]))
-    df_transactions_raw = pd.read_csv(os.path.join(path, dataset_dict["transactions"]), dtype={'article_id': str},
-                                      parse_dates=['t_dat'])
+    df_articles = pd.read_csv(os.path.join(path, dataset_dict["articles"]), dtype={'article_id': str})
+    df_customers = pd.read_csv(os.path.join(path, dataset_dict["customers"]))
+    df_transactions = pd.read_csv(os.path.join(path, dataset_dict["transactions"]), dtype={'article_id': str},
+                                  parse_dates=['t_dat'])
 
     # Clean the dataset by assigning different parameters
-    df_customers = initial_all_missing_values(df_customers_raw)
-    df_articles = articles_cleaning(df_articles_raw)
-    df_transactions = transactions_cleaning(df_transactions_raw)
+    df_customers = initial_all_missing_values(df_customers)
+    df_articles = articles_cleaning(df_articles)
+    df_transactions = transactions_cleaning(df_transactions)
     df_transactions.to_csv(os.path.join(path, "processed_" + dataset_dict["transactions"]))
 
     # Add new features into df_customers
