@@ -2,10 +2,12 @@
 Created on 19/03/2022
 @author: Riccardo Pazzi
 """
-
+import os
 import zipfile, shutil
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
+
 from Data_manager.DataReader import DataReader
 from Data_manager.DataReader_utils import download_from_URL
 from Data_manager.DatasetMapperManager import DatasetMapperManager
@@ -25,9 +27,15 @@ class HMDatasetReader(DataReader):
     AVAILABLE_URM = ["URM_all", "URM_timestamp"]
     AVAILABLE_ICM = []
     AVAILABLE_UCM = []
-    DATASET_SPLIT_ROOT_FOLDER = "./processed/"
+
+    load_dotenv()
+    PROCESSED_PATH = os.getenv('PROCESSED_PATH')
+
+    DATASET_SPLIT_ROOT_FOLDER = "{}/processed/".format(PROCESSED_PATH)
 
     IS_IMPLICIT = True
+
+
 
     def _get_dataset_name_root(self):
         return self.DATASET_SUBFOLDER

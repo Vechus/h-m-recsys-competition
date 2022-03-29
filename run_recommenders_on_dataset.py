@@ -28,7 +28,10 @@ def _get_instance(recommender_class, URM_train, ICM_all, UCM_all):
 if __name__ == '__main__':
 
     reader = HMDatasetReader(False)
-    dataset_object = reader.load_data("./processed/{}/".format(dataset_name))
+
+    PROCESSED_PATH = os.getenv('PROCESSED_PATH')
+
+    dataset_object = reader.load_data('{}/{}/'.format(PROCESSED_PATH, dataset_name))
     print("Loaded dataset into memory...")
 
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset ibrary

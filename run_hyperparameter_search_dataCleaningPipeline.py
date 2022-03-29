@@ -55,6 +55,8 @@ def read_data_split_and_search():
     # URM_test = dataset.get_URM_from_name('URM_test')
     URM_validation = dataset.get_URM_from_name('URM_validation')
 
+
+
     #URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     #URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
@@ -89,7 +91,7 @@ def read_data_split_and_search():
     metric_to_optimize = "MAP"
     cutoff_to_optimize = 12
 
-    n_cases = 10
+    n_cases = 50
     n_random_starts = int(n_cases/3)
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list = cutoff_list)
@@ -114,9 +116,9 @@ def read_data_split_and_search():
 
 
 
-
-    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-    pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
+    #
+    # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+    # pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
 
     #
     #
@@ -133,7 +135,7 @@ def read_data_split_and_search():
     #
 
 
-    dataset.get_loaded_ICM_dict()
+    # dataset.get_loaded_ICM_dict()
 
     ################################################################################################
     ###### Content Baselines
@@ -199,8 +201,8 @@ def read_data_split_and_search():
 if __name__ == '__main__':
 
     logger = Logger('HPS-test')
-    # logger.log('Started Hyper-parameter tuning')
-    print('Started Hyper-parameter tuning')
+    logger.log('Started Hyper-parameter tuning')
+    # print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
     except Exception as e:
@@ -208,5 +210,5 @@ if __name__ == '__main__':
         # logger.log('Exception: \n{}'.format(str(e)))
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
-    # logger.log('Hyper parameter search finished! Check results and turn off the machine.')
-    print('Hyper parameter search finished! Check results and turn off the machine.')
+    logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+    # print('Hyper parameter search finished! Check results and turn off the machine.')
