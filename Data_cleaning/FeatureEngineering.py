@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import math
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 
 # the function of calculating then number of month which don't have any transactions
@@ -43,7 +45,7 @@ def customers_feature_engineering(df_customers, df_transactions):
             axis=1)
 
         df_month_avg_item_per_u['num_sale_months' + '_' + year_str] = df_month_avg_item_per_u.notnull().sum(
-            axis=1)-2
+            axis=1) - 2
         df_month_avg_item_per_u = df_month_avg_item_per_u.fillna(0)
 
         # get the total month of the certain year
@@ -118,9 +120,16 @@ def customers_feature_engineering(df_customers, df_transactions):
 def articles_feature_engineering(df_articles, df_transactions):
     print("New features generation of articles start.")
     df_articles_copy = df_articles.copy()
+
+    df_articles['idxgrp_idx_prdtyp'] = df_articles['cleaned_index_group_name'] + '_' + df_articles[
+        'cleaned_index_name'] + '_' + df_articles['cleaned_product_type_name']
+    # df_trans = df_trans.sample(frac=0.1) # downsampling due to memory limits
+    df_transactions_new = pd.merge(df_transactions, df_articles[['article_id', 'idxgrp_idx_prdtyp']], on='article_id',
+                                   how='left')
+
     # generate some new features from the transaction behaviours of 2020
     year = 2020
-    df = df_transactions[df_transactions['year'] == year]
+    df = df_transactions[df_transactions['year'] == year][df_transactions.columns.difference(['idxgrp_idx_prdtyp'])]
     df_month_price = df[['article_id', 'price', 'month', 'year']].drop_duplicates(
         ['article_id', 'price', 'month', 'year']).copy()
 
@@ -155,6 +164,8 @@ def articles_feature_engineering(df_articles, df_transactions):
         lambda x: math.ceil(x.days / 30)).reset_index().rename(columns={'t_dat': 'sale_periods_months'})
 
     df_result = pd.merge(df_result, df_articles_period_months, on='article_id', how='outer')
+    df_result = df_result.fillna(0)
+    df_result['sale_periods_months'] = df_result['sale_periods_months'].astype(int)
     print("Feature 3:sale periods(months) generation finished.")
 
     # new feature 4:the transaction peak month of each article
@@ -189,6 +200,66 @@ def articles_feature_engineering(df_articles, df_transactions):
 
     df_result = df_result.fillna(0)
     df_result = pd.merge(df_articles, df_result, on='article_id', how='outer')
+
+    del df_articles
+
+    # new feature 5: seasonality for each article
+
+    df_transactions_new['order_price'] = df_transactions_new['price'] * df_transactions_new['article_purchase_count']
+
+    dfgrp1 = df_transactions_new.groupby(['idxgrp_idx_prdtyp'])[['order_price']].sum().reset_index()
+    dfgrp2 = df_transactions_new.groupby(['idxgrp_idx_prdtyp', 'year', 'month'])[['order_price']].sum().reset_index()
+    dfgrp2 = pd.merge(dfgrp2, dfgrp1, on='idxgrp_idx_prdtyp', how='left')
+
+    dfgrp2['monthsales/ttl-sales'] = dfgrp2['order_price_x'] / dfgrp2['order_price_y'] * 100
+    dfgrp2['ym_date'] = dfgrp2['year'].astype(str) + '-' + dfgrp2['month'].astype(str) + '-1'
+    dfgrp2['ym_date'] = pd.to_datetime(dfgrp2['ym_date'])
+    dfgrp2 = pd.pivot_table(dfgrp2, index='ym_date', columns='idxgrp_idx_prdtyp',
+                            values='monthsales/ttl-sales').reset_index().fillna(0)
+
+    feat_cols = [col for col in dfgrp2.columns if col != 'ym_date']
+
+    df_pca = StandardScaler().fit_transform(dfgrp2[feat_cols])
+    model_pca = PCA(n_components=5)
+    model_pca.fit(df_pca)
+    feature = model_pca.transform(df_pca)
+
+    df_eigen = model_pca.components_.T
+    df_eigen = pd.DataFrame(df_eigen,
+                            index=None,
+                            columns=['PC1', 'PC2', 'PC3', 'PC4', 'PC5'])
+    df_eigen['idxgrp_idx_prdtyp'] = feat_cols
+    df_eigen = pd.merge(
+        df_eigen,
+        dfgrp2.corr()[['ladieswear_ladieswear_jacket']].reset_index().rename(
+            columns={'ladieswear_ladieswear_jacket': 'autumn_sales_indicator'}),
+        on='idxgrp_idx_prdtyp',
+        how='left'
+    )
+
+    # print(model_pca.explained_variance_ratio_)
+
+    from sklearn.mixture import GaussianMixture
+    gmm = GaussianMixture(n_components=4, covariance_type='full')
+    gmm.fit(df_eigen[['PC1', 'PC2', 'PC3']])
+
+    # '0' means the article is clustered into autumn, '3' means the article is clustered into summer
+    df_eigen['product_seasonal_type'] = gmm.predict(df_eigen[['PC1', 'PC2', 'PC3']])
+    df_eigen['prob_cluster1'] = gmm.predict_proba(df_eigen[['PC1', 'PC2', 'PC3']])[:, 0]
+    df_eigen['prob_cluster2'] = gmm.predict_proba(df_eigen[['PC1', 'PC2', 'PC3']])[:, 1]
+    df_eigen['prob_cluster3'] = gmm.predict_proba(df_eigen[['PC1', 'PC2', 'PC3']])[:, 2]
+    df_eigen['prob_cluster4'] = gmm.predict_proba(df_eigen[['PC1', 'PC2', 'PC3']])[:, 3]
+
+    df_result = pd.merge(
+        df_result,
+        df_eigen[['idxgrp_idx_prdtyp', 'autumn_sales_indicator', 'product_seasonal_type']],
+        on='idxgrp_idx_prdtyp',
+        how='left'
+    )
+
+    df_result = df_result.fillna(0)
+
+    df_result['product_seasonal_type'] = df_result['product_seasonal_type'].astype(int)
 
     print('All new features added into df_articles!')
 
