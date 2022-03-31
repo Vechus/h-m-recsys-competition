@@ -46,7 +46,7 @@ def read_data_split_and_search():
     reader = HMDatasetReader(False)
 
     PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset = reader.load_data('{}/{}/'.format(PROCESSED_PATH, dataset_name))
+    dataset = reader.load_data('{}/processed/{}/'.format(DATASET_PATH, dataset_name))
     print("Loaded dataset into memory...")
 
 
@@ -106,7 +106,7 @@ def read_data_split_and_search():
                                                        n_random_starts = n_random_starts,
                                                        evaluator_validation_earlystopping = evaluator_validation,
                                                        evaluator_validation = evaluator_validation,
-                                                       # evaluator_test = evaluator_test,
+                                                       evaluate_on_test = 'no',
                                                        evaluator_test = None,
                                                        output_folder_path = output_folder_path,
                                                        resume_from_saved = True,
@@ -150,8 +150,8 @@ def read_data_split_and_search():
                                         metric_to_optimize = metric_to_optimize,
                                         cutoff_to_optimize = cutoff_to_optimize,
                                         evaluator_validation = evaluator_validation,
-                                        # evaluator_test = evaluator_test,
-                                        evaluator_test = evaluator_validation,
+                                        evaluate_on_test='no',
+                                        evaluator_test=None,
                                         output_folder_path = output_folder_path,
                                         parallelizeKNN = True,
                                         allow_weighting = True,
@@ -176,8 +176,8 @@ def read_data_split_and_search():
                                         metric_to_optimize = metric_to_optimize,
                                         cutoff_to_optimize = cutoff_to_optimize,
                                         evaluator_validation = evaluator_validation,
-                                        # evaluator_test = evaluator_test,
-                                        evaluator_test = evaluator_validation,
+                                        evaluate_on_test='no',
+                                        evaluator_test=None,
                                         output_folder_path = output_folder_path,
                                         parallelizeKNN = True,
                                         allow_weighting = True,

@@ -154,7 +154,7 @@ SourceData/
 dataset/*.csv
 dataset/*.csv.zip
 processed/*
-!processed/README.md
+!dataset/processed/README.md
 DataProcessing/processed/*
 dataset/
 result_experiments/
