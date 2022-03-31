@@ -107,7 +107,7 @@ def read_data_split_and_search():
                                                        evaluator_validation_earlystopping = evaluator_validation,
                                                        evaluator_validation = evaluator_validation,
                                                        # evaluator_test = evaluator_test,
-                                                       evaluator_test = evaluator_validation,
+                                                       evaluator_test = None,
                                                        output_folder_path = output_folder_path,
                                                        resume_from_saved = True,
                                                        similarity_type_list = None, # all
@@ -201,7 +201,7 @@ def read_data_split_and_search():
 if __name__ == '__main__':
 
     logger = Logger('HPS-test')
-    logger.log('Started Hyper-parameter tuning')
+    # logger.log('Started Hyper-parameter tuning')
     # print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
@@ -210,5 +210,5 @@ if __name__ == '__main__':
         # logger.log('Exception: \n{}'.format(str(e)))
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
-    logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+    # logger.log('Hyper parameter search finished! Check results and turn off the machine.')
     # print('Hyper parameter search finished! Check results and turn off the machine.')

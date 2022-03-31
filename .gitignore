@@ -156,5 +156,6 @@ dataset/*.csv.zip
 processed/*
 !processed/README.md
 DataProcessing/processed/*
-
+dataset/
+result_experiments/
 aws_folder/

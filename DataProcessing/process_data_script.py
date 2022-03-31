@@ -28,10 +28,12 @@ if __name__ == '__main__':
     manager = DatasetMapperManager()
 
     # URM ALL
+    # Not needed now
     # generate_URM_all(manager, transactions)
 
     # generate all ICMs
     gen_ICM_list(manager, articles)
+
     # URM split
     # split_train_validation_leave_timestamp_out(manager, transactions, (pd.Timestamp("2019-09-23"), pd.Timestamp("2019-09-30")),
     #                                            (0, 0), False)
@@ -45,8 +47,8 @@ if __name__ == '__main__':
     # generate dataset with URM (Implicit=True)
     dataset = manager.generate_Dataset(DATASET_NAME, True)
 
-    PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset.save_data('{}/{}/'.format(PROCESSED_PATH, DATASET_NAME))
+    # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
+    dataset.save_data('{}/processed/{}/'.format(DATASET_PATH, DATASET_NAME))
 
     dataset.print_statistics()
     dataset.print_statistics_global()
