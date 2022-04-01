@@ -261,6 +261,8 @@ def articles_feature_engineering(df_articles, df_transactions):
 
     df_result['product_seasonal_type'] = df_result['product_seasonal_type'].astype(int)
 
+    # df_result.drop(columns=['Unnamed: 0'], axis=1, inplace=True)
+
     print('All new features added into df_articles!')
 
     return df_result

@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 
 if __name__ == '__main__':
     load_dotenv()
-    dataset_dict = {"articles": "articles.csv", "customers": "customers.csv", "transactions": "transactions_train.csv"}
+    dataset_dict = {"articles": "articles.csv", "customers": "customers.csv", "transactions": "transactions_train.csv",
+                    "sample_submission": "sample_submission.csv"}
 
     path = os.getenv('DATASET_PATH')
 
