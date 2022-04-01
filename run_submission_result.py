@@ -12,15 +12,16 @@ if __name__ == '__main__':
     DATASET_PATH = os.getenv('DATASET_PATH')
     PROCESSED_PATH = os.getenv('PROCESSED_PATH')
     dataset = reader.load_data('{}/processed/{}/'.format(DATASET_PATH, dataset_name))
+    ICM_train = dataset.get_ICM_from_name("ICM_colour_group_code")
 
     manager = DatasetMapperManager()
     transactions = pd.read_csv('{}/processed_transactions_train.csv'.format(DATASET_PATH))
     timestamp_list_train = [("2020-06-22", "2020-09-23")]
     timestamp_list_validation = [("2019-09-23", "2019-09-30")]
     split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation)
+    dataset = manager.generate_Dataset('hm', True)
 
     URM_train = dataset.get_URM_from_name('URM_train')
-    ICM_train = dataset.get_ICM_from_name("ICM_colour_group_code")
 
     recommender = ItemKNN_CFCBF_Hybrid_Recommender(URM_train, ICM_train)
     recommender.fit(topK=677, shrink=36, similarity='asymmetric', normalize=True,
