@@ -60,7 +60,7 @@ def read_data_split_and_search():
     #URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     #URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/"
+    output_folder_path = "result_experiments/ItemKNNCBF"
 
 
     # If directory does not exist, create
@@ -139,11 +139,13 @@ def read_data_split_and_search():
 
     ################################################################################################
     ###### Content Baselines
-
+    n = 0
     for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
+        n = n+1
+        if n not in [5, 10]:
+            continue
 
         try:
-
             runHyperparameterSearch_Content(ItemKNNCBFRecommender,
                                         URM_train = URM_train,
                                         URM_train_last_test = URM_train + URM_validation,
@@ -201,14 +203,14 @@ def read_data_split_and_search():
 if __name__ == '__main__':
 
     logger = Logger('HPS-test')
-    # logger.log('Started Hyper-parameter tuning')
+    logger.log('Started Hyper-parameter tuning')
     # print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
     except Exception as e:
-        # logger.log('We got an exception! Check log and turn off the machine.')
-        # logger.log('Exception: \n{}'.format(str(e)))
+        logger.log('We got an exception! Check log and turn off the machine.')
+        logger.log('Exception: \n{}'.format(str(e)))
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
-    # logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+    logger.log('Hyper parameter search finished! Check results and turn off the machine.')
     # print('Hyper parameter search finished! Check results and turn off the machine.')
