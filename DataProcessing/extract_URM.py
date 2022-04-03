@@ -19,12 +19,11 @@ def generate_URM_all(manager, transactions):
     # urm_df.drop_duplicates(subset=["UserID", "ItemID"], inplace=True)
     # print(urm_df)
 
-    transactions.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
-    transactions['ItemID'] = transactions['ItemID'].astype(str)
-    transactions['Data'] = 1.0
-    transactions = transactions[['UserID', 'ItemID', 'Data']]
-    transactions.drop_duplicates()
+    urm_df = transactions.rename(columns={"customer_id": "UserID", "article_id": "ItemID"})
+    urm_df['ItemID'] = urm_df['ItemID'].astype(str)
+    urm_df['Data'] = 1.0
+    urm_df = urm_df[['UserID', 'ItemID', 'Data']]
+    urm_df.drop_duplicates()
 
     # update dataset manager
-    manager.add_URM(transactions, 'URM_all')
-
+    manager.add_URM(urm_df, 'URM_all')
