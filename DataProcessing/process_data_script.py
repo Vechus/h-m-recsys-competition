@@ -19,9 +19,9 @@ if __name__ == '__main__':
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
 
-    transactions = pd.read_csv('{}/processed_transactions_train.csv'.format(DATASET_PATH))
-    articles = pd.read_csv('{}/processed_articles.csv'.format(DATASET_PATH))
-    customers = pd.read_csv('{}/processed_customers.csv'.format(DATASET_PATH))
+    transactions = pd.read_parquet('{}/processed_transactions_train.parquet'.format(DATASET_PATH))
+    articles = pd.read_parquet('{}/processed_articles.parquet'.format(DATASET_PATH))
+    customers = pd.read_parquet('{}/processed_customers.parquet'.format(DATASET_PATH))
 
     print('Loaded all files')
 
