@@ -236,6 +236,30 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     manager.add_URM(validation_interactions, 'URM_validation')
 
 
+def split_submission_train_intervals(manager, timestamp_df, timestamp_array_train):
+    # Retrieve which users fall in the wanted list of time frames
+    print("Preprocessing URM_submission dataframe...")
+    timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
+
+    # timestamp_df.drop('price', inplace=True, axis=1)
+    # timestamp_df.drop('sales_channel_id', inplace=True, axis=1)
+    timestamp_df.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
+    timestamp_df['ItemID'] = timestamp_df['ItemID'].astype(str)
+    timestamp_df['Data'] = 1.0
+
+    timestamp_df = timestamp_df[[timestamp_column, 'UserID', 'ItemID', 'Data']]
+
+    df_submission_train = timestamp_df.query("'" + timestamp_array_train[0][0] + "'<=t_dat<'" + timestamp_array_train[0][1] + "'")
+
+    df_submission_train.drop(timestamp_column, inplace=True, axis=1)
+
+    df_submission_train.drop_duplicates(inplace=True)
+
+    print(df_submission_train.head())
+
+    manager.add_URM(df_submission_train, 'URM_submission_train')
+
+
 if __name__ == "__main__":
     timestamp_list = [("2018-09-20", "2018-10-1"), ("2019-09-01", "2019-10-01"),
                       ("2020-09-01", "2020-09-23")]

@@ -81,7 +81,7 @@ class Dataset(object):
         :param UCM_dictionary:                      Dictionary of "UCM_name":UCM_object
         :param UCM_feature_mapper_dictionary:       Dictionary of "UCM_name":feature_original_id_to_index
         :param user_original_ID_to_index:           Dictionary of "user_original_id":user_index
-        :param item_original_ID_to_index:           Dictionary of "item_original_id":user_index
+        :param item_original_ID_to_index:           Dictionary of "item_original_id":item_index
         """
         super(Dataset, self).__init__()
 
