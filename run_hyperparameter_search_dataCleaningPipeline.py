@@ -107,8 +107,8 @@ def read_data_split_and_search():
                                                        parallelizeKNN=False)
 
     #
-    # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-    # pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
+    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+    pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
 
     #
     #
@@ -129,35 +129,35 @@ def read_data_split_and_search():
     ################################################################################################
     ###### Content Baselines
     # n = 0
-    for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
-        # n = n + 1
-        # if n not in [5, 10]:
-        #     continue
-        if ICM_name not in ['ICM_all']:
-            continue
-        try:
-            runHyperparameterSearch_Content(ItemKNNCBFRecommender,
-                                        URM_train = URM_train,
-                                        URM_train_last_test = URM_train + URM_validation,
-                                        metric_to_optimize = metric_to_optimize,
-                                        cutoff_to_optimize = cutoff_to_optimize,
-                                        evaluator_validation = evaluator_validation,
-                                        evaluate_on_test='no',
-                                        evaluator_test=None,
-                                        output_folder_path = output_folder_path,
-                                        parallelizeKNN = True,
-                                        allow_weighting = True,
-                                        resume_from_saved = True,
-                                        similarity_type_list = None, # all
-                                        ICM_name = ICM_name,
-                                        ICM_object = ICM_object.copy(),
-                                        n_cases = n_cases,
-                                        n_random_starts = n_random_starts)
-
-        except Exception as e:
-
-            print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
-            traceback.print_exc()
+    # for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
+    #     # n = n + 1
+    #     # if n not in [5, 10]:
+    #     #     continue
+    #     if ICM_name not in ['ICM_all']:
+    #         continue
+    #     try:
+    #         runHyperparameterSearch_Content(ItemKNNCBFRecommender,
+    #                                     URM_train = URM_train,
+    #                                     URM_train_last_test = URM_train + URM_validation,
+    #                                     metric_to_optimize = metric_to_optimize,
+    #                                     cutoff_to_optimize = cutoff_to_optimize,
+    #                                     evaluator_validation = evaluator_validation,
+    #                                     evaluate_on_test='no',
+    #                                     evaluator_test=None,
+    #                                     output_folder_path = output_folder_path,
+    #                                     parallelizeKNN = True,
+    #                                     allow_weighting = True,
+    #                                     resume_from_saved = True,
+    #                                     similarity_type_list = None, # all
+    #                                     ICM_name = ICM_name,
+    #                                     ICM_object = ICM_object.copy(),
+    #                                     n_cases = n_cases,
+    #                                     n_random_starts = n_random_starts)
+    #
+    #     except Exception as e:
+    #
+    #         print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
+    #         traceback.print_exc()
 
         # try:
         #
@@ -188,19 +188,19 @@ def read_data_split_and_search():
 
 if __name__ == '__main__':
 
-    log_for_telegram_group = True
-    logger = Logger('HPS-test')
-    if log_for_telegram_group:
-        logger.log('Started Hyper-parameter tuning')
+    # log_for_telegram_group = True
+    # logger = Logger('HPS-test')
+    # if log_for_telegram_group:
+    #     logger.log('Started Hyper-parameter tuning')
     print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
     except Exception as e:
-        if log_for_telegram_group:
-            logger.log('We got an exception! Check log and turn off the machine.')
-            logger.log('Exception: \n{}'.format(str(e)))
+        # if log_for_telegram_group:
+        #     logger.log('We got an exception! Check log and turn off the machine.')
+        #     logger.log('Exception: \n{}'.format(str(e)))
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
-    if log_for_telegram_group:
-        logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+    # if log_for_telegram_group:
+    #     logger.log('Hyper parameter search finished! Check results and turn off the machine.')
     print('Hyper parameter search finished! Check results and turn off the machine.')
