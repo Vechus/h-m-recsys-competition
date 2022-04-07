@@ -26,7 +26,7 @@ from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSear
 from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
 
-def read_data_split_and_search():
+def read_data_split_and_search(telegram_logger=None):
     """
     This function provides a simple example on how to tune parameters of a given algorithm
 
@@ -74,9 +74,9 @@ def read_data_split_and_search():
         # UserKNNCFRecommender,
         # MatrixFactorization_BPR_Cython,
         # MatrixFactorization_FunkSVD_Cython,
-        # PureSVDRecommender,
+        PureSVDRecommender,
         # SLIM_BPR_Cython,
-        # SLIMElasticNetRecommender
+        SLIMElasticNetRecommender
     ]
 
     from Evaluation.Evaluator import EvaluatorHoldout
@@ -104,7 +104,8 @@ def read_data_split_and_search():
                                                        output_folder_path=output_folder_path,
                                                        resume_from_saved=True,
                                                        similarity_type_list=None,  # all
-                                                       parallelizeKNN=False)
+                                                       parallelizeKNN=False,
+                                                       telegram_logger=telegram_logger)
 
     #
     pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
@@ -202,19 +203,19 @@ def read_data_split_and_search():
 
 if __name__ == '__main__':
 
-    # log_for_telegram_group = True
-    # logger = Logger('HPS-test')
-    # if log_for_telegram_group:
-    #     logger.log('Started Hyper-parameter tuning')
+    log_for_telegram_group = True
+    logger = Logger('HPS-longer')
+    if log_for_telegram_group:
+        logger.log('Started Hyper-parameter tuning')
     print('Started Hyper-parameter tuning')
     try:
-        read_data_split_and_search()
+        read_data_split_and_search(telegram_logger=logger)
     except Exception as e:
-        # if log_for_telegram_group:
-        #     logger.log('We got an exception! Check log and turn off the machine.')
-        #     logger.log('Exception: \n{}'.format(str(e)))
+        if log_for_telegram_group:
+            logger.log('We got an exception! Check log and turn off the machine.')
+            logger.log('Exception: \n{}'.format(str(e)))
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
-    # if log_for_telegram_group:
-    #     logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+    if log_for_telegram_group:
+        logger.log('Hyper parameter search finished! Check results and turn off the machine.')
     print('Hyper parameter search finished! Check results and turn off the machine.')
