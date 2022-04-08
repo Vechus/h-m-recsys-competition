@@ -59,7 +59,7 @@ def read_data_split_and_search():
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/TopPop/URM_ALL/"
+    output_folder_path = "result_experiments/collaborative_algorithm/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
@@ -67,16 +67,16 @@ def read_data_split_and_search():
 
     collaborative_algorithm_list = [
         # Random,
-        TopPop,
-        # P3alphaRecommender,
-        # RP3betaRecommender,
-        # ItemKNNCFRecommender,
-        # UserKNNCFRecommender,
+        # TopPop,
+        P3alphaRecommender,
+        RP3betaRecommender,
+        ItemKNNCFRecommender,
+        UserKNNCFRecommender,
         # MatrixFactorization_BPR_Cython,
         # MatrixFactorization_FunkSVD_Cython,
-        # PureSVDRecommender,
-        # SLIM_BPR_Cython,
-        # SLIMElasticNetRecommender
+        PureSVDRecommender,
+        SLIM_BPR_Cython,
+        SLIMElasticNetRecommender
     ]
 
     from Evaluation.Evaluator import EvaluatorHoldout
