@@ -104,7 +104,8 @@ def read_data_split_and_search():
                                                        output_folder_path=output_folder_path,
                                                        resume_from_saved=True,
                                                        similarity_type_list=None,  # all
-                                                       parallelizeKNN=False)
+                                                       parallelizeKNN=False,
+                                                       telegram_logger=logger)
 
     #
     pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
