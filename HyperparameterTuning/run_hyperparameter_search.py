@@ -585,7 +585,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                                           evaluator_validation = None, evaluator_test = None, evaluator_validation_earlystopping = None,
                                           metric_to_optimize = None, cutoff_to_optimize = None,
                                           output_folder_path ="result_experiments/", parallelizeKNN = True,
-                                          allow_weighting = True, allow_bias_URM=False, allow_dropout_MF = False, similarity_type_list = None):
+                                          allow_weighting = True, allow_bias_URM=False, allow_dropout_MF = False, similarity_type_list = None, telegram_logger = None):
     """
     This function performs the hyperparameter optimization for a collaborative recommender
 
@@ -609,6 +609,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
     :param allow_bias_URM:      Boolean value, if True it enables the use of bias to shift the values of the URM
     :param allow_dropout_MF:    Boolean value, if True it enables the use of dropout on the latent factors of MF algorithms
     :param similarity_type_list: List of strings with the similarity heuristics to be used for the KNNs
+    :param telegram_logger:     Logger object for logging messages on telegram
     """
 
 
@@ -633,14 +634,14 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         output_file_name_root = recommender_class.RECOMMENDER_NAME
 
-        hyperparameterSearch = SearchBayesianSkopt(recommender_class, evaluator_validation=evaluator_validation, evaluator_test=evaluator_test)
+        hyperparameterSearch = SearchBayesianSkopt(recommender_class, evaluator_validation=evaluator_validation, evaluator_test=evaluator_test, telegram_logger=telegram_logger)
 
         if recommender_class in [TopPop, GlobalEffects, Random]:
             """
             TopPop, GlobalEffects and Random have no hyperparameters therefore only one evaluation is needed
             """
 
-            hyperparameterSearch = SearchSingleCase(recommender_class, evaluator_validation=evaluator_validation, evaluator_test=evaluator_test)
+            hyperparameterSearch = SearchSingleCase(recommender_class, evaluator_validation=evaluator_validation, evaluator_test=evaluator_test, telegram_logger=telegram_logger)
 
             recommender_input_args = SearchInputRecommenderArgs(
                 CONSTRUCTOR_POSITIONAL_ARGS = [URM_train],

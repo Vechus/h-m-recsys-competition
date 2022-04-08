@@ -23,8 +23,35 @@ def cal_inactive_months(x):
                     return 4
 
 
+# classify the gender for articles
+def set_gender_flg(x):
+    x['is_for_male_or_female'] = 0  # 0:unknown,1:female,2:male
+    x['is_for_mama'] = 0
+    if x['cleaned_index_group_name'] in ['ladieswear', 'divid']:
+        x['is_for_male_or_female'] = 1
+    if x['cleaned_index_group_name'] == 'menswear':
+        x['is_for_male_or_female'] = 2
+    if x['cleaned_index_group_name'] in ['babychildren', 'sport']:
+        if 'boy' in x['cleaned_department_name'].lower() or 'men' in x['cleaned_department_name'].lower():
+            x['is_for_male_or_female'] = 2
+        if 'girl' in x['cleaned_department_name'].lower() or 'ladi' in x['cleaned_department_name'].lower():
+            x['is_for_male_or_female'] = 1
+    if x['cleaned_section_name'] == 'mama':
+        x['is_for_mama'] = 1
+    return x
+
+
 def customers_feature_engineering(df_customers, df_transactions):
     print("New features generation of customers start.")
+    # map original postal code into index
+    postcode_original_ID_to_index_dict = {}
+    for pc_id in df_customers["postal_code"].unique():
+        postcode_original_ID_to_index_dict[pc_id] = len(postcode_original_ID_to_index_dict)
+    df_customers["postcode"] = [postcode_original_ID_to_index_dict[pc_original] for pc_original in
+                                df_customers["postal_code"].values]
+    df_customers.drop(columns='postal_code', axis=1, inplace=True)
+    df_customers = df_customers.rename(columns={'postcode': "postal_code"})
+
     # generate some new features from the transaction behaviours for each year
     years = df_transactions.year.unique()
 
@@ -262,6 +289,11 @@ def articles_feature_engineering(df_articles, df_transactions):
     df_result['product_seasonal_type'] = df_result['product_seasonal_type'].astype(int)
 
     # df_result.drop(columns=['Unnamed: 0'], axis=1, inplace=True)
+    print("Feature 5:product_seasonal_type generation finished.")
+
+    df_result = df_result.apply(set_gender_flg, axis=1)
+
+    print("Feature 6:is_for_male/female/mama generation finished.")
 
     print('All new features added into df_articles!')
 

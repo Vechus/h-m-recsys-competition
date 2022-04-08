@@ -32,12 +32,12 @@ if __name__ == '__main__':
     get_ICM_all(manager, articles)
 
     # URM split
-    timestamp_list_train = [("2019-06-22", "2019-09-23")]
-    timestamp_list_validation = [("2019-09-23", "2019-09-30")]
+    timestamp_list_train = [("2019-04-22", "2019-09-23")]
+    timestamp_list_validation = [("2019-09-16", "2019-09-30")]
     split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation)
 
     # URM_train for submission
-    timestamp_list_submission = [("2020-06-22", "2020-09-23")]
+    timestamp_list_submission = [("2020-04-22", "2020-09-23")]
     split_submission_train_intervals(manager, transactions, timestamp_list_submission)
 
     # generate UCMs

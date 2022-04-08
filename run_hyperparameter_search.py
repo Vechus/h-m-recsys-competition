@@ -191,7 +191,14 @@ if __name__ == '__main__':
     log_for_telegram_group = True
     logger = Logger('HPS-test')
     if log_for_telegram_group:
-        logger.log('Started Hyper-parameter tuning')
+        logger.log('Started Hyper-parameter tuning, '
+                   'P3alphaRecommender,'
+                   'RP3betaRecommender,'
+                   'ItemKNNCFRecommender,'
+                   'UserKNNCFRecommender,'
+                   'PureSVDRecommender,'
+                   'SLIM_BPR_Cython,'
+                   'SLIMElasticNetRecommender')
     print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
@@ -202,5 +209,12 @@ if __name__ == '__main__':
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
     if log_for_telegram_group:
-        logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+        logger.log('Hyper parameter search finished! '
+                   'P3alphaRecommender,'
+                   'RP3betaRecommender,'
+                   'ItemKNNCFRecommender,'
+                   'UserKNNCFRecommender,'
+                   'PureSVDRecommender,'
+                   'SLIM_BPR_Cython,'
+                   'SLIMElasticNetRecommender')
     print('Hyper parameter search finished! Check results and turn off the machine.')
