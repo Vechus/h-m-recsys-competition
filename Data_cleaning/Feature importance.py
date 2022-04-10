@@ -197,6 +197,6 @@ if __name__ == "__main__":
     print(np.mean(scores))
 
     df_fea_imp = get_feat_imp(df_total)
-    df_fea_imp.head(20)
+    print(df_fea_imp.head(20))
 
     df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
