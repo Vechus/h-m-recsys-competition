@@ -47,7 +47,7 @@ def read_data_split_and_search():
     dataset_name = "hm"
     reader = HMDatasetReader(False)
 
-    PROCESSED_PATH = os.getenv('PROCESSED_PATH')
+    # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
     dataset = reader.load_data('{}/processed/{}/'.format(DATASET_PATH, dataset_name))
     print("Loaded dataset into memory...")
 
@@ -59,7 +59,7 @@ def read_data_split_and_search():
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/collaborative_algorithm/"
+    output_folder_path = "result_experiments/collaborative_algorithm_URM_2019-06-22_2019-09-23/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
@@ -189,7 +189,7 @@ def read_data_split_and_search():
 if __name__ == '__main__':
 
     log_for_telegram_group = True
-    logger = Logger('HPS-test')
+    logger = Logger('HPS-test - ZHANG')
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning, '
                    'P3alphaRecommender,'

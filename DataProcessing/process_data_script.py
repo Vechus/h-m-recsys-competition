@@ -8,7 +8,7 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 from Data_manager.Dataset import Dataset
 
 from DataProcessing.extract_URM import generate_URM_all
-from DataProcessing.extract_ICMs import gen_ICM_list, get_ICM_all
+from DataProcessing.extract_ICMs import gen_ICM_list, get_ICM_all, gen_ICM_mix
 from DataProcessing.split_train_validation_leave_timestamp_out import *
 from DataProcessing.extract_UCMs import gen_UCM_list
 
@@ -30,6 +30,11 @@ if __name__ == '__main__':
     # generate all ICMs
     gen_ICM_list(manager, articles)
     get_ICM_all(manager, articles)
+    gen_ICM_mix(manager, articles, top_number=5)
+    gen_ICM_mix(manager, articles, top_number=10)
+    gen_ICM_mix(manager, articles, top_number=15)
+
+
 
     # URM split
     timestamp_list_train = [("2019-04-22", "2019-09-23")]

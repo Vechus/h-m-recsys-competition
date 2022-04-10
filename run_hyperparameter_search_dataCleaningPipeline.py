@@ -16,6 +16,7 @@ from Data_manager.HMDatasetReader import HMDatasetReader
 from functools import partial
 
 from Utils.Logger import Logger
+from datetime import datetime
 
 from Data_manager.DataReader import DataReader
 from Data_manager.split_functions.split_train_validation_random_holdout import \
@@ -149,7 +150,7 @@ def read_data_split_and_search(telegram_logger=None):
         thread4 = ['ICM_transaction_peak_year_month',
                    'ICM_idxgrp_idx_prdtyp']
 
-        if ICM_name not in thread1:
+        if ICM_name not in ['ICM_mix_top5']:
             continue
         # try:
         #     runHyperparameterSearch_Content(ItemKNNCBFRecommender,
@@ -203,8 +204,11 @@ def read_data_split_and_search(telegram_logger=None):
 
 if __name__ == '__main__':
 
+    # current date and time
+    start = datetime.now()
+
     log_for_telegram_group = True
-    logger = Logger('HPS-test')
+    logger = Logger('HPS-test - ZHANG - Start time:'+str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning')
     print('Started Hyper-parameter tuning')
@@ -218,4 +222,8 @@ if __name__ == '__main__':
         print('Exception: \n{}'.format(str(e)))
     if log_for_telegram_group:
         logger.log('Hyper parameter search finished! Check results and turn off the machine.')
+        end = datetime.now()
+        logger.log('End time:'+str(end)+'  Program duration:'+str(end-start))
     print('Hyper parameter search finished! Check results and turn off the machine.')
+
+
