@@ -33,7 +33,8 @@ def get_best_line(filename):
 
 
 def handle_ICM_name(filename):
-    ICMName = re.search('ICM_.*_SearchBayesianSkopt', filename).group(0).rsplit('_', 2)[0]
+    # ICMName = re.search('ICM_.*_SearchBayesianSkopt', filename).group(0).rsplit('_', 2)[0]
+    ICMName = re.search('ICM_(.*)_SearchBayesianSkopt', filename).group(1).rsplit('_', 1)[0]
     return '\'' + ICMName + '\','
 
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     load_dotenv()
 
     RESULT_PATH = os.getenv('RESULT_PATH')
-    result_name = '/ItemKNNCBF_CFCBF'
+    result_name = '/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30'
 
     columns = ['ICM name', 'Best config', 'MAP']
     dataframe = pd.DataFrame(columns=columns)

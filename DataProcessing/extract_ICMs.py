@@ -78,28 +78,28 @@ def get_ICM_all(manager, articles):
 
 
 def gen_ICM_mix(manager, articles, top_number):
-    ICM_list = ['ICM_idxgrp_idx_prdtyp',
-                'ICM_cleaned_section_name',
-                'ICM_section_no',
-                'ICM_cleaned_graphical_appearance_name',
-                'ICM_garment_group_no',
-                'ICM_perceived_colour_master_id',
-                'ICM_cleaned_department_name',
-                'ICM_transaction_peak_year_month',
-                'ICM_index_code',
-                'ICM_cleaned_perceived_colour_value_name',
-                'ICM_cleaned_garment_group_name',
-                'ICM_perceived_colour_value_id',
-                'ICM_department_no',
-                'ICM_product_seasonal_type',
-                'ICM_index_group_no',
-                'ICM_cleaned_colour_group_name',
-                'ICM_sale_periods_months',
-                'ICM_cleaned_perceived_colour_master_name',
-                'ICM_on_discount',
-                'ICM_colour_group_code',
-                'ICM_graphical_appearance_no',
-                'ICM_cleaned_product_type_name']
+    ICM_list = ['idxgrp_idx_prdtyp',
+                'cleaned_section_name',
+                'section_no',
+                'cleaned_graphical_appearance_name',
+                'garment_group_no',
+                'perceived_colour_master_id',
+                'cleaned_department_name',
+                'transaction_peak_year_month',
+                'index_code',
+                'cleaned_perceived_colour_value_name',
+                'cleaned_garment_group_name',
+                'perceived_colour_value_id',
+                'department_no',
+                'product_seasonal_type',
+                'index_group_no',
+                'cleaned_colour_group_name',
+                'sale_periods_months',
+                'cleaned_perceived_colour_master_name',
+                'on_discount',
+                'colour_group_code',
+                'graphical_appearance_no',
+                'cleaned_product_type_name']
 
     if top_number > len(ICM_list):
         raise Exception('Top Number > len(ICM_list)')
@@ -120,4 +120,4 @@ def gen_ICM_mix(manager, articles, top_number):
         icm_df['Data'] = 1.0
         df_total = pd.concat([df_total, icm_df], axis=0)
 
-    manager.add_ICM(df_total, 'ICM_mix_top_'+str(top_number))
+    manager.add_ICM(df_total, 'ICM_mix_top_' + str(top_number))
