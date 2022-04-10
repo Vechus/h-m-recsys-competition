@@ -67,7 +67,7 @@ def get_ICM_all(manager, articles):
         print('Creating ICM for column {}'.format(column))
 
         icm_df = articles[['article_id', column]]
-        icm_df[column] = icm_df.apply(lambda x: column+'_'+str(x[column]), axis=1)
+        icm_df[column] = icm_df.apply(lambda x: column + '_' + str(x[column]), axis=1)
         icm_df.rename(columns={column: "FeatureID", "article_id": "ItemID"}, inplace=True)
         icm_df['ItemID'] = icm_df['ItemID'].astype(str)
         icm_df['FeatureID'] = icm_df['FeatureID'].astype(str)
@@ -75,3 +75,49 @@ def get_ICM_all(manager, articles):
         df_total = pd.concat([df_total, icm_df], axis=0)
 
     manager.add_ICM(df_total, 'ICM_all')
+
+
+def gen_ICM_mix(manager, articles, top_number):
+    ICM_list = ['ICM_idxgrp_idx_prdtyp',
+                'ICM_cleaned_section_name',
+                'ICM_section_no',
+                'ICM_cleaned_graphical_appearance_name',
+                'ICM_garment_group_no',
+                'ICM_perceived_colour_master_id',
+                'ICM_cleaned_department_name',
+                'ICM_transaction_peak_year_month',
+                'ICM_index_code',
+                'ICM_cleaned_perceived_colour_value_name',
+                'ICM_cleaned_garment_group_name',
+                'ICM_perceived_colour_value_id',
+                'ICM_department_no',
+                'ICM_product_seasonal_type',
+                'ICM_index_group_no',
+                'ICM_cleaned_colour_group_name',
+                'ICM_sale_periods_months',
+                'ICM_cleaned_perceived_colour_master_name',
+                'ICM_on_discount',
+                'ICM_colour_group_code',
+                'ICM_graphical_appearance_no',
+                'ICM_cleaned_product_type_name']
+
+    if top_number > len(ICM_list):
+        raise Exception('Top Number > len(ICM_list)')
+
+    ICM_list = ICM_list[0:top_number]
+
+    print('Creating ICM_mix: ' + str(ICM_list))
+    df_total = pd.DataFrame()
+
+    for column in ICM_list:
+        print('Creating ICM for column {}'.format(column))
+
+        icm_df = articles[['article_id', column]]
+        icm_df[column] = icm_df.apply(lambda x: column + '_' + str(x[column]), axis=1)
+        icm_df.rename(columns={column: "FeatureID", "article_id": "ItemID"}, inplace=True)
+        icm_df['ItemID'] = icm_df['ItemID'].astype(str)
+        icm_df['FeatureID'] = icm_df['FeatureID'].astype(str)
+        icm_df['Data'] = 1.0
+        df_total = pd.concat([df_total, icm_df], axis=0)
+
+    manager.add_ICM(df_total, 'ICM_mix_top_'+str(top_number))

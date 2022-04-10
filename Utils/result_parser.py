@@ -32,6 +32,11 @@ def get_best_line(filename):
     return best_line
 
 
+def handle_ICM_name(filename):
+    ICMName = re.search('ICM_.*_SearchBayesianSkopt', filename).group(0).rsplit('_', 2)[0]
+    return '\'' + ICMName + '\','
+
+
 if __name__ == '__main__':
 
     load_dotenv()
@@ -46,7 +51,8 @@ if __name__ == '__main__':
         best_line = get_best_line(file_name)
         config = handle_best_config(best_line)
         MAP = handle_MAP(best_line)
-        df_new = {'ICM name': re.search('ICM_.*_SearchBayesianSkopt', file_name).group(0).rsplit('_', 2)[0],
+        ICM_name = handle_ICM_name(file_name)
+        df_new = {'ICM name': ICM_name,
                   'Best config': config,
                   'MAP': MAP}
         df_new = pd.DataFrame(data=df_new, index=[file_name.split('/')[-1].replace('.txt', '')])
