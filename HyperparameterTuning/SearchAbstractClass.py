@@ -125,8 +125,7 @@ class SearchAbstractClass(object):
     def __init__(self, recommender_class,
                  evaluator_validation = None,
                  evaluator_test = None,
-                 verbose = True,
-                 telegram_logger = None):
+                 verbose = True):
 
         super(SearchAbstractClass, self).__init__()
 
@@ -134,7 +133,6 @@ class SearchAbstractClass(object):
         self.verbose = verbose
         self.log_file = None
         self.evaluator_validation = evaluator_validation
-        self.telegram_logger = telegram_logger
 
         if evaluator_test is None:
             self.evaluator_test = None
@@ -296,8 +294,8 @@ class SearchAbstractClass(object):
             self.log_file.write(string)
             self.log_file.flush()
         
-        if self.telegram_logger is not None:
-            self.telegram_logger.log(string)
+        # if self.telegram_logger is not None:
+        #     self.telegram_logger.log(string)
 
 
     def _fit_model(self, current_fit_hyperparameters):

@@ -58,14 +58,14 @@ class SearchBayesianSkopt(SearchAbstractClass):
 
     ALGORITHM_NAME = "SearchBayesianSkopt"
 
-    def __init__(self, recommender_class, evaluator_validation = None, evaluator_test = None, verbose = True, telegram_logger = None):
+    def __init__(self, recommender_class, evaluator_validation = None, evaluator_test = None, verbose = True):
 
         assert evaluator_validation is not None, "{}: evaluator_validation must be provided".format(self.ALGORITHM_NAME)
 
         super(SearchBayesianSkopt, self).__init__(recommender_class,
                                                   evaluator_validation = evaluator_validation,
                                                   evaluator_test = evaluator_test,
-                                                  verbose = verbose, telegram_logger=telegram_logger)
+                                                  verbose = verbose)
 
 
 

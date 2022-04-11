@@ -27,7 +27,9 @@ from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSear
 from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
 
-def read_data_split_and_search(telegram_logger=None):
+# def read_data_split_and_search(telegram_logger=None):
+def read_data_split_and_search():
+
     """
     This function provides a simple example on how to tune parameters of a given algorithm
 
@@ -106,8 +108,7 @@ def read_data_split_and_search(telegram_logger=None):
                                                        output_folder_path=output_folder_path,
                                                        resume_from_saved=True,
                                                        similarity_type_list=None,  # all
-                                                       parallelizeKNN=False,
-                                                       telegram_logger=telegram_logger)
+                                                       parallelizeKNN=False)
 
     #
     pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
@@ -216,7 +217,7 @@ if __name__ == '__main__':
         logger.log('Started Hyper-parameter tuning. UserKNNCFRecommender and PureSVDRecommender')
     print('Started Hyper-parameter tuning')
     try:
-        read_data_split_and_search(telegram_logger=logger)
+        read_data_split_and_search()
     except Exception as e:
         if log_for_telegram_group:
             logger.log('We got an exception! Check log and turn off the machine.')
