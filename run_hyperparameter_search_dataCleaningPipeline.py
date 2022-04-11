@@ -110,8 +110,8 @@ def read_data_split_and_search(telegram_logger=None):
                                                        telegram_logger=telegram_logger)
 
     #
-    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-    pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
+    #pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+    #pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
 
     #
     #
