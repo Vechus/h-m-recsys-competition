@@ -60,7 +60,7 @@ def read_data_split_and_search(telegram_logger=None):
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/"
+    output_folder_path = "result_experiments/CF_recommenders/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
@@ -75,9 +75,9 @@ def read_data_split_and_search(telegram_logger=None):
         # UserKNNCFRecommender,
         # MatrixFactorization_BPR_Cython,
         # MatrixFactorization_FunkSVD_Cython,
-        PureSVDRecommender,
+        # PureSVDRecommender,
         # SLIM_BPR_Cython,
-        SLIMElasticNetRecommender,
+        # SLIMElasticNetRecommender,
         ImplicitALSRecommender
     ]
 
