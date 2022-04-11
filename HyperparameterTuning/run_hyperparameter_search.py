@@ -872,7 +872,8 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
         if recommender_class is ImplicitALSRecommender:
             hyperparameters_range_dictionary = {
                 "factors": Integer(1, 200),
-                "iterations": Categorical([300])
+                "iterations": Categorical([300]),
+                "alpha": Real(low = 1e-3, high = 50.0, prior = 'log-uniform'),
             }
 
             recommender_input_args = SearchInputRecommenderArgs(
