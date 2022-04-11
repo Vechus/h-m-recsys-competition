@@ -109,8 +109,8 @@ def read_data_split_and_search(telegram_logger=None):
                                                        telegram_logger=telegram_logger)
 
     #
-    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-    pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
+    # pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+    # pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
 
     #
     #
@@ -150,7 +150,7 @@ def read_data_split_and_search(telegram_logger=None):
         thread4 = ['ICM_transaction_peak_year_month',
                    'ICM_idxgrp_idx_prdtyp']
 
-        if ICM_name not in ['ICM_mix_top5']:
+        if ICM_name not in ['ICM_mix_top_5_accTo_CBF']:
             continue
         # try:
         #     runHyperparameterSearch_Content(ItemKNNCBFRecommender,
