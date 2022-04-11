@@ -45,25 +45,30 @@ if __name__ == '__main__':
     RESULT_PATH = os.getenv('RESULT_PATH')
     result_name = '/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30'
 
-    columns = ['ICM name', 'Best config', 'MAP']
+    columns = ['ICM name', 'MAP', 'Best config']
     dataframe = pd.DataFrame(columns=columns)
 
     for file_name in list(glob.glob(RESULT_PATH + result_name + '/*.txt')):
+
+        if 'CFCBF' in file_name.split('/')[-1]:
+            continue
+
         best_line = get_best_line(file_name)
         config = handle_best_config(best_line)
         MAP = handle_MAP(best_line)
         ICM_name = handle_ICM_name(file_name)
         df_new = {'ICM name': ICM_name,
-                  'Best config': config,
-                  'MAP': MAP}
+                  'MAP': MAP,
+                  'Best config': config}
+
         df_new = pd.DataFrame(data=df_new, index=[file_name.split('/')[-1].replace('.txt', '')])
 
         if df_new['ICM name'].values not in dataframe['ICM name'].values:
             dataframe = dataframe.append(df_new)
         elif dataframe.loc[dataframe['ICM name'] == df_new.iloc[0]['ICM name']]['MAP'].values[0] < df_new['MAP'].values:
-            dataframe.drop(dataframe.loc[dataframe['ICM name'] == df_new.iloc[0]['ICM name']].index,inplace=True)
+            dataframe.drop(dataframe.loc[dataframe['ICM name'] == df_new.iloc[0]['ICM name']].index, inplace=True)
             dataframe = dataframe.append(df_new)
 
     dataframe.sort_values(by=['MAP'], inplace=True, ascending=False)
-    dataframe.to_excel(RESULT_PATH + result_name + '/output.xlsx')
+    dataframe.to_excel(RESULT_PATH + result_name + '/output_CBF.xlsx')
     print("Completed!!!")
