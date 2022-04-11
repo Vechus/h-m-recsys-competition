@@ -60,7 +60,7 @@ def read_data_split_and_search(telegram_logger=None):
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/CF_recommenders/"
+    output_folder_path = "result_experiments/CF_recommenders_URM_20190622_20190923_Val_20190923_20190930/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
@@ -178,30 +178,30 @@ def read_data_split_and_search(telegram_logger=None):
         #     print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
         #     traceback.print_exc()
 
-        try:
-            runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
-                                           URM_train=URM_train,
-                                           URM_train_last_test=URM_train + URM_validation,
-                                           metric_to_optimize=metric_to_optimize,
-                                           cutoff_to_optimize=cutoff_to_optimize,
-                                           evaluator_validation=evaluator_validation,
-                                           evaluate_on_test='no',
-                                           evaluator_test=None,
-                                           output_folder_path=output_folder_path,
-                                           parallelizeKNN=True,
-                                           allow_weighting=True,
-                                           resume_from_saved=True,
-                                           similarity_type_list=None,  # all
-                                           ICM_name=ICM_name,
-                                           ICM_object=ICM_object.copy(),
-                                           n_cases=n_cases,
-                                           n_random_starts=n_random_starts)
-
-
-        except Exception as e:
-
-            print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
-            traceback.print_exc()
+        # try:
+        #     runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
+        #                                    URM_train=URM_train,
+        #                                    URM_train_last_test=URM_train + URM_validation,
+        #                                    metric_to_optimize=metric_to_optimize,
+        #                                    cutoff_to_optimize=cutoff_to_optimize,
+        #                                    evaluator_validation=evaluator_validation,
+        #                                    evaluate_on_test='no',
+        #                                    evaluator_test=None,
+        #                                    output_folder_path=output_folder_path,
+        #                                    parallelizeKNN=True,
+        #                                    allow_weighting=True,
+        #                                    resume_from_saved=True,
+        #                                    similarity_type_list=None,  # all
+        #                                    ICM_name=ICM_name,
+        #                                    ICM_object=ICM_object.copy(),
+        #                                    n_cases=n_cases,
+        #                                    n_random_starts=n_random_starts)
+        #
+        #
+        # except Exception as e:
+        #
+        #     print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
+        #     traceback.print_exc()
 
 
 if __name__ == '__main__':
