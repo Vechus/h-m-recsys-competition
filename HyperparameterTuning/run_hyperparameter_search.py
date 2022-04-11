@@ -38,6 +38,7 @@ from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import M
 from Recommenders.Neural.MultVAERecommender import MultVAERecommender_OptimizerMask as MultVAERecommender
 from Recommenders.FactorizationMachines.LightFMRecommender import LightFMCFRecommender
 
+from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
 ######################################################################
 ##########                                                  ##########
 ##########                  PURE CONTENT BASED              ##########
@@ -866,6 +867,20 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 FIT_KEYWORD_ARGS = earlystopping_keywargs
             )
 
+        ##########################################################################################################
+
+        if recommender_class is ImplicitALSRecommender:
+            hyperparameters_range_dictionary = {
+                "factors": Integer(1, 200),
+                "iterations": Categorical([300])
+            }
+
+            recommender_input_args = SearchInputRecommenderArgs(
+                CONSTRUCTOR_POSITIONAL_ARGS=[URM_train],
+                CONSTRUCTOR_KEYWORD_ARGS={},
+                FIT_POSITIONAL_ARGS=[],
+                FIT_KEYWORD_ARGS={}
+            )
 
         ##########################################################################################################
 

@@ -77,7 +77,8 @@ def read_data_split_and_search(telegram_logger=None):
         # MatrixFactorization_FunkSVD_Cython,
         PureSVDRecommender,
         # SLIM_BPR_Cython,
-        SLIMElasticNetRecommender
+        SLIMElasticNetRecommender,
+        ImplicitALSRecommender
     ]
 
     from Evaluation.Evaluator import EvaluatorHoldout

@@ -35,6 +35,8 @@ from Recommenders.MatrixFactorization.NMFRecommender import NMFRecommender
 from Recommenders.EASE_R.EASE_R_Recommender import EASE_R_Recommender
 # from Recommenders.FactorizationMachines.LightFMRecommender import LightFMCFRecommender
 from Recommenders.Neural.MultVAERecommender import MultVAERecommender_OptimizerMask as MultVAERecommender
+from Recommenders.Implicit.ImplicitALSRecommender import ImplicitALSRecommender
+from Recommenders.Implicit.FeatureCombinedImplicitALSRecommender import FeatureCombinedImplicitALSRecommender
 
 
 ######################################################################
