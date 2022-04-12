@@ -5,6 +5,7 @@ import gc
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from lightgbm import LGBMClassifier, early_stopping, log_evaluation
+from lightgbm import LGBMRanker
 
 import os
 import joblib
@@ -71,6 +72,7 @@ def train(df_data):
 
     for fold, (train_idx, val_idx) in enumerate(folds.split(df_data, df_data[label])):
         print(f"=====fold {fold}=======")
+        print(train_idx, val_idx)
 
         df_train = df_data.loc[train_idx].reset_index(drop=True)
         df_val = df_data.loc[val_idx].reset_index(drop=True)
@@ -141,6 +143,18 @@ def add_features(df_truth, df_false, is_article_added=True, is_customer_added=Tr
     return df_truth_merge, df_false_merge
 
 
+def split_transaction(df_trans, start_date=None, end_date=None):
+    if start_date is not None and end_date is None:
+        df_trans = df_trans[df_trans["t_dat"] >= start_date].reset_index(drop=True)
+    elif start_date is None and end_date is not None:
+        df_trans = df_trans[df_trans["t_dat"] < end_date].reset_index(drop=True)
+    else:
+        df_trans = df_trans[(df_trans["t_dat"] >= start_date) & (df_trans["t_dat"] < end_date)].reset_index(drop=True)
+
+    print("min date of transaction: ", min(df_trans["t_dat"]), "max date of transaction: ", max(df_trans["t_dat"]))
+    return df_trans
+
+
 if __name__ == "__main__":
     load_dotenv()
     path = os.getenv('DATASET_PATH')
@@ -152,20 +166,22 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
     # start_date = '2020-08-01'
-    start_date = '2020-01-01'
+    start_date = '2019-06-22'
+    end_date = '2019-09-23'
 
-    image_feat_dim = 768
-    text_feat_dim = 384
+    # image_feat_dim = 768
+    # text_feat_dim = 384
 
     # n_fold = 2
-    n_fold = 5
+    n_fold = 10
     seed = 2022
     lgbm = {"n_estimators": 50}
 
     label = "label"
 
     df_trans = pd.read_csv(os.path.join(path, transaction_path), dtype={'article_id': str}, parse_dates=['t_dat'])
-    df_trans = df_trans[df_trans["t_dat"] >= start_date].reset_index(drop=True)
+    # df_trans = df_trans[df_trans["t_dat"] >= start_date].reset_index(drop=True)
+    df_trans = split_transaction(df_trans, start_date, end_date)
     df_trans = df_trans[df_trans.columns.difference(['t_dat'])]
     df_trans = reduce_mem_usage(df_trans)
 
@@ -183,13 +199,16 @@ if __name__ == "__main__":
     df_truth_merge, df_false_merge = add_features(df_truth, df_false)
 
     df_total = pd.concat([df_truth_merge, df_false_merge])
-    df_total = df_total.drop(["customer_id", "article_id"], axis=1)
+    # df_total = df_total.drop(["customer_id", "article_id"], axis=1)
 
-    print("#Ture: ", df_total[df_total["label"] == 1].shape, "#False ", df_total[df_total["label"] == 0].shape)
+    print("#Ture: ", df_total[df_total["label"] == 1].shape, "#False: ", df_total[df_total["label"] == 0].shape)
 
     print(df_total.columns)
 
     df_total.to_pickle("{}/feature{}.pkl".format(output_dir, str(start_date)))
+
+    # print(df_total)
+    df_total = df_total.reset_index(drop=True)
 
     scores = train(df_total)
 
@@ -200,3 +219,21 @@ if __name__ == "__main__":
     print(df_fea_imp.head(20))
 
     df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
+
+    # ranker = LGBMRanker(
+    #     objective="lambdarank",
+    #     metric="ndcg",
+    #     boosting_type="dart",
+    #     max_depth=7,
+    #     n_estimators=300,
+    #     importance_type='gain',
+    #     verbose=10
+    # )
+    #
+    # train_baskets = df_total.groupby(['customer_id'])['article_id'].count().values
+    #
+    # ranker = ranker.fit(
+    #     df_total.drop(columns=['customer_id', 'article_id', 'label']),
+    #     df_total.pop('label'),
+    #     group=train_baskets,
+    # )
