@@ -1,12 +1,17 @@
 import implicit
-from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
+#from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
 from Utils.confidence_scaling import linear_scaling_confidence
+from Recommenders.Implicit.ImplicitBaseRecommender import ImplicitBaseRecommender
 
 
-class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
+class ImplicitALSRecommender(ImplicitBaseRecommender):
     """ImplicitALSRecommender recommender"""
 
     RECOMMENDER_NAME = "ImplicitALSRecommender"
+
+    def __init__(self, URM_train, verbose=True):
+        super(ImplicitALSRecommender, self).__init__(URM_train=URM_train)
+        self.verbose = verbose
 
     def fit(self,
             factors=100,
