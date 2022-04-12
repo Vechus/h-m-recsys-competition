@@ -110,21 +110,21 @@ def read_data_split_and_search():
                                                        parallelizeKNN=False)
 
     #
-    #pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-    #pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
+    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
+    pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
 
     #
     #
-    for recommender_class in collaborative_algorithm_list:
-
-        try:
-
-            runParameterSearch_Collaborative_partial(recommender_class)
-
-        except Exception as e:
-
-            print("On recommender {} Exception {}".format(recommender_class, str(e)))
-            traceback.print_exc()
+    #for recommender_class in collaborative_algorithm_list:
+    #
+    #    try:
+    #
+    #        runParameterSearch_Collaborative_partial(recommender_class)
+    #
+    #    except Exception as e:
+    #
+    #        print("On recommender {} Exception {}".format(recommender_class, str(e)))
+    #        traceback.print_exc()
 
     exit()
 
