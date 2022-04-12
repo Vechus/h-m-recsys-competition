@@ -84,43 +84,43 @@ def read_data_split_and_search():
 
     for UCM_name, UCM_object in dataset.get_loaded_UCM_dict().items():
 
-        thread1 = ['club_member_status',
-                   'fashion_news_frequency',
-                   'age',
-                   'postal_code',
-                   'num_missing_months_2018'
+        thread1 = ['UCM_club_member_status',
+                   'UCM_fashion_news_frequency',
+                   'UCM_age',
+                   'UCM_postal_code',
+                   'UCM_num_missing_months_2018'
                     ]
 
         thread2 = [
-                    # 'num_missing_months_perc_2018',
-                    'num_sale_months_2018',
-                    'num_transactions_2018',
-                    # 'avg_transactions_in_active_month_2018',
-                    'num_missing_months_2019'
+                    # 'UCM_num_missing_months_perc_2018',
+                    'UCM_num_sale_months_2018',
+                    'UCM_num_transactions_2018',
+                    # 'UCM_avg_transactions_in_active_month_2018',
+                    'UCM_num_missing_months_2019'
                 ]
 
         thread3 = [
-                    # 'num_missing_months_perc_2019',
-                    'num_sale_months_2019',
-                    'num_transactions_2019',
-                    # 'avg_transactions_in_active_month_2019',
-                    'num_missing_months_2020'
+                    # 'UCM_num_missing_months_perc_2019',
+                    'UCM_num_sale_months_2019',
+                    'UCM_num_transactions_2019',
+                    # 'UCM_avg_transactions_in_active_month_2019',
+                    'UCM_num_missing_months_2020'
                 ]
 
         thread4 = [
-                    # 'num_missing_months_perc_2020',
-                    'num_sale_months_2020',
-                    'num_transactions_2020',
-                    # 'avg_transactions_in_active_month_2020',
-                    'latest_continuous_inactive_months_2020'
+                    # 'UCM_num_missing_months_perc_2020',
+                    'UCM_num_sale_months_2020',
+                    'UCM_num_transactions_2020',
+                    # 'UCM_avg_transactions_in_active_month_2020',
+                    'UCM_latest_continuous_inactive_months_2020'
                 ]
 
         thread5 = [
-                    'num_missing_months_total',
-                    'num_sale_months_total',
-                    # 'num_missing_months_perc_total',
-                    'num_transactions_total',
-                    # 'avg_transactions_in_active_month_total'
+                    'UCM_num_missing_months_total',
+                    'UCM_num_sale_months_total',
+                    # 'UCM_num_missing_months_perc_total',
+                    'UCM_num_transactions_total',
+                    # 'UCM_avg_transactions_in_active_month_total'
                    ]
 
         if UCM_name not in thread1:
