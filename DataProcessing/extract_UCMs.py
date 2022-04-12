@@ -1,14 +1,31 @@
-import numpy as np
-import pandas as pd
-
-from Data_manager.DatasetMapperManager import DatasetMapperManager
-from Data_manager.Dataset import Dataset
-
-
 UCM_list = [
+    'club_member_status',
     'fashion_news_frequency',
-    'club_member_status'
+    'age',
+    'postal_code',
+    'num_missing_months_2018',
+    'num_missing_months_perc_2018',
+    'num_sale_months_2018',
+    'num_transactions_2018',
+    'avg_transactions_in_active_month_2018',
+    'num_missing_months_2019',
+    'num_missing_months_perc_2019',
+    'num_sale_months_2019',
+    'num_transactions_2019',
+    'avg_transactions_in_active_month_2019',
+    'num_missing_months_2020',
+    'num_missing_months_perc_2020',
+    'num_sale_months_2020',
+    'num_transactions_2020',
+    'avg_transactions_in_active_month_2020',
+    'latest_continuous_inactive_months_2020',
+    'num_missing_months_total',
+    'num_sale_months_total',
+    'num_missing_months_perc_total',
+    'num_transactions_total',
+    'avg_transactions_in_active_month_total'
 ]
+
 
 def gen_UCM_list(manager, customers):
     for column in UCM_list:

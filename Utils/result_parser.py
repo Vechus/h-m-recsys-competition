@@ -50,8 +50,8 @@ if __name__ == '__main__':
 
     for file_name in list(glob.glob(RESULT_PATH + result_name + '/*.txt')):
 
-        if 'CFCBF' in file_name.split('/')[-1]:
-            continue
+        # if 'CFCBF' in file_name.split('/')[-1]:
+        #     continue
 
         best_line = get_best_line(file_name)
         config = handle_best_config(best_line)
