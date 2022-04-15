@@ -5,7 +5,7 @@ Created on 01/12/2020
 @author: Alessandro Sanvito
 """
 
-from ..BaseSimilarityMatrixRecommender import BaseUserSimilarityMatrixRecommender
+from Recommenders.BaseSimilarityMatrixRecommender import BaseUserSimilarityMatrixRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 
 class UserRP3betaRecommender(BaseUserSimilarityMatrixRecommender):

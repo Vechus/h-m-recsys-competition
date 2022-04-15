@@ -72,6 +72,7 @@ def read_data_split_and_search():
         TopPop,
         # P3alphaRecommender,
         # RP3betaRecommender,
+        UserRP3betaRecommender,
         # ItemKNNCFRecommender,
         # UserKNNCFRecommender,
         # MatrixFactorization_BPR_Cython,
@@ -79,7 +80,7 @@ def read_data_split_and_search():
         # PureSVDRecommender,
         # SLIM_BPR_Cython,
         # SLIMElasticNetRecommender,
-        ImplicitALSRecommender
+        # ImplicitALSRecommender
     ]
 
     from Evaluation.Evaluator import EvaluatorHoldout
