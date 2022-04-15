@@ -22,6 +22,7 @@ from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+from Recommenders.GraphBased.UserRP3betaRecommender import UserRP3betaRecommender
 from Recommenders.EASE_R.EASE_R_Recommender import EASE_R_Recommender
 
 # KNN machine learning
@@ -755,7 +756,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-        if recommender_class is RP3betaRecommender:
+        if recommender_class is RP3betaRecommender or recommender_class is UserRP3betaRecommender:
 
             hyperparameters_range_dictionary = {
                 "topK": Integer(5, 1000),
