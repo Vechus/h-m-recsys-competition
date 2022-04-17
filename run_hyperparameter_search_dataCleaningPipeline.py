@@ -211,7 +211,7 @@ if __name__ == '__main__':
     start = datetime.now()
 
     log_for_telegram_group = True
-    logger = Logger('IALS - Start time:'+str(start))
+    logger = Logger('IALS TEST - Start time:'+str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning')
     print('Started Hyper-parameter tuning')
