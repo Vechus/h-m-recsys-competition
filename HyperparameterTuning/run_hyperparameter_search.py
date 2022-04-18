@@ -22,6 +22,7 @@ from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+from Recommenders.GraphBased.UserRP3betaRecommender import UserRP3betaRecommender
 from Recommenders.EASE_R.EASE_R_Recommender import EASE_R_Recommender
 
 # KNN machine learning
@@ -68,6 +69,9 @@ import traceback
 from HyperparameterTuning.SearchBayesianSkopt import SearchBayesianSkopt
 from HyperparameterTuning.SearchSingleCase import SearchSingleCase
 from HyperparameterTuning.SearchAbstractClass import SearchInputRecommenderArgs
+
+from Utils.confidence_scaling import linear_scaling_confidence
+from bayes_opt import BayesianOptimization
 
 ######################################################################
 
@@ -635,6 +639,41 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         output_file_name_root = recommender_class.RECOMMENDER_NAME
 
+        if recommender_class is ImplicitALSRecommender:
+            hyperparameters_range_dictionary = {
+                "factors": (1, 200),
+                "iterations": (20, 21),
+                "alpha": (0, 10),
+            }
+
+            IALSrec = ImplicitALSRecommender(URM_train=URM_train)
+
+            def BO_func(factors, iterations, alpha):
+                IALSrec.fit(factors=int(factors),
+                            iterations=int(iterations),
+                            confidence_scaling=linear_scaling_confidence,
+                            **{"alpha": alpha})
+
+                result = evaluator_validation.evaluateRecommender(IALSrec)
+                return result
+
+            optimizer = BayesianOptimization(
+                f=BO_func,
+                pbounds=hyperparameters_range_dictionary,
+                verbose=5,
+                random_state=5
+            )
+            optimizer.maximize(
+                init_points=n_random_starts,
+                n_iter=n_cases
+            )
+
+            import json
+            with open(output_folder_path + IALSrec.RECOMMENDER_NAME + '_logs.json', 'w') as json_file:
+                json.dump(optimizer.max, json_file)
+
+            return
+
         hyperparameterSearch = SearchBayesianSkopt(recommender_class, evaluator_validation=evaluator_validation, evaluator_test=evaluator_test)
 
         if recommender_class in [TopPop, GlobalEffects, Random]:
@@ -755,7 +794,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
 
         ##########################################################################################################
 
-        if recommender_class is RP3betaRecommender:
+        if recommender_class is RP3betaRecommender or recommender_class is UserRP3betaRecommender:
 
             hyperparameters_range_dictionary = {
                 "topK": Integer(5, 1000),
@@ -870,6 +909,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
         ##########################################################################################################
 
         if recommender_class is ImplicitALSRecommender:
+            print("YOU SHOULD NOT BE HERE! (IALS Recommender SKopt evaluation)")
             hyperparameters_range_dictionary = {
                 "factors": Integer(1, 200),
                 "iterations": Categorical([300]),

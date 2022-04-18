@@ -72,6 +72,7 @@ def read_data_split_and_search():
         TopPop,
         # P3alphaRecommender,
         # RP3betaRecommender,
+        # UserRP3betaRecommender,
         # ItemKNNCFRecommender,
         # UserKNNCFRecommender,
         # MatrixFactorization_BPR_Cython,
@@ -88,7 +89,7 @@ def read_data_split_and_search():
     metric_to_optimize = "MAP"
     cutoff_to_optimize = 12
 
-    n_cases = 50
+    n_cases = 5
     n_random_starts = int(n_cases / 3)
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list)
@@ -210,7 +211,7 @@ if __name__ == '__main__':
     start = datetime.now()
 
     log_for_telegram_group = True
-    logger = Logger('HPS-test - ZHANG - Start time:'+str(start))
+    logger = Logger('IALS TEST - Start time:'+str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning')
     print('Started Hyper-parameter tuning')

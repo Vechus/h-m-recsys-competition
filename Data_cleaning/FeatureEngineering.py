@@ -23,6 +23,16 @@ def cal_inactive_months(x):
                     return 4
 
 
+def age_bin(age, age_bin):
+    if age == -1:
+        age_interval = "unknown"
+    elif age < 20:
+        age_interval = "<20"
+    else:
+        age_interval = "[{},{})".format(math.floor(age / age_bin) * age_bin, (math.floor(age / age_bin) + 1) * age_bin)
+    return age_interval
+
+
 # classify the gender for articles
 def set_gender_flg(x):
     x['is_for_male_or_female'] = 0  # 0:unknown,1:female,2:male
@@ -137,6 +147,9 @@ def customers_feature_engineering(df_customers, df_transactions):
     print("New feather 5:avg_transactions_in_active_month_total generation finished.")
 
     df_result = pd.merge(df_customers, df_result_accumulated, on='customer_id', how='outer')
+
+    df_result["age_class_5"] = df_result.apply(lambda x: age_bin(x.age, 5), axis=1)
+    df_result["age_class_10"] = df_result.apply(lambda x: age_bin(x.age, 10), axis=1)
 
     print('All new features added into df_customers!')
 
