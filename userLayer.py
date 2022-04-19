@@ -13,7 +13,7 @@ reader = HMDatasetReader(False)
 DATASET_PATH = os.getenv('DATASET_PATH')
 PROCESSED_PATH = os.getenv('PROCESSED_PATH')
 
-dataset = reader.load_data('{}/processed/{}/'.format(DATASET_PATH, dataset_name))
+dataset = reader.load_data('{}/processed_URM_20190622_20190923/{}/'.format(DATASET_PATH, dataset_name))
 
 # URM_train_validation, URM_test = split_train_in_two_percentage_global_sample(URM_all, train_percentage=0.85)
 # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_validation, train_percentage=0.85)
