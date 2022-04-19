@@ -84,12 +84,15 @@ def read_data_split_and_search():
 
     for UCM_name, UCM_object in dataset.get_loaded_UCM_dict().items():
 
-        thread1 = ['UCM_club_member_status',
-                   'UCM_fashion_news_frequency',
-                   'UCM_age',
+        thread1a = [
                    'UCM_postal_code',
                    'UCM_num_missing_months_2018'
                    ]
+        thread1b = ['UCM_club_member_status',
+                   'UCM_fashion_news_frequency',
+                   ]
+
+        threadAge = ['UCM_age']
 
         thread2 = [
             # 'UCM_num_missing_months_perc_2018',
@@ -123,7 +126,7 @@ def read_data_split_and_search():
             # 'UCM_avg_transactions_in_active_month_total'
         ]
 
-        if UCM_name not in thread1:
+        if UCM_name not in threadAge:
             continue
         # try:
         #     runHyperparameterSearch_Content(UserKNNCBFRecommender,
