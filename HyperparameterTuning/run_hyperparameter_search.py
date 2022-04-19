@@ -655,7 +655,8 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                             **{"alpha": alpha})
 
                 result = evaluator_validation.evaluateRecommender(IALSrec)
-                return result
+                print(result)
+                return result["MAP"]
 
             optimizer = BayesianOptimization(
                 f=BO_func,
