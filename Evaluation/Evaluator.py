@@ -486,6 +486,7 @@ class EvaluatorHoldout(Evaluator):
                                                                                       remove_custom_items_flag=self.ignore_items_flag,
                                                                                       return_scores=True
                                                                                       )
+            print(scores_batch)
 
             results_dict = self._compute_metrics_on_recommendation_list(test_user_batch_array=test_user_batch_array,
                                                                         recommended_items_batch_list=recommended_items_batch_list,
