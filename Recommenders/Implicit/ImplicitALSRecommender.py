@@ -1,10 +1,9 @@
 import implicit
-#from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
+from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
 from Utils.confidence_scaling import linear_scaling_confidence
-from Recommenders.Implicit.ImplicitBaseRecommender import ImplicitBaseRecommender
 
 
-class ImplicitALSRecommender(ImplicitBaseRecommender):
+class ImplicitALSRecommender(BaseMatrixFactorizationRecommender):
     """ImplicitALSRecommender recommender"""
 
     RECOMMENDER_NAME = "ImplicitALSRecommender"
@@ -19,7 +18,7 @@ class ImplicitALSRecommender(ImplicitBaseRecommender):
             use_native=True, use_cg=True, use_gpu=False,
             iterations=15,
             calculate_training_loss=False, num_threads=0,
-            confidence_scaling=None,
+            confidence_scaling=linear_scaling_confidence,
             alpha=1
             ):
 

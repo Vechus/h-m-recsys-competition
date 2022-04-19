@@ -61,7 +61,7 @@ def read_data_split_and_search():
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/UserKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/"
+    output_folder_path = "result_experiments/UserKNNCBF_CFCBF_URM_Train_2019-08-22_2019-09-23_Val_2019-09-23_2019-09-30/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
@@ -89,39 +89,39 @@ def read_data_split_and_search():
                    'UCM_age',
                    'UCM_postal_code',
                    'UCM_num_missing_months_2018'
-                    ]
+                   ]
 
         thread2 = [
-                    # 'UCM_num_missing_months_perc_2018',
-                    'UCM_num_sale_months_2018',
-                    'UCM_num_transactions_2018',
-                    # 'UCM_avg_transactions_in_active_month_2018',
-                    'UCM_num_missing_months_2019'
-                ]
+            # 'UCM_num_missing_months_perc_2018',
+            'UCM_num_sale_months_2018',
+            'UCM_num_transactions_2018',
+            # 'UCM_avg_transactions_in_active_month_2018',
+            'UCM_num_missing_months_2019'
+        ]
 
         thread3 = [
-                    # 'UCM_num_missing_months_perc_2019',
-                    'UCM_num_sale_months_2019',
-                    'UCM_num_transactions_2019',
-                    # 'UCM_avg_transactions_in_active_month_2019',
-                    'UCM_num_missing_months_2020'
-                ]
+            # 'UCM_num_missing_months_perc_2019',
+            'UCM_num_sale_months_2019',
+            'UCM_num_transactions_2019',
+            # 'UCM_avg_transactions_in_active_month_2019',
+            'UCM_num_missing_months_2020'
+        ]
 
         thread4 = [
-                    # 'UCM_num_missing_months_perc_2020',
-                    'UCM_num_sale_months_2020',
-                    'UCM_num_transactions_2020',
-                    # 'UCM_avg_transactions_in_active_month_2020',
-                    'UCM_latest_continuous_inactive_months_2020'
-                ]
+            # 'UCM_num_missing_months_perc_2020',
+            'UCM_num_sale_months_2020',
+            'UCM_num_transactions_2020',
+            # 'UCM_avg_transactions_in_active_month_2020',
+            'UCM_latest_continuous_inactive_months_2020'
+        ]
 
         thread5 = [
-                    'UCM_num_missing_months_total',
-                    'UCM_num_sale_months_total',
-                    # 'UCM_num_missing_months_perc_total',
-                    'UCM_num_transactions_total',
-                    # 'UCM_avg_transactions_in_active_month_total'
-                   ]
+            'UCM_num_missing_months_total',
+            'UCM_num_sale_months_total',
+            # 'UCM_num_missing_months_perc_total',
+            'UCM_num_transactions_total',
+            # 'UCM_avg_transactions_in_active_month_total'
+        ]
 
         if UCM_name not in thread1:
             continue

@@ -35,7 +35,10 @@ if __name__ == '__main__':
     gen_ICM_mix(manager, articles, top_number=15)
 
     # URM split
-    timestamp_list_train = [("2019-06-22", "2019-09-23")]
+    # timestamp_list_train = [("2019-06-22", "2019-09-23")]
+    # timestamp_list_validation = [("2019-09-23", "2019-09-30")]
+
+    timestamp_list_train = [("2019-08-22", "2019-09-23")]
     timestamp_list_validation = [("2019-09-23", "2019-09-30")]
     split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation)
 
