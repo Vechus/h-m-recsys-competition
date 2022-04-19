@@ -1,8 +1,10 @@
 import pandas as pd
 import os
 from Data_manager.HMDatasetReader import HMDatasetReader
+from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.KNN.ItemKNN_CFCBF_Hybrid_Recommender import ItemKNN_CFCBF_Hybrid_Recommender
-from Recommenders.NonPersonalizedRecommender import TopPop
+from Recommenders.NonPersonalizedRecommender import TopPop,Random
+from Recommenders.TopPop_weight_decayed import TopPop_weight_decayed
 
 if __name__ == '__main__':
     dataset_name = "hm"
@@ -27,18 +29,19 @@ if __name__ == '__main__':
 
     URM_submission_train = dataset.get_URM_from_name('URM_submission_train')
 
-    recommender = ItemKNN_CFCBF_Hybrid_Recommender(URM_submission_train, ICM_train)
-    recommender.fit(topK=748, shrink=317, similarity='tversky', normalize=True, tversky_alpha=0.0,
-                    tversky_beta=1.6153392035973693,
-                    ICM_weight=0.011213820771787788)
+    recommender = P3alphaRecommender(URM_submission_train)
+    recommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
 
-    recommender_pop = TopPop(URM_submission_train)
-    recommender_pop.fit()
+    # recommender_random = Random(URM_submission_train)
+    # recommender_random.fit()
+
+    recommender_pop_weight = TopPop_weight_decayed()
+    # recommender_pop_weight.fit()
 
     path = os.getenv('DATASET_PATH')
     df_sample_submission = pd.read_csv(os.path.join(path, "sample_submission.csv"))
 
-    save_path = os.path.join(path, "{}-submission-final-{}.csv".format(recommender.RECOMMENDER_NAME, ICM_name))
+    save_path = os.path.join(path, "{}-submission-final-withTopWD{}.csv".format(recommender.RECOMMENDER_NAME, ICM_name))
 
     f = open(save_path, "w")
     f.write("customer_id,prediction\n")
@@ -65,15 +68,16 @@ if __name__ == '__main__':
 
     for i in df_train.customer_id.unique():
         i_index = user_original_ID_to_index_mapper[i]
-        recommended_items = recommender.recommend(i_index, cutoff=12, remove_seen_flag=False,
-                                                  remove_custom_items_flag=True)
+        recommended_items = recommender.recommend(i_index, cutoff=12, remove_seen_flag=False)
         well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
         f.write(f"{i}, {well_formatted}\n")
         print("%s:%s" % (i, well_formatted))
-    for i in remaining_customer_list:
-        recommended_items = recommender_pop.recommend(i, cutoff=12, remove_seen_flag=False)
-        well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
-        f.write(f"{i}, {well_formatted}\n")
-        print("%s:%s" % (i, well_formatted))
+
+    recommender_pop_weight.recommend(remaining_customer_list, f)
+    # for i in remaining_customer_list:
+    #     recommended_items = recommender_random.recommend(i, cutoff=12, remove_seen_flag=False)
+    #     well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
+    #     f.write(f"{i}, {well_formatted}\n")
+    #     print("%s:%s" % (i, recommended_items))
     f.close()
     print("save complete")

@@ -14,6 +14,7 @@ import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
 from dotenv import load_dotenv
+from sklearn import preprocessing
 
 
 def reduce_mem_usage(df):
@@ -166,8 +167,8 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
     # start_date = '2020-08-01'
-    start_date = '2019-06-22'
-    end_date = '2019-09-23'
+    start_date = '2020-06-22'
+    end_date = '2020-09-23'
 
     # image_feat_dim = 768
     # text_feat_dim = 384
@@ -209,6 +210,10 @@ if __name__ == "__main__":
 
     # print(df_total)
     df_total = df_total.reset_index(drop=True)
+
+    lbl = preprocessing.LabelEncoder()
+    df_total['customer_id'] = lbl.fit_transform(df_total['customer_id'].astype(str))
+    df_total['article_id'] = lbl.fit_transform(df_total['article_id'].astype(str))
 
     scores = train(df_total)
 
