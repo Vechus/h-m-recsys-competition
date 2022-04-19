@@ -646,7 +646,7 @@ def runHyperparameterSearch_Collaborative(recommender_class, URM_train, URM_trai
                 "alpha": (0, 10),
             }
 
-            IALSrec = ImplicitALSRecommender(URM_train=URM_train)
+            IALSrec = ImplicitALSRecommender(URM_train=URM_train.T)
 
             def BO_func(factors, iterations, alpha):
                 IALSrec.fit(factors=int(factors),
