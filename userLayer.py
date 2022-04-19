@@ -29,10 +29,10 @@ evaluator_test = EvaluatorHoldout(URM_validation, cutoff_list=[12])
 
 profile_length = np.ediff1d(sps.csr_matrix(URM_train).indptr)
 
-block_size = int(len(profile_length)*0.05)
+block_size = int(len(profile_length) * 0.05)
 sorted_users = np.argsort(profile_length)
 
-print(block_size,sorted_users)
+print(block_size, sorted_users)
 
 for group_id in range(0, 20):
     start_pos = group_id * block_size
@@ -57,21 +57,22 @@ from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
 from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
-from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
+from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, \
+    MatrixFactorization_FunkSVD_Cython, MatrixFactorization_AsySVD_Cython
 from Recommenders.MatrixFactorization.PureSVDRecommender import PureSVDRecommender
 from Recommenders.KNN.ItemKNN_CFCBF_Hybrid_Recommender import ItemKNN_CFCBF_Hybrid_Recommender
 
 MAP_recommender_per_group = {}
 
 collaborative_recommender_class = {
-                                   "TopPop": TopPop,
-                                   "UserKNNCF": UserKNNCFRecommender,
-                                   "ItemKNNCF": ItemKNNCFRecommender,
-                                   "P3alpha": P3alphaRecommender,
-                                   "RP3beta": RP3betaRecommender,
-                                   "PureSVD": PureSVDRecommender,
-                                   "SLIMEN": SLIMElasticNetRecommender
-                                   }
+    "TopPop": TopPop,
+    "UserKNNCF": UserKNNCFRecommender,
+    "ItemKNNCF": ItemKNNCFRecommender,
+    "P3alpha": P3alphaRecommender,
+    "RP3beta": RP3betaRecommender,
+    "PureSVD": PureSVDRecommender,
+    "SLIMEN": SLIMElasticNetRecommender
+}
 
 hybird_recommender_class = {"ItemKNNCFCBF": ItemKNN_CFCBF_Hybrid_Recommender
                             }
@@ -119,14 +120,14 @@ for group_id in range(0, 20):
         else:
             MAP_recommender_per_group[label] = [result_df.loc[cutoff]["MAP"]]
 
-
 import matplotlib.pyplot as plt
 
 _ = plt.figure(figsize=(16, 9))
 for label, recommender in recommender_object_dict.items():
     results = MAP_recommender_per_group[label]
-    plt.scatter(x=np.arange(0,len(results)), y=results, label=label)
+    plt.scatter(x=np.arange(0, len(results)), y=results, label=label)
 plt.ylabel('MAP')
 plt.xlabel('User Group')
 plt.legend()
 plt.show()
+plt.savefig(os.path.join(DATASET_PATH, 'userwise.png'))
