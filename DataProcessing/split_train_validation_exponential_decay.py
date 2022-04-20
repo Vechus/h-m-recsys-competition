@@ -118,7 +118,7 @@ def split_submission_train_intervals(manager, timestamp_df, timestamp_array_trai
 
 
 if __name__ == "__main__":
-    timestamp_list = [("2019-01-01", "2019-09-23")]
+    timestamp_list = [("2019-06-22", "2019-09-23")]
     validation_timestamp = [("2019-09-23", "2019-09-30")]
     transactions = pd.read_csv('../dataset/transactions_train.csv')
     print("Loaded transaction csv...")
