@@ -167,16 +167,16 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
     # start_date = '2020-08-01'
-    start_date = '2020-06-22'
+    start_date = '2020-07-22'
     end_date = '2020-09-23'
 
     # image_feat_dim = 768
     # text_feat_dim = 384
 
     # n_fold = 2
-    n_fold = 10
+    n_fold = 20
     seed = 2022
-    lgbm = {"n_estimators": 50}
+    lgbm = {"n_estimators": 100}
 
     label = "label"
 
@@ -190,6 +190,10 @@ if __name__ == "__main__":
 
     df_false = df_truth.copy()
     df_false.loc[:, "article_id"] = df_false["article_id"].sample(frac=1).tolist()
+    df_false_copy = df_truth.copy()
+    df_false_copy = df_false_copy.sample(int(df_false.shape[0]))
+    df_false_copy.loc[:, "article_id"] = df_false_copy["article_id"].sample(frac=1).tolist()
+    df_false = pd.concat([df_false, df_false_copy], axis=0).drop_duplicates()
 
     df_truth.loc[:, label] = 1
     df_false.loc[:, label] = 0
@@ -202,7 +206,10 @@ if __name__ == "__main__":
     df_total = pd.concat([df_truth_merge, df_false_merge])
     # df_total = df_total.drop(["customer_id", "article_id"], axis=1)
 
-    print("#Ture: ", df_total[df_total["label"] == 1].shape, "#False: ", df_total[df_total["label"] == 0].shape)
+    print("#Ture: ", df_total[df_total["label"] == 1].shape,
+          round(df_total[df_total["label"] == 1].shape[0] / df_total.shape[0],2), "#False: ",
+          df_total[df_total["label"] == 0].shape,
+          round(df_total[df_total["label"] == 0].shape[0] / df_total.shape[0],2))
 
     print(df_total.columns)
 
@@ -224,21 +231,3 @@ if __name__ == "__main__":
     print(df_fea_imp.head(20))
 
     df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
-
-    # ranker = LGBMRanker(
-    #     objective="lambdarank",
-    #     metric="ndcg",
-    #     boosting_type="dart",
-    #     max_depth=7,
-    #     n_estimators=300,
-    #     importance_type='gain',
-    #     verbose=10
-    # )
-    #
-    # train_baskets = df_total.groupby(['customer_id'])['article_id'].count().values
-    #
-    # ranker = ranker.fit(
-    #     df_total.drop(columns=['customer_id', 'article_id', 'label']),
-    #     df_total.pop('label'),
-    #     group=train_baskets,
-    # )
