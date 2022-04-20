@@ -66,13 +66,13 @@ from Recommenders.KNN.ItemKNN_CFCBF_Hybrid_Recommender import ItemKNN_CFCBF_Hybr
 MAP_recommender_per_group = {}
 
 collaborative_recommender_class = {
+    "SLIMEN": MultiThreadSLIM_SLIMElasticNetRecommender,
     "TopPop": TopPop,
     "UserKNNCF": UserKNNCFRecommender,
     "ItemKNNCF": ItemKNNCFRecommender,
     "P3alpha": P3alphaRecommender,
     "RP3beta": RP3betaRecommender,
     "PureSVD": PureSVDRecommender,
-    "SLIMEN": MultiThreadSLIM_SLIMElasticNetRecommender
 }
 
 hybird_recommender_class = {"ItemKNNCFCBF": ItemKNN_CFCBF_Hybrid_Recommender
