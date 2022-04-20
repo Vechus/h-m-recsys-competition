@@ -225,7 +225,7 @@ def _partial_fit(items, topK, alpha, l1_ratio, urm_shape, positive_only=True, sh
 class MultiThreadSLIM_SLIMElasticNetRecommender(SLIMElasticNetRecommender):
 
     def fit(self, alpha=1.0, l1_ratio=0.1, positive_only=True, topK=100,
-            verbose=True, workers=int(cpu_count()*0.3)):
+            verbose=True, workers=int(cpu_count()*0.5)):
 
         assert l1_ratio>= 0 and l1_ratio<=1, \
             "ElasticNet: l1_ratio must be between 0 and 1, provided value was {}".format(l1_ratio)

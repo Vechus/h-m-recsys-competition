@@ -54,7 +54,8 @@ from Recommenders.NonPersonalizedRecommender import TopPop
 from Recommenders.KNN.UserKNNCFRecommender import UserKNNCFRecommender
 from Recommenders.KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
 from Recommenders.SLIM.Cython.SLIM_BPR_Cython import SLIM_BPR_Cython
-from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
+from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender, \
+    MultiThreadSLIM_SLIMElasticNetRecommender
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
 from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
 from Recommenders.MatrixFactorization.Cython.MatrixFactorization_Cython import MatrixFactorization_BPR_Cython, \
@@ -71,7 +72,7 @@ collaborative_recommender_class = {
     "P3alpha": P3alphaRecommender,
     "RP3beta": RP3betaRecommender,
     "PureSVD": PureSVDRecommender,
-    "SLIMEN": SLIMElasticNetRecommender
+    "SLIMEN": MultiThreadSLIM_SLIMElasticNetRecommender
 }
 
 hybird_recommender_class = {"ItemKNNCFCBF": ItemKNN_CFCBF_Hybrid_Recommender
