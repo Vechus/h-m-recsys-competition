@@ -7,6 +7,19 @@ from Data_manager.HMDatasetReader import HMDatasetReader
 from Data_manager.split_functions.split_train_validation_random_holdout import \
     split_train_in_two_percentage_global_sample
 from Evaluation.Evaluator import EvaluatorHoldout
+from datetime import datetime
+from Utils.Logger import Logger
+
+
+# current date and time
+start = datetime.now()
+
+log_for_telegram_group = True
+logger = Logger('UserWise-test - ZHANG - Start time:' + str(start))
+if log_for_telegram_group:
+    logger.log('User wise')
+
+
 
 dataset_name = "hm"
 reader = HMDatasetReader(False)
@@ -146,3 +159,8 @@ plt.show()
 plt.savefig(os.path.join(DATASET_PATH, 'userwise.png'))
 
 
+if log_for_telegram_group:
+    end = datetime.now()
+    logger.log('UserWise finished! Check results and turn off the machine. '
+               'End time:' + str(end) + '  Program duration:' + str(end - start))
+print('Hyper parameter search finished! Check results and turn off the machine.')
