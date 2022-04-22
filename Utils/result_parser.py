@@ -38,13 +38,7 @@ def handle_ICM_name(filename):
     return '\'' + ICMName + '\','
 
 
-if __name__ == '__main__':
-
-    load_dotenv()
-
-    RESULT_PATH = os.getenv('RESULT_PATH')
-    result_name = '/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30'
-
+def generate_Item_result():
     columns = ['ICM name', 'MAP', 'Best config']
     dataframe = pd.DataFrame(columns=columns)
 
@@ -71,4 +65,35 @@ if __name__ == '__main__':
 
     dataframe.sort_values(by=['MAP'], inplace=True, ascending=False)
     dataframe.to_excel(RESULT_PATH + result_name + '/output_CBF.xlsx')
+
+
+def generate_CF_result():
+    columns = ['MAP', 'Best config']
+    dataframe = pd.DataFrame(columns=columns)
+
+    for file_name in list(glob.glob(RESULT_PATH + result_name + '/*.txt')):
+
+        best_line = get_best_line(file_name)
+        config = handle_best_config(best_line)
+        MAP = handle_MAP(best_line)
+        df_new = {'MAP': MAP,
+                  'Best config': config}
+
+        df_new = pd.DataFrame(data=df_new, index=[file_name.split('/')[-1].replace('.txt', '')])
+
+        dataframe = dataframe.append(df_new)
+
+    dataframe.sort_values(by=['MAP'], inplace=True, ascending=False)
+    dataframe.to_excel(RESULT_PATH + result_name + '/output.xlsx')
+
+
+if __name__ == '__main__':
+    load_dotenv()
+
+    RESULT_PATH = os.getenv('RESULT_PATH')
+    result_name = '/collaborative_algorithm_URM_2019-06-22_2019-09-23'
+
+    # generate_Item_result()
+    generate_CF_result()
+
     print("Completed!!!")

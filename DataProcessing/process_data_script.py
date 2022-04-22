@@ -29,14 +29,17 @@ if __name__ == '__main__':
 
     # generate all ICMs
     gen_ICM_list(manager, articles)
-    get_ICM_all(manager, articles)
-    gen_ICM_mix(manager, articles, top_number=5)
-    gen_ICM_mix(manager, articles, top_number=10)
-    gen_ICM_mix(manager, articles, top_number=15)
+    # get_ICM_all(manager, articles)
+    # gen_ICM_mix(manager, articles, top_number=5)
+    # gen_ICM_mix(manager, articles, top_number=10)
+    # gen_ICM_mix(manager, articles, top_number=15)
 
     # URM split
-    timestamp_list_train = [("2019-06-22", "2019-09-23")]
-    timestamp_list_validation = [("2019-09-23", "2019-09-30")]
+    # timestamp_list_train = [("2019-06-22", "2019-09-23")]
+    # timestamp_list_validation = [("2019-09-23", "2019-09-30")]
+
+    timestamp_list_train = [("2018-09-20", "2020-09-16")]
+    timestamp_list_validation = [("2020-09-16", "2020-09-23")]
     split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation)
 
     # URM_train for submission
@@ -50,7 +53,7 @@ if __name__ == '__main__':
     dataset = manager.generate_Dataset(DATASET_NAME, True)
 
     # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset.save_data('{}/processed/{}/'.format(DATASET_PATH, DATASET_NAME))
+    dataset.save_data('{}/processed_URM_train_20180920_20200916_val_20200916_20200923/{}/'.format(DATASET_PATH, DATASET_NAME))
 
     dataset.print_statistics()
     dataset.print_statistics_global()

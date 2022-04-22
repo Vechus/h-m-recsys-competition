@@ -59,6 +59,7 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     # Look through the timestamp array to find the last date
     # Assuming the last date is at the end
     finalDate = pd.to_datetime(timestamp_array_train[-1][1])
+
     dayDifference_df = (train_interactions[timestamp_column] - finalDate).dt.days
 
     train_interactions['Data'] = np.exp((dayDifference_df/EXPONENTIAL_DECAY).to_numpy())
@@ -84,20 +85,54 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     manager.add_URM(train_interactions, 'URM_train')
     manager.add_URM(validation_interactions, 'URM_validation')
 
+def split_submission_train_intervals(manager, timestamp_df, timestamp_array_train):
+    # Retrieve which users fall in the wanted list of time frames
+    print("Preprocessing URM_submission dataframe...")
+    timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
+
+    # timestamp_df.drop('price', inplace=True, axis=1)
+    # timestamp_df.drop('sales_channel_id', inplace=True, axis=1)
+    timestamp_df.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
+    timestamp_df['ItemID'] = timestamp_df['ItemID'].astype(str)
+    timestamp_df['Data'] = 1.0
+
+    timestamp_df = timestamp_df[[timestamp_column, 'UserID', 'ItemID', 'Data']]
+
+    df_submission_train = timestamp_df.query("'" + timestamp_array_train[0][0] + "'<=t_dat<'" + timestamp_array_train[0][1] + "'")
+
+    finalDate = pd.to_datetime(timestamp_array_train[0][1])
+
+    dayDifference_df = (df_submission_train[timestamp_column] - finalDate).dt.days
+
+    df_submission_train['Data'] = np.exp((dayDifference_df / 180).to_numpy())
+
+    df_submission_train.sort_values(by='Data')
+
+    df_submission_train.drop(timestamp_column, inplace=True, axis=1)
+
+    df_submission_train.drop_duplicates(subset=['UserID', 'ItemID'], keep='last', inplace=True)
+
+    print(df_submission_train.head())
+    print(df_submission_train.tail())
+
+    manager.add_URM(df_submission_train, 'URM_submission_train')
+
 
 if __name__ == "__main__":
-    timestamp_list = [("2019-01-01", "2019-09-23")]
+    timestamp_list = [("2019-06-22", "2019-09-23")]
     validation_timestamp = [("2019-09-23", "2019-09-30")]
     transactions = pd.read_csv('../dataset/transactions_train.csv')
     print("Loaded transaction csv...")
 
+    timestamp_list_submission = [("2019-06-22", "2019-09-23")]
+
     manager = DatasetMapperManager()
     split_train_validation_multiple_intervals(manager, transactions, timestamp_list, validation_timestamp)
-
+    split_submission_train_intervals(manager,transactions,timestamp_list_submission)
     # generate dataset with URM (Implicit=True)
     dataset = manager.generate_Dataset(DATASET_NAME, False)
-    print("Done! Saving dataset in processed/{}/".format(DATASET_NAME))
-    dataset.save_data('../processed/{}/'.format(DATASET_NAME))
+    # print("Done! Saving dataset in processed/{}/".format(DATASET_NAME))
+    # dataset.save_data('../processed/{}/'.format(DATASET_NAME))
     print("Dataset stats:")
     dataset.print_statistics()
     dataset.print_statistics_global()
