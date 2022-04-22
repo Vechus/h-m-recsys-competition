@@ -13,14 +13,14 @@ reader = HMDatasetReader(False)
 DATASET_PATH = os.getenv('DATASET_PATH')
 PROCESSED_PATH = os.getenv('PROCESSED_PATH')
 
-dataset = reader.load_data('{}/processed_URM_20190622_20190923/{}/'.format(DATASET_PATH, dataset_name))
+dataset = reader.load_data('{}/processed_URM_train_20180920_20200916_val_20200916_20200923/{}/'.format(DATASET_PATH, dataset_name))
 
 # URM_train_validation, URM_test = split_train_in_two_percentage_global_sample(URM_all, train_percentage=0.85)
 # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train_validation, train_percentage=0.85)
 ICM_name = "ICM_idxgrp_idx_prdtyp"
 ICM_train = dataset.get_ICM_from_name(ICM_name)
 
-UCM_name = "UCM_age"
+UCM_name = "UCM_postal_code"
 UCM_train = dataset.get_loaded_UCM_dict()[UCM_name]
 
 URM_train = dataset.get_URM_from_name('URM_train')
