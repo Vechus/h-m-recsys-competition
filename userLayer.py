@@ -7,19 +7,6 @@ from Data_manager.HMDatasetReader import HMDatasetReader
 from Data_manager.split_functions.split_train_validation_random_holdout import \
     split_train_in_two_percentage_global_sample
 from Evaluation.Evaluator import EvaluatorHoldout
-from datetime import datetime
-from Utils.Logger import Logger
-
-
-# current date and time
-start = datetime.now()
-
-log_for_telegram_group = True
-logger = Logger('UserWise-test - ZHANG - Start time:' + str(start))
-if log_for_telegram_group:
-    logger.log('User wise')
-
-
 
 dataset_name = "hm"
 reader = HMDatasetReader(False)
@@ -46,12 +33,12 @@ evaluator_test = EvaluatorHoldout(URM_validation, cutoff_list=[12])
 profile_length = np.ediff1d(sps.csr_matrix(URM_train).indptr)
 profile_length = [x for x in profile_length if x > 0]
 
-block_size = int(len(profile_length) * 0.2)
+block_size = int(len(profile_length) * 0.05)
 sorted_users = np.argsort(profile_length)
 
 print(block_size, sorted_users,max(profile_length))
 
-for group_id in range(0, 5):
+for group_id in range(0, 20):
     start_pos = group_id * block_size
     end_pos = min((group_id + 1) * block_size, len(profile_length))
 
@@ -85,9 +72,9 @@ from Recommenders.KNN.UserKNN_CFCBF_Hybrid_Recommender import UserKNN_CFCBF_Hybr
 MAP_recommender_per_group = {}
 
 collaborative_recommender_class = {
-    "SLIMEN": MultiThreadSLIM_SLIMElasticNetRecommender,
+    # "SLIMEN": MultiThreadSLIM_SLIMElasticNetRecommender,
     "TopPop": TopPop,
-    "UserKNNCF": UserKNNCFRecommender,
+    # "UserKNNCF": UserKNNCFRecommender,
     "ItemKNNCF": ItemKNNCFRecommender,
     "P3alpha": P3alphaRecommender,
     "RP3beta": RP3betaRecommender,
@@ -95,7 +82,7 @@ collaborative_recommender_class = {
 }
 
 hybird_recommender_class = { "ItemKNNCFCBF": ItemKNN_CFCBF_Hybrid_Recommender,
-                            "UserKNNCFCBF": UserKNN_CFCBF_Hybrid_Recommender
+                            # "UserKNNCFCBF": UserKNN_CFCBF_Hybrid_Recommender
                             }
 
 recommender_object_dict = {}
@@ -117,7 +104,7 @@ for label, recommender_class in hybird_recommender_class.items():
 
 cutoff = 12
 
-for group_id in range(0, 5):
+for group_id in range(0, 20):
 
     start_pos = group_id * block_size
     end_pos = min((group_id + 1) * block_size, len(profile_length))
@@ -159,8 +146,3 @@ plt.show()
 plt.savefig(os.path.join(DATASET_PATH, 'userwise.png'))
 
 
-if log_for_telegram_group:
-    end = datetime.now()
-    logger.log('UserWise finished! Check results and turn off the machine. '
-               'End time:' + str(end) + '  Program duration:' + str(end - start))
-print('Hyper parameter search finished! Check results and turn off the machine.')
