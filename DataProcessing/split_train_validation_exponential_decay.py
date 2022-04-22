@@ -7,7 +7,8 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 timestamp_column = 't_dat'
 userid_column = 'customer_id'
 itemid_column = 'article_id'
-DATASET_NAME = 'hm-exponential-decay-Validation_salesWeek-Train_restOf2019'
+DATASET_NAME = 'hm-exponential-decay60-Validation_salesWeek-Train_restOf2019'
+EXPONENTIAL_DECAY = 60
 
 
 def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, timestamp_array, columns_name=None):
@@ -60,7 +61,7 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     finalDate = pd.to_datetime(timestamp_array_train[-1][1])
     dayDifference_df = (train_interactions[timestamp_column] - finalDate).dt.days
 
-    train_interactions['Data'] = np.exp((dayDifference_df/180).to_numpy())
+    train_interactions['Data'] = np.exp((dayDifference_df/EXPONENTIAL_DECAY).to_numpy())
 
     train_interactions.sort_values(by='Data')
 
