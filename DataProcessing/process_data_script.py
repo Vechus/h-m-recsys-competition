@@ -9,7 +9,7 @@ from Data_manager.Dataset import Dataset
 
 from DataProcessing.extract_URM import generate_URM_all
 from DataProcessing.extract_ICMs import gen_ICM_list, get_ICM_all, gen_ICM_mix
-from DataProcessing.split_train_validation_exponential_decay import *
+from DataProcessing.split_train_validation_leave_timestamp_out import *
 from DataProcessing.extract_UCMs import gen_UCM_list
 
 DATASET_NAME = 'hm'
