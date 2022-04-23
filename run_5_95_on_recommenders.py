@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorMultipleURMs
 import traceback, os
 
-dataset_name = "processed_URM_20190622_20190923"
+dataset_name = "processed_URM_20190622_20190923/hm"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
