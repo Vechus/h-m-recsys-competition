@@ -106,9 +106,9 @@ if __name__ == '__main__':
             #     assert results_run_1.equals(results_run_2)
 
             print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
-            print("Algorithm: {}, list of MAP on 5 splits: {}".format(recommender_class, results_5_95))
+            print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
             logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
-            logFile.write("Algorithm: {}, list of MAP on 5 splits: {}".format(recommender_class, results_5_95))
+            logFile.write("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
             logFile.flush()
 
         except Exception as e:

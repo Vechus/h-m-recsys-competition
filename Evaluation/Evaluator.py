@@ -600,8 +600,8 @@ class EvaluatorMultipleURMs(object):
         for dummy_evaluator in self.Evaluator_list:
             self.results.append(dummy_evaluator.evaluateRecommender(recommender_object))
 
-        for result_df, _ in self.results:
-            self.map_list.append(result_df.loc[10]["MAP"])
+        #for result_df, _ in self.results:
+        #    self.map_list.append(result_df.loc[10]["MAP"])
 
         return self.results
 
