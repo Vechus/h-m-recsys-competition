@@ -36,8 +36,9 @@ if __name__ == '__main__':
     # print(dataset_object.AVAILABLE_URM)
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset library
     URM_train = dataset_object.get_URM_from_name('URM_train')
-    URM_test = dataset_object.get_URM_from_name('URM_validation')  # Temporary solution, this should use cross-validation
-    ICM_all = dataset_object.get_ICM_from_name('idxgrp_idx_prdtyp')
+    URM_test = dataset_object.get_URM_from_name('URM_validation')
+    for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
+        print(ICM_name)
     UCM_all = []
     print(URM_train.shape)
     print(URM_test.shape)
