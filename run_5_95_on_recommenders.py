@@ -39,6 +39,7 @@ if __name__ == '__main__':
     URM_test = dataset_object.get_URM_from_name('URM_validation')
     for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
         print(ICM_name)
+    ICM_all = dataset_object.get_ICM_from_name("ICM_idxgrp_idx_prdtyp")
     UCM_all = []
     print(URM_train.shape)
     print(URM_test.shape)
