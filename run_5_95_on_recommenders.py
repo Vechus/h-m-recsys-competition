@@ -55,7 +55,7 @@ if __name__ == '__main__':
     test_5_95_list = split_multiple_times(URM_test, 5, 0.95, keep_only_test=True)
 
     # Evaluate on all splits
-    evaluator9_95 = EvaluatorMultipleURMs(test_5_95_list, [5, 12])
+    evaluator5_95 = EvaluatorMultipleURMs(test_5_95_list, [5, 12])
 
     # from MatrixFactorization.PyTorch.MF_MSE_PyTorch import MF_MSE_PyTorch
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
             recommender_object.fit(**fit_params)
 
             results_run_1, results_run_string_1 = evaluator.evaluateRecommender(recommender_object)
-            results_5_95 = evaluator9_95.evaluate_with_statistics(recommender_object)
+            results_5_95 = evaluator5_95.evaluate_with_statistics(recommender_object)
 
 
             # recommender_object.save_model(output_root_path, file_name="temp_model.zip")
@@ -107,6 +107,8 @@ if __name__ == '__main__':
 
             print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
             print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
+            print("Recap of splits: \n")
+            evaluator5_95.print_map_statistics()
             logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
             logFile.write("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
             logFile.flush()

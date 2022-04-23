@@ -595,13 +595,13 @@ class EvaluatorMultipleURMs(object):
                                                ignore_users=ignore_users, verbose=verbose)
             self.Evaluator_list.append(dummy_evaluator)
 
-    def evaluate_with_statistics(self, recommender_object):
+    def evaluate_with_statistics(self, recommender_object, relevant_cutoff=12):
         # The evaluation for different URMs could be parallelized
         for dummy_evaluator in self.Evaluator_list:
             self.results.append(dummy_evaluator.evaluateRecommender(recommender_object))
 
-        #for result_df, _ in self.results:
-        #    self.map_list.append(result_df.loc[10]["MAP"])
+        for result_df, _ in self.results:
+            self.map_list.append(result_df.loc[relevant_cutoff]["MAP"])
 
         return self.results
 
