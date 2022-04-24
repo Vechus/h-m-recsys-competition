@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # current date and time
     start = datetime.now()
 
-    log_for_telegram_group = False
+    log_for_telegram_group = True
     logger = Logger('Hybrid - Start time:' + str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning. UserKNNCFRecommender and PureSVDRecommender')
