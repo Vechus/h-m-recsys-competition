@@ -51,7 +51,7 @@ def read_data_split_and_search_hybrid():
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
 
-    cutoff_list = [6, 12, 24]
+    cutoff_list = [12]
     metric_to_optimize = "MAP"
     cutoff_to_optimize = 12
 
