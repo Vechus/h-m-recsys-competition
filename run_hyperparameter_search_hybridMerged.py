@@ -159,6 +159,7 @@ if __name__ == '__main__':
             logger.log('Exception: \n{}'.format(str(e)))
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
+        print(traceback.format_exc())
     if log_for_telegram_group:
         end = datetime.now()
         logger.log('Hyper parameter search finished! Check results and turn off the machine. '
