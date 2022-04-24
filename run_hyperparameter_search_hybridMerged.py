@@ -59,7 +59,7 @@ def read_data_split_and_search_hybrid():
 
     ItemKNNCBFRecommender_ICM_all_cosine_SearchBayesianSkopt = ItemKNNCBFRecommender(URM_train,
                                                                                      ICM_train=dataset.get_ICM_from_name(
-                                                                                         'all'))
+                                                                                         'ICM_all'))
     ItemKNNCBFRecommender_ICM_all_cosine_SearchBayesianSkopt.fit(topK=923, shrink=988, similarity='cosine',
                                                                  normalize=False, feature_weighting='TF-IDF')
 
