@@ -29,10 +29,10 @@ if __name__ == '__main__':
 
     # generate all ICMs
     gen_ICM_list(manager, articles)
-    # get_ICM_all(manager, articles)
-    # gen_ICM_mix(manager, articles, top_number=5)
-    # gen_ICM_mix(manager, articles, top_number=10)
-    # gen_ICM_mix(manager, articles, top_number=15)
+    get_ICM_all(manager, articles)
+    gen_ICM_mix(manager, articles, top_number=5)
+    gen_ICM_mix(manager, articles, top_number=10)
+    gen_ICM_mix(manager, articles, top_number=15)
 
     # URM split
     # timestamp_list_train = [("2019-06-22", "2019-09-23")]
