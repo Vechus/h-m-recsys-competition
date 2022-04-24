@@ -41,10 +41,9 @@ class K_Fold_Evaluator_MAP(Evaluator):
             result_dict, _ = self.evaluator_list[index].evaluateRecommender(
                 recommender_list[index]
             )
-            print(str(result_dict))
 
             results.append(
-                result_dict["MAP"]
+                result_dict[12]["MAP"]
             )
 
         return results
