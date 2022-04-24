@@ -113,7 +113,7 @@ def read_data_split_and_search_hybrid():
             hybrid2,
             hybrid3
     ):
-        hybrid_recommender.fit(alphas=[
+        hybrid_recommender[0].fit(alphas=[
             hybrid0,
             hybrid1,
             hybrid2,
