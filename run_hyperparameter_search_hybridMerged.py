@@ -88,7 +88,7 @@ def read_data_split_and_search_hybrid():
 
     tuning_params = {}
     for i in range(len(best_recommenders)):
-        tuning_params['hybrid' + i] = (0, 1)
+        tuning_params['hybrid{}'.format(i)] = (0, 1)
 
     print('There are {} recommenders to hybridize!'.format())
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # current date and time
     start = datetime.now()
 
-    log_for_telegram_group = True
+    log_for_telegram_group = False
     logger = Logger('Hybrid - Start time:' + str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning. UserKNNCFRecommender and PureSVDRecommender')
