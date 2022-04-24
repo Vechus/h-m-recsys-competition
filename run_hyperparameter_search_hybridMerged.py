@@ -21,7 +21,7 @@ from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommende
 
 from bayes_opt import BayesianOptimization
 from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
-
+from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
 
 def read_data_split_and_search_hybrid():
     load_dotenv()
@@ -58,7 +58,7 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list)
+    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation, cutoff_list=cutoff_list, verbose=False)
 
     ItemKNNCBFRecommenders_ICMs = [
         'ICM_all'
@@ -105,7 +105,7 @@ def read_data_split_and_search_hybrid():
     print(str(tuning_params))
 
     results = []
-    hybrid_recommender = GeneralizedMergedHybridRecommender(URM_train, recommenders=best_recommenders)
+    hybrid_recommender = [GeneralizedMergedHybridRecommender(URM_train, recommenders=best_recommenders)]
 
     def BO_func(
             hybrid0,
