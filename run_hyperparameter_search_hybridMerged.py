@@ -102,6 +102,7 @@ def read_data_split_and_search_hybrid():
         tuning_params['hybrid{}'.format(i)] = (0, 1)
 
     print('There are {} recommenders to hybridize!'.format())
+    print(str(tuning_params))
 
     results = []
     hybrid_recommender = GeneralizedMergedHybridRecommender(URM_train, recommenders=best_recommenders)
