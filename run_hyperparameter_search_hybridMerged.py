@@ -101,7 +101,7 @@ def read_data_split_and_search_hybrid():
     for i in range(len(best_recommenders)):
         tuning_params['hybrid{}'.format(i)] = (0, 1)
 
-    print('There are {} recommenders to hybridize!'.format())
+    print('There are {} recommenders to hybridize!'.format(len(best_recommenders)))
     print(str(tuning_params))
 
     results = []
