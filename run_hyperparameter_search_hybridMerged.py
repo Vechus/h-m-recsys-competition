@@ -122,7 +122,7 @@ def read_data_split_and_search_hybrid():
         result = evaluator_validation.evaluateRecommender(hybrid_recommender)
         results.append(result)
         print(result)
-        return result
+        return sum(result) / len(result)
 
     optimizer = BayesianOptimization(
         f=BO_func,
