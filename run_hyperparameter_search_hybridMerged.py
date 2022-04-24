@@ -19,6 +19,8 @@ from HyperparameterTuning.run_hyperparameter_search import runHyperparameterSear
     runHyperparameterSearch_Content, runHyperparameterSearch_Hybrid
 from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommender
 
+from bayes_opt import BayesianOptimization
+from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
 
 def read_data_split_and_search_hybrid():
     load_dotenv()
@@ -57,22 +59,74 @@ def read_data_split_and_search_hybrid():
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list)
 
-    ItemKNNCBFRecommender_ICM_all_cosine_SearchBayesianSkopt = ItemKNNCBFRecommender(URM_train,
-                                                                                     ICM_train=dataset.get_ICM_from_name(
-                                                                                         'ICM_all'))
-    ItemKNNCBFRecommender_ICM_all_cosine_SearchBayesianSkopt.fit(topK=923, shrink=988, similarity='cosine',
-                                                                 normalize=False, feature_weighting='TF-IDF')
-
-    ItemKNNCBFRecommender_ICM_all_cosine_SearchBayesianSkopt.save_model('results_experiments/', file_name='ItemKNNCBFRecommender_ICM_all_cosine')
-    exit()
-
-    best_recommenders = [
-        ItemKNNCBFRecommender_ICM_all_cosine_SearchBayesianSkopt
+    ItemKNNCBFRecommenders_ICMs = [
+        'ICM_all'
+    ]
+    ItemKNNCBFRecommenders = [
+        ItemKNNCBFRecommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in ItemKNNCBFRecommenders_ICMs
     ]
 
-    n_recommenders = 3
+    ItemKNN_CFCBF_Hybrid_Recommenders_ICMs = [
+        'ICM_mix_top_10_accTo_CBF',
+        'ICM_mix_top_5_accTo_CBF',
+        'ICM_mix_top_15_accTo_CBF'
+    ]
+    ItemKNN_CFCBF_Hybrid_Recommenders_Filenames = [
+        'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_10_asymmetric_best_model_last.zip',
+        'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_5_tversky_best_model_last.zip',
+        'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_15_asymmetric_best_model_last.zip'
+    ]
+    ItemKNN_CFCBF_Hybrid_Recommenders = [
+        ItemKNN_CFCBF_Hybrid_Recommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in ItemKNN_CFCBF_Hybrid_Recommenders_ICMs
+    ]
 
+    for i in range(len(ItemKNN_CFCBF_Hybrid_Recommenders_ICMs)):
+        ItemKNN_CFCBF_Hybrid_Recommenders[i].load_model(folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
+                        file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames)
 
+    best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
+
+    tuning_params = {}
+    for i in range(len(best_recommenders)):
+        tuning_params['hybrid' + i] = (0, 1)
+
+    print('There are {} recommenders to hybridize!'.format())
+
+    results = []
+    hybrid_recommender = GeneralizedMergedHybridRecommender(URM_train, recommenders=best_recommenders)
+
+    def BO_func(
+            hybrid1,
+            hybrid2,
+            hybrid3,
+            hybrid4
+    ):
+        hybrid_recommender.fit(alphas=[
+            hybrid1,
+            hybrid2,
+            hybrid3,
+            hybrid4
+        ])
+        result = evaluator_validation.evaluateRecommender(hybrid_recommender)
+        results.append(result)
+        return result['MAP']
+
+    optimizer = BayesianOptimization(
+        f=BO_func,
+        pbounds=tuning_params,
+        verbose=5,
+        random_state=5,
+    )
+
+    optimizer.maximize(
+        init_points=50,
+        n_iter=50,
+    )
+
+    import json
+
+    with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+        json.dump(optimizer.max, json_file)
 
 
 if __name__ == '__main__':
