@@ -58,7 +58,7 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    evaluator_validation = K_Fold_Evaluator_MAP(URM_validation, cutoff_list=cutoff_list, verbose=False)
+    evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
 
     ItemKNNCBFRecommenders_ICMs = [
         'ICM_all'
