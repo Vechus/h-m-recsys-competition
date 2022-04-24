@@ -59,7 +59,6 @@ def read_data_split_and_search_hybrid():
 
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list)
 
-    print('REC1')
     ItemKNNCBFRecommenders_ICMs = [
         'ICM_all'
     ]
@@ -67,7 +66,6 @@ def read_data_split_and_search_hybrid():
         ItemKNNCBFRecommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in ItemKNNCBFRecommenders_ICMs
     ]
 
-    print('REC2')
     ItemKNN_CFCBF_Hybrid_Recommenders_ICMs = [
         'ICM_mix_top_10_accTo_CBF',
         'ICM_mix_top_5_accTo_CBF',
@@ -82,12 +80,10 @@ def read_data_split_and_search_hybrid():
         ItemKNN_CFCBF_Hybrid_Recommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in ItemKNN_CFCBF_Hybrid_Recommenders_ICMs
     ]
 
-    print('REC3')
     for i in range(len(ItemKNN_CFCBF_Hybrid_Recommenders_ICMs)):
         ItemKNN_CFCBF_Hybrid_Recommenders[i].load_model(folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
-                        file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames)
+                        file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
-    print('REC4')
     best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
 
     tuning_params = {}
