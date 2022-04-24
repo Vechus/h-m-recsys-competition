@@ -22,6 +22,7 @@ from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommende
 from bayes_opt import BayesianOptimization
 from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
 
+
 def read_data_split_and_search_hybrid():
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
@@ -62,9 +63,17 @@ def read_data_split_and_search_hybrid():
     ItemKNNCBFRecommenders_ICMs = [
         'ICM_all'
     ]
-    ItemKNNCBFRecommenders = [
-        ItemKNNCBFRecommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in ItemKNNCBFRecommenders_ICMs
+    ItemKNNCBFRecommenders_Filenames = [
+        'ItemKNNCBFRecommender_ICM_all_cosine.zip'
     ]
+    ItemKNNCBFRecommenders = [
+        ItemKNNCBFRecommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in
+        ItemKNNCBFRecommenders_ICMs
+    ]
+    for i in range(len(ItemKNNCBFRecommenders_ICMs)):
+        ItemKNNCBFRecommenders[i].load_model(
+            folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
+            file_name=ItemKNNCBFRecommenders_Filenames[i])
 
     ItemKNN_CFCBF_Hybrid_Recommenders_ICMs = [
         'ICM_mix_top_10_accTo_CBF',
@@ -77,12 +86,14 @@ def read_data_split_and_search_hybrid():
         'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_15_asymmetric_best_model_last.zip'
     ]
     ItemKNN_CFCBF_Hybrid_Recommenders = [
-        ItemKNN_CFCBF_Hybrid_Recommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in ItemKNN_CFCBF_Hybrid_Recommenders_ICMs
+        ItemKNN_CFCBF_Hybrid_Recommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in
+        ItemKNN_CFCBF_Hybrid_Recommenders_ICMs
     ]
 
     for i in range(len(ItemKNN_CFCBF_Hybrid_Recommenders_ICMs)):
-        ItemKNN_CFCBF_Hybrid_Recommenders[i].load_model(folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
-                        file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
+        ItemKNN_CFCBF_Hybrid_Recommenders[i].load_model(
+            folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
+            file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
     best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
 
@@ -96,16 +107,16 @@ def read_data_split_and_search_hybrid():
     hybrid_recommender = GeneralizedMergedHybridRecommender(URM_train, recommenders=best_recommenders)
 
     def BO_func(
+            hybrid0,
             hybrid1,
             hybrid2,
-            hybrid3,
-            hybrid4
+            hybrid3
     ):
         hybrid_recommender.fit(alphas=[
+            hybrid0,
             hybrid1,
             hybrid2,
-            hybrid3,
-            hybrid4
+            hybrid3
         ])
         result = evaluator_validation.evaluateRecommender(hybrid_recommender)
         results.append(result)
