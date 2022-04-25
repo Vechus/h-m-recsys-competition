@@ -5,6 +5,7 @@ Created on 22/11/17
 
 @author: Maurizio Ferrari Dacrema
 """
+import sys
 
 from Recommenders.Recommender_import_list import *
 
@@ -126,7 +127,7 @@ def read_data_split_and_search():
             # 'UCM_avg_transactions_in_active_month_total'
         ]
 
-        if UCM_name not in threadAge:
+        if UCM_name not in sys.argv[1]:
             continue
         # try:
         #     runHyperparameterSearch_Content(UserKNNCBFRecommender,
