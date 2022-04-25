@@ -39,7 +39,11 @@ if __name__ == '__main__':
     URM_test = dataset_object.get_URM_from_name('URM_validation')
     for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
         print(ICM_name)
-    ICM_all = dataset_object.get_ICM_from_name("ICM_section_no")
+    ICM_all_list = [dataset_object.get_ICM_from_name("ICM_cleaned_section_name"),
+                    dataset_object.get_ICM_from_name("ICM_cleaned_graphical_appearance_name"),
+                    dataset_object.get_ICM_from_name("ICM_garment_group_no"),
+                    dataset_object.get_ICM_from_name("ICM_perceived_colour_master_id"),
+                    dataset_object.get_ICM_from_name("ICM_cleaned_department_name")]
     UCM_all = []
     print(URM_train.shape)
     print(URM_test.shape)
@@ -75,22 +79,22 @@ if __name__ == '__main__':
     logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
     for recommender_class in recommender_class_list:
+        for ICM_iterator in ICM_all_list:
+            try:
 
-        try:
+                print("Algorithm: {}".format(recommender_class))
 
-            print("Algorithm: {}".format(recommender_class))
+                recommender_object = _get_instance(recommender_class, URM_train, ICM_iterator, UCM_all)
 
-            recommender_object = _get_instance(recommender_class, URM_train, ICM_all, UCM_all)
+                if isinstance(recommender_object, Incremental_Training_Early_Stopping):
+                    fit_params = {"epochs": 15, **earlystopping_keywargs}
+                else:
+                    fit_params = {}
 
-            if isinstance(recommender_object, Incremental_Training_Early_Stopping):
-                fit_params = {"epochs": 15, **earlystopping_keywargs}
-            else:
-                fit_params = {}
+                recommender_object.fit(**fit_params)
 
-            recommender_object.fit(**fit_params)
-
-            results_run_1, results_run_string_1 = evaluator.evaluateRecommender(recommender_object)
-            results_5_95 = evaluator5_95.evaluate_with_statistics(recommender_object)
+                results_run_1, results_run_string_1 = evaluator.evaluateRecommender(recommender_object)
+                results_5_95 = evaluator5_95.evaluate_with_statistics(recommender_object)
 
 
             # recommender_object.save_model(output_root_path, file_name="temp_model.zip")
@@ -105,15 +109,15 @@ if __name__ == '__main__':
             # if recommender_class not in [Random]:
             #     assert results_run_1.equals(results_run_2)
 
-            print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
-            print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
-            print("Recap of splits: \n")
-            evaluator5_95.print_map_statistics()
-            logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
-            logFile.write("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
-            logFile.flush()
+                print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
+                print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
+                print("Recap of splits: \n")
+                evaluator5_95.print_map_statistics()
+                logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
+                logFile.write("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
+                logFile.flush()
 
-        except Exception as e:
-            traceback.print_exc()
-            logFile.write("Algorithm: {} - Exception: {}\n".format(recommender_class, str(e)))
-            logFile.flush()
+            except Exception as e:
+                traceback.print_exc()
+                logFile.write("Algorithm: {} - Exception: {}\n".format(recommender_class, str(e)))
+                logFile.flush()
