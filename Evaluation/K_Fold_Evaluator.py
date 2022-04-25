@@ -5,8 +5,8 @@ Created on 23/11/2020
 @author: Alessandro Sanvito
 @editor: Luca Vecchio
 """
-from Evaluator import Evaluator
-from Evaluator import EvaluatorHoldout
+from Evaluation.Evaluator import Evaluator
+from Evaluation.Evaluator import EvaluatorHoldout
 
 
 class K_Fold_Evaluator_MAP(Evaluator):
@@ -43,7 +43,7 @@ class K_Fold_Evaluator_MAP(Evaluator):
             )
 
             results.append(
-                result_dict[10]["MAP"]
+                result_dict.to_dict()["MAP"][12]
             )
 
         return results
