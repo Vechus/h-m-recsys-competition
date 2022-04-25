@@ -132,8 +132,8 @@ def read_data_split_and_search_hybrid():
     )
 
     optimizer.maximize(
-        init_points=50,
-        n_iter=50,
+        init_points=n_random_starts,
+        n_iter=n_cases,
     )
 
     import json

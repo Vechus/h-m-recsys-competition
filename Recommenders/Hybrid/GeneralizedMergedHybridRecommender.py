@@ -1,4 +1,5 @@
 from Recommenders.BaseRecommender import BaseRecommender
+import numpy as np
 
 
 class GeneralizedMergedHybridRecommender(BaseRecommender):
@@ -33,7 +34,9 @@ class GeneralizedMergedHybridRecommender(BaseRecommender):
         pass
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
-        result = self.alphas[0]*self.recommenders[0]._compute_item_score(user_id_array,items_to_compute)
+        item_score = self.recommenders[0]._compute_item_score(user_id_array,items_to_compute)
+        result = self.alphas[0]*item_score / np.max(item_score)
         for index in range(1,len(self.alphas)):
-            result = result + self.alphas[index]*self.recommenders[index]._compute_item_score(user_id_array,items_to_compute)
+            item_score = self.recommenders[index]._compute_item_score(user_id_array,items_to_compute)
+            result = result + self.alphas[index]*item_score / np.max(item_score)
         return result
