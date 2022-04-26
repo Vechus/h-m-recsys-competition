@@ -23,7 +23,9 @@ UCM_list = [
     'num_sale_months_total',
     'num_missing_months_perc_total',
     'num_transactions_total',
-    'avg_transactions_in_active_month_total'
+    'avg_transactions_in_active_month_total',
+    'age_class_5',
+    'age_class_10'
 ]
 
 
