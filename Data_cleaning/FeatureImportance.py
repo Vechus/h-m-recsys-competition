@@ -95,7 +95,7 @@ def train(df_data):
         scores.append(val_score)
 
         # save_model
-        joblib.dump(model, f"lgbm_fold_{fold}.joblib")
+        joblib.dump(model, f"lgbm_fold_{fold}_1.joblib")
 
 
     return scores
@@ -174,7 +174,7 @@ def get_feat_imp(df_data):
     imps_list = []
     cols = [col for col in df_data.columns if label != col]
     for _fold in range(n_fold):
-        with open(f"lgbm_fold_{_fold}.joblib", "rb") as f:
+        with open(f"lgbm_fold_{_fold}_1.joblib", "rb") as f:
             model = joblib.load(f)
         imps = model.feature_importances_
         imps_list.append(imps)
