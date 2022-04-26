@@ -67,13 +67,14 @@ def train(df_data):
     cols = [col for col in df_data.columns if label != col]
 
     folds = StratifiedKFold(n_splits=n_fold, random_state=seed, shuffle=True)
-    es = early_stopping(1000)
+    es = early_stopping(20)
     le = log_evaluation(period=100)
     scores = []
 
     for fold, (train_idx, val_idx) in enumerate(folds.split(df_data, df_data[label])):
         print(f"=====fold {fold}=======")
         print(train_idx, val_idx)
+
 
         df_train = df_data.loc[train_idx].reset_index(drop=True)
         df_val = df_data.loc[val_idx].reset_index(drop=True)
@@ -96,7 +97,77 @@ def train(df_data):
         # save_model
         joblib.dump(model, f"lgbm_fold_{fold}.joblib")
 
+
     return scores
+
+
+def get_table_feat(df):
+    article_id_cols = ['product_code',
+                       'product_type_no',
+                       'graphical_appearance_no', 'colour_group_code',
+                       'perceived_colour_value_id', 'perceived_colour_master_id',
+                       'department_no', 'index_group_no', 'section_no',
+                       'garment_group_no',
+                       # 'cleaned_detail_desc',
+                       'on_discount', 'sale_periods_months',
+                       'autumn_sales_indicator',
+        'out_of_stock',
+        'is_for_male_or_female', 'is_for_mama',
+                        'rebuy_ratio_article']
+
+    article_dummy_cols = [#'cleaned_prod_name',
+        'idxgrp_idx_prdtyp',
+        'product_seasonal_type',
+        # 'cleaned_department_name',
+                          'cleaned_product_type_name',
+                          'cleaned_product_group_name', 'cleaned_graphical_appearance_name',
+                          'cleaned_colour_group_name', 'cleaned_perceived_colour_value_name',
+                          'cleaned_perceived_colour_master_name', #'cleaned_department_name',
+                          'cleaned_index_name', 'cleaned_index_group_name',
+        'transaction_peak_year_month',
+                          'cleaned_section_name', 'cleaned_garment_group_name']
+
+    article_drop_cols = ["index_code",
+                         "cleaned_prod_name",
+                         "cleaned_detail_desc",
+                         "cleaned_department_name",
+                         ]
+
+    df = df.drop(article_drop_cols, axis=1)
+    df = pd.get_dummies(df, columns=article_dummy_cols)
+    return df
+
+
+def create_article_feat(df_article,
+                        # df_image
+                        ):
+    # rename image
+    # rename_dic = {f"{i}": f"image_col_{i}" for i in range(Config.image_feat_dim)}
+    # df_image = df_image.rename(columns=rename_dic)
+
+    df_article_feat = get_table_feat(df_article)
+    # df_article_feat = df_article_feat.merge(df_image, on="article_id", how="left")
+
+    return df_article_feat
+
+
+def create_customer_feat(df):
+    customer_drop_cols = [
+        #"postal_code"
+        ]
+    customer_dummy_cols = ["club_member_status", "fashion_news_frequency"]
+
+    df = df.drop(customer_drop_cols, axis=1)
+    #     df.loc[:, "FN"] = df["FN"].fillna(0)
+    #     df.loc[:, "Active"] = df["Active"].fillna(0)
+    #     df.loc[:, "club_member_status"] = df["club_member_status"].fillna("NONE")
+    #     df.loc[:, "fashion_news_frequency"] = df["fashion_news_frequency"].fillna("NONE")
+    #     df.loc[:, "age"] = df["age"].fillna(0)
+    df.loc[:, "age"] = np.log1p(df["age"])
+
+    df = pd.get_dummies(df, columns=customer_dummy_cols)
+
+    return df
 
 
 def get_feat_imp(df_data):
@@ -156,6 +227,22 @@ def split_transaction(df_trans, start_date=None, end_date=None):
     return df_trans
 
 
+
+def create_dataset_faster(df_truth, df_article_feat, df_customer_feat):
+    df_data = pd.concat([
+        df_truth.reset_index(drop=True),
+        df_article_feat.reindex(df_truth['article_id'].values).reset_index(drop=True)
+    ], axis=1)
+    df_data = pd.concat([
+        df_data.reset_index(drop=True),
+        df_customer_feat.reindex(df_data['customer_id'].values).reset_index(drop=True)
+    ], axis=1)
+
+    df_data = df_data.drop(["customer_id", "article_id"], axis=1)
+
+    return df_data
+
+
 if __name__ == "__main__":
     load_dotenv()
     path = os.getenv('DATASET_PATH')
@@ -167,21 +254,20 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
     # start_date = '2020-08-01'
-    start_date = '2020-07-22'
+    start_date = '2020-06-15'
     end_date = '2020-09-23'
 
     # image_feat_dim = 768
     # text_feat_dim = 384
 
     # n_fold = 2
-    n_fold = 20
+    n_fold = 15
     seed = 2022
     lgbm = {"n_estimators": 100}
 
     label = "label"
 
     df_trans = pd.read_csv(os.path.join(path, transaction_path), dtype={'article_id': str}, parse_dates=['t_dat'])
-    # df_trans = df_trans[df_trans["t_dat"] >= start_date].reset_index(drop=True)
     df_trans = split_transaction(df_trans, start_date, end_date)
     df_trans = df_trans[df_trans.columns.difference(['t_dat'])]
     df_trans = reduce_mem_usage(df_trans)
@@ -190,44 +276,50 @@ if __name__ == "__main__":
 
     df_false = df_truth.copy()
     df_false.loc[:, "article_id"] = df_false["article_id"].sample(frac=1).tolist()
-    df_false_copy = df_truth.copy()
-    df_false_copy = df_false_copy.sample(int(df_false.shape[0]))
-    df_false_copy.loc[:, "article_id"] = df_false_copy["article_id"].sample(frac=1).tolist()
-    df_false = pd.concat([df_false, df_false_copy], axis=0).drop_duplicates()
+    # df_false_copy = df_truth.copy()
+    # df_false_copy = df_false_copy.sample(int(df_false.shape[0]))
+    # df_false_copy.loc[:, "article_id"] = df_false_copy["article_id"].sample(frac=1).tolist()
+    # df_false = pd.concat([df_false, df_false_copy], axis=0).drop_duplicates()
 
     df_truth.loc[:, label] = 1
     df_false.loc[:, label] = 0
 
+    df_truth = pd.concat([df_truth, df_false])
+
     df_article = import_data(path, article_path)
     df_customer = import_data(path, customer_path)
 
-    df_truth_merge, df_false_merge = add_features(df_truth, df_false)
+    df_article_feat = create_article_feat(df_article)
+    df_customer_feat = create_customer_feat(df_customer)
 
-    df_total = pd.concat([df_truth_merge, df_false_merge])
-    # df_total = df_total.drop(["customer_id", "article_id"], axis=1)
+    del df_article
+    del df_customer
 
-    print("#Ture: ", df_total[df_total["label"] == 1].shape,
-          round(df_total[df_total["label"] == 1].shape[0] / df_total.shape[0],2), "#False: ",
-          df_total[df_total["label"] == 0].shape,
-          round(df_total[df_total["label"] == 0].shape[0] / df_total.shape[0],2))
+    df_article_feat = df_article_feat.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
+    df_customer_feat = df_customer_feat.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
 
-    print(df_total.columns)
+    df_article_feat = df_article_feat.set_index("article_id")
+    df_customer_feat = df_customer_feat.set_index("customer_id")
 
-    df_total.to_pickle("{}/feature{}.pkl".format(output_dir, str(start_date)))
+    df_data = create_dataset_faster(df_truth, df_article_feat, df_customer_feat)
 
-    # print(df_total)
-    df_total = df_total.reset_index(drop=True)
+    # print(df_data.head())
 
-    lbl = preprocessing.LabelEncoder()
-    df_total['customer_id'] = lbl.fit_transform(df_total['customer_id'].astype(str))
-    df_total['article_id'] = lbl.fit_transform(df_total['article_id'].astype(str))
+    print("#Ture: ", df_data[df_data["label"] == 1].shape,
+          round(df_data[df_data["label"] == 1].shape[0] / df_data.shape[0],2), "#False: ",
+          df_data[df_data["label"] == 0].shape,
+          round(df_data[df_data["label"] == 0].shape[0] / df_data.shape[0],2))
 
-    scores = train(df_total)
+    print(df_data.columns)
+    #
+    # df_total.to_pickle("{}/feature{}.pkl".format(output_dir, str(start_date)))
+    #
+    scores = train(df_data)
 
     print(scores)
     print(np.mean(scores))
 
-    df_fea_imp = get_feat_imp(df_total)
-    print(df_fea_imp.head(20))
-
-    df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
+    df_fea_imp = get_feat_imp(df_data)
+    print(df_fea_imp.head(30))
+    #
+    # df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
