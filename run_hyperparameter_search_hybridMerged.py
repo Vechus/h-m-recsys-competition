@@ -105,7 +105,8 @@ def read_data_split_and_search_hybrid():
             file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
     #best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
-    best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
+    #best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
+    best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender]
 
     tuning_params = {}
     for i in range(len(best_recommenders)):
@@ -121,13 +122,13 @@ def read_data_split_and_search_hybrid():
             hybrid0,
             hybrid1,
             hybrid2,
-            hybrid3
+            #hybrid3
     ):
         hybrid_recommender[0].fit(alphas=[
             hybrid0,
             hybrid1,
             hybrid2,
-            hybrid3
+            #hybrid3
         ])
         result = evaluator_validation.evaluateRecommender(hybrid_recommender)
         results.append(result)
