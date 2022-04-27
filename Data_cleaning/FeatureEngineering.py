@@ -3,6 +3,7 @@ import numpy as np
 import math
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from collections import Counter
 
 
 # the function of calculating then number of month which don't have any transactions
@@ -61,6 +62,21 @@ def customers_feature_engineering(df_customers, df_transactions):
                                 df_customers["postal_code"].values]
     df_customers.drop(columns='postal_code', axis=1, inplace=True)
     df_customers = df_customers.rename(columns={'postcode': "postal_code"})
+
+    df_customer_group = df_transactions.groupby(['customer_id'])
+    list2 = []
+    for each in df_customer_group:
+        df = each[1]
+        list1 = df['article_id'].values.tolist()
+        dict1 = Counter(list1)
+        repetition = len([i for i in dict1.values() if i > 1]) / len(dict1)
+        list2.append(repetition)
+    dff_customer = pd.DataFrame()
+    dff_customer['customer_id'] = list(df_customer_group.groups.keys())
+    dff_customer['rebuy_ratio_customer'] = list2
+    df_customers = pd.merge(df_customers, dff_customer, how='left', on='customer_id')
+
+    del dff_customer
 
     # generate some new features from the transaction behaviours for each year
     years = df_transactions.year.unique()
@@ -160,6 +176,21 @@ def customers_feature_engineering(df_customers, df_transactions):
 def articles_feature_engineering(df_articles, df_transactions):
     print("New features generation of articles start.")
     df_articles_copy = df_articles.copy()
+
+    df_article_group = df_transactions.groupby(['article_id'])
+    list2 = []
+    for each in df_article_group:
+        df = each[1]
+        list1 = df['customer_id'].values.tolist()
+        dict1 = Counter(list1)
+        repetition = len([i for i in dict1.values() if i > 1]) / len(dict1)
+        list2.append(repetition)
+    dff_article = pd.DataFrame()
+    dff_article['article_id'] = list(df_article_group.groups.keys())
+    dff_article['rebuy_ratio_article'] = list2
+
+    df_articles = pd.merge(df_articles, dff_article, how='left', on='article_id')
+    del dff_article
 
     df_articles['idxgrp_idx_prdtyp'] = df_articles['cleaned_index_group_name'] + '_' + df_articles[
         'cleaned_index_name'] + '_' + df_articles['cleaned_product_type_name']

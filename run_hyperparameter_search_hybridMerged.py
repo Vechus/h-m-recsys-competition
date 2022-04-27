@@ -61,6 +61,14 @@ def read_data_split_and_search_hybrid():
     evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
 
     # |  74       |  0.003248 |  0.0      |  1.006e-0 |  5.551e-1 |  1.0      |
+    # p3alpha updated 27/04/22
+    p3alphaRecommender = P3alphaRecommender(URM_train)
+    p3alphaRecommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
+
+    # rp3beta updated 27/04/22
+    rp3betaRecommender = RP3betaRecommender(URM_train)
+    rp3betaRecommender.fit(topK=626, alpha=0.21827333332714935, beta=0.0, normalize_similarity=True)
+
     ItemKNNCBFRecommenders_ICMs = [
         'ICM_all'
     ]
@@ -96,7 +104,8 @@ def read_data_split_and_search_hybrid():
             folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
             file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
-    best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
+    #best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
+    best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
 
     tuning_params = {}
     for i in range(len(best_recommenders)):
@@ -142,16 +151,19 @@ def read_data_split_and_search_hybrid():
     with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
         json.dump(optimizer.max, json_file)
 
+    with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
+        json.dump(results, json_file)
+
 
 if __name__ == '__main__':
 
     # current date and time
     start = datetime.now()
 
-    log_for_telegram_group = False
+    log_for_telegram_group = True
     logger = Logger('Hybrid - Start time:' + str(start))
     if log_for_telegram_group:
-        logger.log('Started Hyper-parameter tuning. UserKNNCFRecommender and PureSVDRecommender')
+        logger.log('Started Hyper-parameter tuning. Hybrid recsys')
     print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search_hybrid()

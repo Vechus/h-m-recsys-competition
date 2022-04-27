@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     timestamp_list_train = [("2019-06-22", "2019-09-23")]
     timestamp_list_validation = [("2019-09-23", "2019-09-30")]
-    split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation)
+    split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train', URM_validation='URM_validation')
 
     # URM_train for submission
     timestamp_list_submission = [("2020-06-22", "2020-09-23")]
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     dataset = manager.generate_Dataset(DATASET_NAME, True)
 
     # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset.save_data('{}/processed_train-20190622_20190923-val-20190923_20190930/{}/'.format(DATASET_PATH, DATASET_NAME))
+    dataset.save_data('{}/processed_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/{}/'.format(DATASET_PATH, DATASET_NAME))
 
     dataset.print_statistics()
     dataset.print_statistics_global()
