@@ -60,6 +60,7 @@ def read_data_split_and_search_hybrid():
 
     evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
 
+    # |  74       |  0.003248 |  0.0      |  1.006e-0 |  5.551e-1 |  1.0      |
     ItemKNNCBFRecommenders_ICMs = [
         'ICM_all'
     ]
@@ -138,7 +139,7 @@ def read_data_split_and_search_hybrid():
 
     import json
 
-    with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+    with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
         json.dump(optimizer.max, json_file)
 
 
