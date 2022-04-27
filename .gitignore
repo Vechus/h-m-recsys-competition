@@ -159,3 +159,7 @@ DataProcessing/processed/*
 dataset/
 result_experiments/
 aws_folder/
+
+*/*.joblib
+*/*.swo
+*/*.swp
