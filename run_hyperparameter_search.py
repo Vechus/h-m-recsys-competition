@@ -51,7 +51,7 @@ def read_data_split_and_search():
     reader = HMDatasetReader(False)
 
     PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset = reader.load_data('{}/processed/{}/'.format(DATASET_PATH, dataset_name))
+    dataset = reader.load_data('{}/processed_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/{}/'.format(DATASET_PATH, dataset_name))
     print("Loaded dataset into memory...")
 
     # get URM_train, URM_test, URM_validation
@@ -62,7 +62,7 @@ def read_data_split_and_search():
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/collaborative_algorithm_URM_2019-06-22_2019-09-23/"
+    output_folder_path = "result_experiments/CF_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
@@ -71,13 +71,13 @@ def read_data_split_and_search():
     collaborative_algorithm_list = [
         # Random,
         TopPop,
-        # P3alphaRecommender,
-        # RP3betaRecommender,
+        P3alphaRecommender,
+        RP3betaRecommender,
         # ItemKNNCFRecommender,
-        UserKNNCFRecommender,
+        # UserKNNCFRecommender,
         # MatrixFactorization_BPR_Cython,
         # MatrixFactorization_FunkSVD_Cython,
-        PureSVDRecommender,
+        # PureSVDRecommender,
         # SLIM_BPR_Cython,
         # SLIMElasticNetRecommender,
         # ImplicitALSRecommender
