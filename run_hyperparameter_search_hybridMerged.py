@@ -60,6 +60,7 @@ def read_data_split_and_search_hybrid():
 
     evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
 
+    # |  74       |  0.003248 |  0.0      |  1.006e-0 |  5.551e-1 |  1.0      |
     # p3alpha updated 27/04/22
     p3alphaRecommender = P3alphaRecommender(URM_train)
     p3alphaRecommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
@@ -104,7 +105,8 @@ def read_data_split_and_search_hybrid():
             file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
     #best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
-    best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
+    #best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
+    best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender]
 
     tuning_params = {}
     for i in range(len(best_recommenders)):
@@ -120,13 +122,13 @@ def read_data_split_and_search_hybrid():
             hybrid0,
             hybrid1,
             hybrid2,
-            hybrid3
+            #hybrid3
     ):
         hybrid_recommender[0].fit(alphas=[
             hybrid0,
             hybrid1,
             hybrid2,
-            hybrid3
+            #hybrid3
         ])
         result = evaluator_validation.evaluateRecommender(hybrid_recommender)
         results.append(result)
@@ -147,7 +149,7 @@ def read_data_split_and_search_hybrid():
 
     import json
 
-    with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+    with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
         json.dump(optimizer.max, json_file)
 
     with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
