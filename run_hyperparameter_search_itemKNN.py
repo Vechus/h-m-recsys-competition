@@ -5,6 +5,7 @@ Created on 22/11/17
 
 @author: Maurizio Ferrari Dacrema
 """
+import sys
 
 from Recommenders.Recommender_import_list import *
 
@@ -29,7 +30,6 @@ from Recommenders.SLIM.SLIMElasticNetRecommender import SLIMElasticNetRecommende
 
 # def read_data_split_and_search(telegram_logger=None):
 def read_data_split_and_search():
-
     """
     This function provides a simple example on how to tune parameters of a given algorithm
 
@@ -62,26 +62,11 @@ def read_data_split_and_search():
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
-    output_folder_path = "result_experiments/CF_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/"
+    output_folder_path = "result_experiments/ItemKNNCBF_CFCBF_URM_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/"
 
     # If directory does not exist, create
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
-
-    collaborative_algorithm_list = [
-        # Random,
-        TopPop,
-        P3alphaRecommender,
-        RP3betaRecommender,
-        # ItemKNNCFRecommender,
-        # UserKNNCFRecommender,
-        # MatrixFactorization_BPR_Cython,
-        # MatrixFactorization_FunkSVD_Cython,
-        # PureSVDRecommender,
-        # SLIM_BPR_Cython,
-        # SLIMElasticNetRecommender,
-        # ImplicitALSRecommender
-    ]
 
     from Evaluation.Evaluator import EvaluatorHoldout
 
@@ -95,65 +80,12 @@ def read_data_split_and_search():
     evaluator_validation = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list)
     evaluator_test = None  # EvaluatorHoldout(URM_test, cutoff_list = cutoff_list)
 
-    runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
-                                                       URM_train=URM_train,
-                                                       metric_to_optimize=metric_to_optimize,
-                                                       cutoff_to_optimize=cutoff_to_optimize,
-                                                       n_cases=n_cases,
-                                                       n_random_starts=n_random_starts,
-                                                       evaluator_validation_earlystopping=evaluator_validation,
-                                                       evaluator_validation=evaluator_validation,
-                                                       evaluate_on_test='no',
-                                                       evaluator_test=None,
-                                                       output_folder_path=output_folder_path,
-                                                       resume_from_saved=True,
-                                                       similarity_type_list=None,  # all
-                                                       parallelizeKNN=False)
-
-    #
-    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count()), maxtasksperchild=1)
-    pool.map(runParameterSearch_Collaborative_partial, collaborative_algorithm_list)
-
-    #
-    #
-    # for recommender_class in collaborative_algorithm_list:
-    #
-    #     try:
-    #
-    #         runParameterSearch_Collaborative_partial(recommender_class)
-    #
-    #     except Exception as e:
-    #
-    #         print("On recommender {} Exception {}".format(recommender_class, str(e)))
-    #         traceback.print_exc()
-    #
-    # exit()
-
-    # dataset.get_loaded_ICM_dict()
-
     ################################################################################################
     ###### Content Baselines
-    # n = 0
+
     for ICM_name, ICM_object in dataset.get_loaded_ICM_dict().items():
-        # n = n + 1
-        # if n not in [5, 10]:
-        #     continue
-        thread1 = ['ICM_garment_group_no',
-                   'ICM_cleaned_graphical_appearance_name',
-                   'ICM_cleaned_perceived_colour_master_name']
 
-        thread2 = ['ICM_cleaned_garment_group_name',
-                   'ICM_product_seasonal_type',
-                   'ICM_perceived_colour_master_id']
-
-        thread3 = ['ICM_cleaned_perceived_colour_value_name',
-                   'ICM_graphical_appearance_no',
-                   'ICM_perceived_colour_value_id']
-
-        thread4 = ['ICM_transaction_peak_year_month',
-                   'ICM_idxgrp_idx_prdtyp']
-
-        if ICM_name not in ['ICM_mix_top_5_accTo_CBF']:
+        if ICM_name not in sys.argv[1]:
             continue
         # try:
         #     runHyperparameterSearch_Content(ItemKNNCBFRecommender,
@@ -179,31 +111,30 @@ def read_data_split_and_search():
         #     print("On CBF recommender for ICM {} Exception {}".format(ICM_name, str(e)))
         #     traceback.print_exc()
 
+        try:
+            runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
+                                           URM_train=URM_train,
+                                           URM_train_last_test=URM_train + URM_validation,
+                                           metric_to_optimize=metric_to_optimize,
+                                           cutoff_to_optimize=cutoff_to_optimize,
+                                           evaluator_validation=evaluator_validation,
+                                           evaluate_on_test='no',
+                                           evaluator_test=None,
+                                           output_folder_path=output_folder_path,
+                                           parallelizeKNN=True,
+                                           allow_weighting=True,
+                                           resume_from_saved=True,
+                                           similarity_type_list=None,  # all
+                                           ICM_name=ICM_name,
+                                           ICM_object=ICM_object.copy(),
+                                           n_cases=n_cases,
+                                           n_random_starts=n_random_starts)
 
-        # try:
-        #     runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
-        #                                    URM_train=URM_train,
-        #                                    URM_train_last_test=URM_train + URM_validation,
-        #                                    metric_to_optimize=metric_to_optimize,
-        #                                    cutoff_to_optimize=cutoff_to_optimize,
-        #                                    evaluator_validation=evaluator_validation,
-        #                                    evaluate_on_test='no',
-        #                                    evaluator_test=None,
-        #                                    output_folder_path=output_folder_path,
-        #                                    parallelizeKNN=True,
-        #                                    allow_weighting=True,
-        #                                    resume_from_saved=True,
-        #                                    similarity_type_list=None,  # all
-        #                                    ICM_name=ICM_name,
-        #                                    ICM_object=ICM_object.copy(),
-        #                                    n_cases=n_cases,
-        #                                    n_random_starts=n_random_starts)
-        #
-        #
-        # except Exception as e:
-        #
-        #     print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
-        #     traceback.print_exc()
+
+        except Exception as e:
+
+            print("On recommender {} Exception {}".format(ItemKNN_CFCBF_Hybrid_Recommender, str(e)))
+            traceback.print_exc()
 
 
 if __name__ == '__main__':
@@ -212,9 +143,9 @@ if __name__ == '__main__':
     start = datetime.now()
 
     log_for_telegram_group = True
-    logger = Logger('HPS-test - ZHANG - Start time:'+str(start))
+    logger = Logger('HPS-test - ZHANG - Start time:' + str(start))
     if log_for_telegram_group:
-        logger.log('Started Hyper-parameter tuning. UserKNNCFRecommender and PureSVDRecommender')
+        logger.log('Started Hyper-parameter tuning')
     print('Started Hyper-parameter tuning')
     try:
         read_data_split_and_search()
@@ -225,9 +156,7 @@ if __name__ == '__main__':
         print('We got an exception! Check log and turn off the machine.')
         print('Exception: \n{}'.format(str(e)))
     if log_for_telegram_group:
+        logger.log('Hyper parameter search finished! Check results and turn off the machine.')
         end = datetime.now()
-        logger.log('Hyper parameter search finished! Check results and turn off the machine. '
-                   'End time:'+str(end)+'  Program duration:'+str(end-start))
+        logger.log('End time:' + str(end) + '  Program duration:' + str(end - start))
     print('Hyper parameter search finished! Check results and turn off the machine.')
-
-

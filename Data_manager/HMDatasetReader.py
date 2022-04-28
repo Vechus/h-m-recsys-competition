@@ -33,7 +33,7 @@ class HMDatasetReader(DataReader):
 
     DATASET_SPLIT_ROOT_FOLDER = "{}/processed/".format(PROCESSED_PATH)
 
-    IS_IMPLICIT = True
+    IS_IMPLICIT = False
 
 
 

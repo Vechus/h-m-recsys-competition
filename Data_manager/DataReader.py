@@ -50,7 +50,7 @@ class DataReader(object):
     AVAILABLE_UCM = []
 
     # This flag specifies if the given dataset contains implicit preferences or explicit ratings
-    IS_IMPLICIT = True
+    IS_IMPLICIT = False
 
     _DATA_READER_NAME = "DataReader"
 
