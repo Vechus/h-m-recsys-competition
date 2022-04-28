@@ -78,6 +78,14 @@ def customers_feature_engineering(df_customers, df_transactions):
 
     del dff_customer
 
+    df_customer_buy_discount = df_transactions.groupby('customer_id')['buy_with_no_discount'].agg(['count', 'sum'])
+    df_customer_buy_discount['buy_with_discount_ratio_customer'] = 1 - df_customer_buy_discount['sum'] / \
+                                                                   df_customer_buy_discount['count']
+    df_customer_buy_discount = df_customer_buy_discount.drop(['count', 'sum'], axis=1).reset_index()
+    df_customers = pd.merge(df_customers, df_customer_buy_discount, how='left', on='customer_id')
+    del df_customer_buy_discount
+
+
     # generate some new features from the transaction behaviours for each year
     years = df_transactions.year.unique()
 
@@ -191,6 +199,18 @@ def articles_feature_engineering(df_articles, df_transactions):
 
     df_articles = pd.merge(df_articles, dff_article, how='left', on='article_id')
     del dff_article
+
+    df_article_price = df_transactions.groupby('article_id')['price'].agg(
+        ['mean', 'max', 'min', 'median']).reset_index().rename(
+        columns={'mean': 'mean_price', 'max': 'max_price', 'min': 'min_price', 'median': 'median_price'})
+    df_articles = pd.merge(df_articles, df_article_price, how='left', on='article_id')
+    del df_article_price
+    df_article_buy_discount = df_transactions.groupby('article_id')['buy_with_no_discount'].agg(['count', 'sum'])
+    df_article_buy_discount['buy_with_discount_ratio_article'] = 1 - df_article_buy_discount['sum'] / \
+                                                                 df_article_buy_discount['count']
+    df_article_buy_discount = df_article_buy_discount.drop(['count', 'sum'], axis=1).reset_index()
+    df_articles = pd.merge(df_articles, df_article_buy_discount, how='left', on='article_id')
+    del df_article_buy_discount
 
     df_articles['idxgrp_idx_prdtyp'] = df_articles['cleaned_index_group_name'] + '_' + df_articles[
         'cleaned_index_name'] + '_' + df_articles['cleaned_product_type_name']

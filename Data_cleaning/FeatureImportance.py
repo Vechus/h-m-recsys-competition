@@ -95,7 +95,7 @@ def train(df_data):
         scores.append(val_score)
 
         # save_model
-        joblib.dump(model, f"lgbm_fold_{fold}_1.joblib")
+        joblib.dump(model, f"lgbm_fold_{fold}_0428_1.joblib")
 
 
     return scores
@@ -113,7 +113,7 @@ def get_table_feat(df):
                        'autumn_sales_indicator',
         'out_of_stock',
         'is_for_male_or_female', 'is_for_mama',
-                        'rebuy_ratio_article']
+                        'rebuy_ratio_article','mean_price','max_price','min_price','median_price','buy_with_discount_ratio_article']
 
     article_dummy_cols = [#'cleaned_prod_name',
         'idxgrp_idx_prdtyp',
@@ -174,7 +174,7 @@ def get_feat_imp(df_data):
     imps_list = []
     cols = [col for col in df_data.columns if label != col]
     for _fold in range(n_fold):
-        with open(f"lgbm_fold_{_fold}_1.joblib", "rb") as f:
+        with open(f"lgbm_fold_{_fold}_0428_1.joblib", "rb") as f:
             model = joblib.load(f)
         imps = model.feature_importances_
         imps_list.append(imps)
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
     # start_date = '2020-08-01'
-    start_date = '2020-06-15'
+    start_date = '2020-09-01'
     end_date = '2020-09-23'
 
     # image_feat_dim = 768
