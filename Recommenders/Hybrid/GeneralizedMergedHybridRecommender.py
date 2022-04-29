@@ -35,7 +35,9 @@ class GeneralizedMergedHybridRecommender(BaseRecommender):
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
         item_score = self.recommenders[0]._compute_item_score(user_id_array,items_to_compute)
-        result = self.alphas[0]*item_score / np.max(item_score)
+        max_item_score = np.max(item_score)
+        item_score = item_score / max_item_score
+        result = self.alphas[0]*item_score
         for index in range(1,len(self.alphas)):
             item_score = self.recommenders[index]._compute_item_score(user_id_array,items_to_compute)
             result = result + self.alphas[index]*item_score / np.max(item_score)
