@@ -131,17 +131,6 @@ def read_data_split_and_search_hybrid():
 
     hybrid_recommender = [GeneralizedMergedHybridRecommender(URM_train, recommenders=recommenders) for recommenders in Hybrid_Recommenders_List]
 
-    threads = []
-    for recommender in hybrid_recommender:
-        threads.append(threading.Thread(target=hybrid_parameter_search, args=(recommender,)))
-
-    for thread in threads:
-        thread.start()
-
-    for thread in threads:
-        thread.join()
-
-
     def hybrid_parameter_search(hybrid_recommender: GeneralizedMergedHybridRecommender):
         results = []
 
@@ -240,6 +229,16 @@ def read_data_split_and_search_hybrid():
 
         with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
             json.dump(results, json_file)
+    
+    threads = []
+    for recommender in hybrid_recommender:
+        threads.append(threading.Thread(target=hybrid_parameter_search, args=(recommender,)))
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
 if __name__ == '__main__':
 
