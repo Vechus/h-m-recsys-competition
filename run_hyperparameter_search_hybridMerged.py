@@ -42,6 +42,9 @@ def read_data_split_and_search_hybrid():
     # URM_test = dataset.get_URM_from_name('URM_test')
     URM_validation = dataset.get_URM_from_name('URM_validation')
 
+    URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
+    URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
+
     # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
     # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
 
@@ -59,6 +62,12 @@ def read_data_split_and_search_hybrid():
     n_random_starts = int(n_cases / 3)
 
     evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
+
+    toppop_exp = TopPop(URM_train_exp)
+    toppop_exp.fit()
+
+    toppop_normal = TopPop(URM_train)
+    toppop_normal.fit()
 
     # |  74       |  0.003248 |  0.0      |  1.006e-0 |  5.551e-1 |  1.0      |
     # p3alpha updated 27/04/22
@@ -106,7 +115,13 @@ def read_data_split_and_search_hybrid():
 
     #best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
     #best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
-    best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender]
+    #best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender]
+    #best_recommenders = [p3alphaRecommender, rp3betaRecommender]
+    #best_recommenders = ItemKNNCBFRecommenders + [rp3betaRecommender]
+    best_recommenders = [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
+    #best_recommenders = [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
+    #best_recommenders = [toppop_exp, p3alphaRecommender, rp3betaRecommender]
+    
 
     tuning_params = {}
     for i in range(len(best_recommenders)):
@@ -152,7 +167,7 @@ def read_data_split_and_search_hybrid():
     with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
         json.dump(optimizer.max, json_file)
 
-    with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
+    with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
         json.dump(results, json_file)
 
 
