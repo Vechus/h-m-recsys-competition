@@ -63,8 +63,6 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
-
     toppop_exp = TopPop(URM_train_exp)
     toppop_exp.fit()
 
@@ -129,9 +127,10 @@ def read_data_split_and_search_hybrid():
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
 
-    hybrid_recommender = [GeneralizedMergedHybridRecommender(URM_train, recommenders=recommenders) for recommenders in Hybrid_Recommenders_List]
+    hybrid_recommenders = [GeneralizedMergedHybridRecommender(URM_train, recommenders=recommenders) for recommenders in Hybrid_Recommenders_List]
 
     def hybrid_parameter_search(hybrid_recommender: GeneralizedMergedHybridRecommender):
+        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
         results = []
 
         tuning_params = {}
@@ -231,7 +230,7 @@ def read_data_split_and_search_hybrid():
             json.dump(results, json_file)
     
     threads = []
-    for recommender in hybrid_recommender:
+    for recommender in hybrid_recommenders:
         threads.append(threading.Thread(target=hybrid_parameter_search, args=(recommender,)))
 
     for thread in threads:
