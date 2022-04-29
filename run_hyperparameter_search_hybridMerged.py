@@ -34,7 +34,7 @@ def read_data_split_and_search_hybrid():
     reader = HMDatasetReader(False)
 
     PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset = reader.load_data('{}/processed_train-20190622_20190923-val-20190923_20190930/hm/'.format(DATASET_PATH))
+    dataset = reader.load_data('{}/processed_train_20190622_20190923_val_20190923_20190930_and_exp/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
     # get URM_train, URM_test, URM_validation
