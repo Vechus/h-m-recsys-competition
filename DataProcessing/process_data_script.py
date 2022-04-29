@@ -40,9 +40,8 @@ if __name__ == '__main__':
     # timestamp_list_validation = [("2019-09-23", "2019-09-30")]
 
     timestamp_list_train = [("2019-06-22", "2019-09-23")]
-    timestamp_list_validation = [("2019-09-24", "2019-09-30")]
-    split_train_validation_leave_timestamp_out(manager, transactions, timestamp_list_train[0], timestamp_list_validation[0])
-    split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train_explicit', URM_validation='URM_validation_explicit')
+    timestamp_list_validation = [("2019-09-23", "2019-09-30")]
+    split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train', URM_validation='URM_validation')    split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train_explicit', URM_validation='URM_validation_explicit')
     exp_decay.split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train_exp', URM_validation='URM_validation_exp')
 
     # URM_train for submission
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     gen_UCM_list(manager, customers)
 
     # generate dataset with URM (Implicit=True)
-    dataset = manager.generate_Dataset(DATASET_NAME, is_implicit=False)
+    dataset = manager.generate_Dataset(DATASET_NAME)#, is_implicit=False)
 
     # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
     dataset.save_data('{}/processed_train_20190622_20190923_val_20190923_20190930_and_exp/{}/'.format(DATASET_PATH, DATASET_NAME))
