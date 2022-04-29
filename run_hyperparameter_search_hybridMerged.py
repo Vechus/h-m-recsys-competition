@@ -23,6 +23,8 @@ from bayes_opt import BayesianOptimization
 from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
 from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
 
+import threading
+
 def read_data_split_and_search_hybrid():
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
@@ -113,63 +115,131 @@ def read_data_split_and_search_hybrid():
             folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
             file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
-    #best_recommenders = ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders
-    #best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
-    #best_recommenders = ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender]
-    #best_recommenders = [p3alphaRecommender, rp3betaRecommender]
-    #best_recommenders = ItemKNNCBFRecommenders + [rp3betaRecommender]
-    best_recommenders = [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
-    #best_recommenders = [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
-    #best_recommenders = [toppop_exp, p3alphaRecommender, rp3betaRecommender]
+    Hybrid_Recommenders_List = [
+        ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
+        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
+        [p3alphaRecommender, rp3betaRecommender],
+        ItemKNNCBFRecommenders + [rp3betaRecommender],
+        [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
+        [toppop_exp, p3alphaRecommender, rp3betaRecommender]
+    ]
     
 
-    tuning_params = {}
-    for i in range(len(best_recommenders)):
-        tuning_params['hybrid{}'.format(i)] = (0, 1)
+    print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
 
-    print('There are {} recommenders to hybridize!'.format(len(best_recommenders)))
-    print(str(tuning_params))
+    hybrid_recommender = [GeneralizedMergedHybridRecommender(URM_train, recommenders=recommenders) for recommenders in Hybrid_Recommenders_List]
 
-    results = []
-    hybrid_recommender = [GeneralizedMergedHybridRecommender(URM_train, recommenders=best_recommenders)]
+    threads = []
+    for recommender in hybrid_recommender:
+        threads.append(threading.Thread(target=hybrid_parameter_search, args=(recommender,)))
 
-    def BO_func(
-            hybrid0,
-            hybrid1,
-            hybrid2,
-            #hybrid3
-    ):
-        hybrid_recommender[0].fit(alphas=[
-            hybrid0,
-            hybrid1,
-            hybrid2,
-            #hybrid3
-        ])
-        result = evaluator_validation.evaluateRecommender(hybrid_recommender)
-        results.append(result)
-        print(result)
-        return sum(result) / len(result)
+    for thread in threads:
+        thread.start()
 
-    optimizer = BayesianOptimization(
-        f=BO_func,
-        pbounds=tuning_params,
-        verbose=5,
-        random_state=5,
-    )
+    for thread in threads:
+        thread.join()
 
-    optimizer.maximize(
-        init_points=n_random_starts,
-        n_iter=n_cases,
-    )
 
-    import json
+    def hybrid_parameter_search(hybrid_recommender: GeneralizedMergedHybridRecommender):
+        results = []
 
-    with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
-        json.dump(optimizer.max, json_file)
+        tuning_params = {}
+        for i in range(len(hybrid_recommender.recommenders)):
+            tuning_params['hybrid{}'.format(i)] = (0, 1)
 
-    with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
-        json.dump(results, json_file)
+        if len(hybrid_recommender.recommenders) == 2:
+            
+            def BO_func(
+                    hybrid0,
+                    hybrid1
+            ):
+                hybrid_recommender.fit(alphas=[
+                    hybrid0,
+                    hybrid1
+                ])
+                result = evaluator_validation.evaluateRecommender(hybrid_recommender)
+                results.append(result)
+                print(result)
+                return sum(result) / len(result)
 
+        elif len(hybrid_recommender.recommenders) == 3:
+
+            def BO_func(
+                    hybrid0,
+                    hybrid1,
+                    hybrid2
+            ):
+                hybrid_recommender.fit(alphas=[
+                    hybrid0,
+                    hybrid1,
+                    hybrid2
+                ])
+                result = evaluator_validation.evaluateRecommender(hybrid_recommender)
+                results.append(result)
+                print(result)
+                return sum(result) / len(result)
+        
+        elif len(hybrid_recommender.recommenders) == 4:
+
+            def BO_func(
+                    hybrid0,
+                    hybrid1,
+                    hybrid2,
+                    hybrid3
+            ):
+                hybrid_recommender.fit(alphas=[
+                    hybrid0,
+                    hybrid1,
+                    hybrid2,
+                    hybrid3
+                ])
+                result = evaluator_validation.evaluateRecommender(hybrid_recommender)
+                results.append(result)
+                print(result)
+                return sum(result) / len(result)
+
+        elif len(hybrid_recommender.recommenders) == 5:
+
+            def BO_func(
+                    hybrid0,
+                    hybrid1,
+                    hybrid2,
+                    hybrid3,
+                    hybrid4
+            ):
+                hybrid_recommender.fit(alphas=[
+                    hybrid0,
+                    hybrid1,
+                    hybrid2,
+                    hybrid3,
+                    hybrid4
+                ])
+                result = evaluator_validation.evaluateRecommender(hybrid_recommender)
+                results.append(result)
+                print(result)
+                return sum(result) / len(result)
+
+        optimizer = BayesianOptimization(
+            f=BO_func,
+            pbounds=tuning_params,
+            verbose=5,
+            random_state=5,
+        )
+
+        optimizer.maximize(
+            init_points=n_random_starts,
+            n_iter=n_cases,
+        )
+
+        import json
+
+        with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+            json.dump(optimizer.max, json_file)
+
+        with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
+            json.dump(results, json_file)
 
 if __name__ == '__main__':
 
