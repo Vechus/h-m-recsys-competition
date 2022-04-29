@@ -134,16 +134,16 @@ def read_data_split_and_search_hybrid():
         results = []
 
         tuning_params = {}
-        for i in range(len(hybrid_recommender.recommenders)):
+        for i in range(len(hybrid_recommender[0].recommenders)):
             tuning_params['hybrid{}'.format(i)] = (0, 1)
 
-        if len(hybrid_recommender.recommenders) == 2:
+        if len(hybrid_recommender[0].recommenders) == 2:
             
             def BO_func(
                     hybrid0,
                     hybrid1
             ):
-                hybrid_recommender.fit(alphas=[
+                hybrid_recommender[0].fit(alphas=[
                     hybrid0,
                     hybrid1
                 ])
@@ -152,14 +152,14 @@ def read_data_split_and_search_hybrid():
                 print(result)
                 return sum(result) / len(result)
 
-        elif len(hybrid_recommender.recommenders) == 3:
+        elif len(hybrid_recommender[0].recommenders) == 3:
 
             def BO_func(
                     hybrid0,
                     hybrid1,
                     hybrid2
             ):
-                hybrid_recommender.fit(alphas=[
+                hybrid_recommender[0].fit(alphas=[
                     hybrid0,
                     hybrid1,
                     hybrid2
@@ -169,7 +169,7 @@ def read_data_split_and_search_hybrid():
                 print(result)
                 return sum(result) / len(result)
         
-        elif len(hybrid_recommender.recommenders) == 4:
+        elif len(hybrid_recommender[0].recommenders) == 4:
 
             def BO_func(
                     hybrid0,
@@ -177,7 +177,7 @@ def read_data_split_and_search_hybrid():
                     hybrid2,
                     hybrid3
             ):
-                hybrid_recommender.fit(alphas=[
+                hybrid_recommender[0].fit(alphas=[
                     hybrid0,
                     hybrid1,
                     hybrid2,
@@ -188,7 +188,7 @@ def read_data_split_and_search_hybrid():
                 print(result)
                 return sum(result) / len(result)
 
-        elif len(hybrid_recommender.recommenders) == 5:
+        elif len(hybrid_recommender[0].recommenders) == 5:
 
             def BO_func(
                     hybrid0,
@@ -197,7 +197,7 @@ def read_data_split_and_search_hybrid():
                     hybrid3,
                     hybrid4
             ):
-                hybrid_recommender.fit(alphas=[
+                hybrid_recommender[0].fit(alphas=[
                     hybrid0,
                     hybrid1,
                     hybrid2,
@@ -223,10 +223,10 @@ def read_data_split_and_search_hybrid():
 
         import json
 
-        with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+        with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
             json.dump(optimizer.max, json_file)
 
-        with open("result_experiments/hybrid/" + hybrid_recommender.RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
+        with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
             json.dump(results, json_file)
     
     threads = []
