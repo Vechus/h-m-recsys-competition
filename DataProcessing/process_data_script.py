@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     timestamp_list_train = [("2019-06-22", "2019-09-23")]
     timestamp_list_validation = [("2019-09-23", "2019-09-30")]
-    split_train_validation_leave_timestamp_out(manager, transactions, timestamp_list_train, timestamp_list_validation)
+    split_train_validation_leave_timestamp_out(manager, transactions, timestamp_list_train, timestamp_list_validation[0])
     split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train_explicit', URM_validation='URM_validation_explicit')
     exp_decay.split_train_validation_multiple_intervals(manager, transactions, timestamp_list_train, timestamp_list_validation, URM_train='URM_train_exp', URM_validation='URM_validation_exp')
 
