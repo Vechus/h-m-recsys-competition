@@ -127,10 +127,10 @@ def read_data_split_and_search_hybrid():
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
 
-    hybrid_recommenders = [[GeneralizedMergedHybridRecommender(URM_train, recommenders=recommenders)] for recommenders in Hybrid_Recommenders_List]
+    hybrid_recommenders = [[GeneralizedMergedHybridRecommender(URM_train.copy(), recommenders=recommenders.copy())] for recommenders in Hybrid_Recommenders_List]
 
     def hybrid_parameter_search(hybrid_recommender: list): # list of GeneralizedMergedHybridRecommender
-        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation], cutoff_list=cutoff_list, verbose=False)
+        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation.copy()], cutoff_list=cutoff_list.copy(), verbose=False)
         results = []
 
         tuning_params = {}
