@@ -115,13 +115,13 @@ def read_data_split_and_search_hybrid():
 
     Hybrid_Recommenders_List = [
         ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
-        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
-        [p3alphaRecommender, rp3betaRecommender],
-        ItemKNNCBFRecommenders + [rp3betaRecommender],
-        [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
-        [toppop_exp, p3alphaRecommender, rp3betaRecommender]
+        #ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        #ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
+        #[p3alphaRecommender, rp3betaRecommender],
+        #ItemKNNCBFRecommenders + [rp3betaRecommender],
+        #[toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        #[toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
+        #[toppop_exp, p3alphaRecommender, rp3betaRecommender]
     ]
     
 
