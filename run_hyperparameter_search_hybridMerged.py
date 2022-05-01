@@ -129,7 +129,8 @@ def read_data_split_and_search_hybrid():
         #[toppop_exp, p3alphaRecommender, rp3betaRecommender],
         [toppop_normal, toppop_explicit, toppop_exp],
         [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
-        [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
+        [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
     ]
     
 
@@ -157,7 +158,7 @@ def read_data_split_and_search_hybrid():
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
-                print(result)
+                # print(result)
                 return sum(result) / len(result)
 
         elif len(hybrid_recommender[0].recommenders) == 3:
@@ -174,7 +175,7 @@ def read_data_split_and_search_hybrid():
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
-                print(result)
+                # print(result)
                 return sum(result) / len(result)
         
         elif len(hybrid_recommender[0].recommenders) == 4:
@@ -193,7 +194,7 @@ def read_data_split_and_search_hybrid():
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
-                print(result)
+                # print(result)
                 return sum(result) / len(result)
 
         elif len(hybrid_recommender[0].recommenders) == 5:
@@ -214,7 +215,7 @@ def read_data_split_and_search_hybrid():
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
-                print(result)
+                # print(result)
                 return sum(result) / len(result)
 
         optimizer = BayesianOptimization(
