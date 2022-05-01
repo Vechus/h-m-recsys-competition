@@ -44,6 +44,8 @@ def read_data_split_and_search_hybrid():
     # URM_test = dataset.get_URM_from_name('URM_test')
     URM_validation = dataset.get_URM_from_name('URM_validation')
 
+    UTM_train_explicit = dataset.get_URM_from_name('UTM_train_explicit')
+
     URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
     URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
@@ -65,6 +67,9 @@ def read_data_split_and_search_hybrid():
 
     toppop_exp = TopPop(URM_train_exp)
     toppop_exp.fit()
+
+    toppop_explicit = TopPop(UTM_train_explicit)
+    toppop_explicit.fit()
 
     toppop_normal = TopPop(URM_train)
     toppop_normal.fit()
@@ -114,14 +119,17 @@ def read_data_split_and_search_hybrid():
             file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
     Hybrid_Recommenders_List = [
-        ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
+        #ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
         #ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         #ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
         #[p3alphaRecommender, rp3betaRecommender],
         #ItemKNNCBFRecommenders + [rp3betaRecommender],
         #[toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         #[toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
-        #[toppop_exp, p3alphaRecommender, rp3betaRecommender]
+        #[toppop_exp, p3alphaRecommender, rp3betaRecommender],
+        [toppop_normal, toppop_explicit, toppop_exp],
+        [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
+        [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]]
     ]
     
 
@@ -135,7 +143,7 @@ def read_data_split_and_search_hybrid():
 
         tuning_params = {}
         for i in range(len(hybrid_recommender[0].recommenders)):
-            tuning_params['hybrid{}'.format(i)] = (0, 1)
+            tuning_params['hybrid{}'.format(i)] = (1e-2, 1)
 
         if len(hybrid_recommender[0].recommenders) == 2:
             
