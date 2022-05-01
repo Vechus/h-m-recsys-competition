@@ -44,7 +44,7 @@ def read_data_split_and_search_hybrid():
     # URM_test = dataset.get_URM_from_name('URM_test')
     URM_validation = dataset.get_URM_from_name('URM_validation')
 
-    UTM_train_explicit = dataset.get_URM_from_name('UTM_train_explicit')
+    URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
 
     URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
     URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
@@ -68,7 +68,7 @@ def read_data_split_and_search_hybrid():
     toppop_exp = TopPop(URM_train_exp)
     toppop_exp.fit()
 
-    toppop_explicit = TopPop(UTM_train_explicit)
+    toppop_explicit = TopPop(URM_train_explicit)
     toppop_explicit.fit()
 
     toppop_normal = TopPop(URM_train)
