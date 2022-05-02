@@ -76,7 +76,7 @@ def read_data_split_and_search_hybrid():
 
     itemKNN_CFCBF_Hybrid_Recommenders = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
                                                                          dataset.get_loaded_ICM_dict()[
-                                                                             "mix_top_10_accTo_CBF"])
+                                                                             "ICM_mix_top_10_accTo_CBF"])
     itemKNN_CFCBF_Hybrid_Recommenders.fit(topK=663, shrink=900, similarity='asymmetric', normalize=True,
                                           asymmetric_alpha=0.03882135719640912, feature_weighting='TF-IDF',
                                           ICM_weight=0.14382621361392856)
