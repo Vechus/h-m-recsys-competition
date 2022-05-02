@@ -119,14 +119,14 @@ def read_data_split_and_search_hybrid():
             file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
 
     Hybrid_Recommenders_List = [
-        #ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
-        #ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        #ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
-        #[p3alphaRecommender, rp3betaRecommender],
-        #ItemKNNCBFRecommenders + [rp3betaRecommender],
-        #[toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        #[toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
-        #[toppop_exp, p3alphaRecommender, rp3betaRecommender],
+        ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
+        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
+        [p3alphaRecommender, rp3betaRecommender],
+        ItemKNNCBFRecommenders + [rp3betaRecommender],
+        [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
+        [toppop_exp, p3alphaRecommender, rp3betaRecommender],
         [toppop_normal, toppop_explicit, toppop_exp],
         [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
@@ -144,7 +144,7 @@ def read_data_split_and_search_hybrid():
 
         tuning_params = {}
         for i in range(len(hybrid_recommender[0].recommenders)):
-            tuning_params['hybrid{}'.format(i)] = (1e-2, 1)
+            tuning_params['hybrid{}'.format(i)] = (-1, 1)
 
         if len(hybrid_recommender[0].recommenders) == 2:
             
