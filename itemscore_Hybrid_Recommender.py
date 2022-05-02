@@ -19,7 +19,7 @@ class itemscore_Hybrid_Recommender(BaseRecommender):
         super(itemscore_Hybrid_Recommender, self).__init__(URM_train)
 
         self.norm = 1
-        self.URM_train = sps.csr_matrix(URM_train)
+        self.URM_train = URM_train
         self.recommender_1 = recommender1
         self.recommender_2 = recommender2
 
