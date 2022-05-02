@@ -38,7 +38,6 @@ def hyperparameter_tuning(recommender_class, recommender1, recommender2):
     hyperparameterSearch = SearchBayesianSkopt(recommender_class,
                                                evaluator_validation=evaluator_validation)
 
-
     recommender_input_args = SearchInputRecommenderArgs(
         CONSTRUCTOR_POSITIONAL_ARGS=[URM_train_explicit, recommender1, recommender2],
         # For a CBF model simply put [URM_train, ICM_train]
