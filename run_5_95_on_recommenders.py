@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorMultipleURMs
 import traceback, os
 
-dataset_name = "hm-exponential-decay30-Validation_salesWeek-Train_3months"
+dataset_name = "hm-exponential-decay30-Validation_salesWeek-Train_restOf2019"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # print(dataset_object.AVAILABLE_URM)
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset library
     URM_train = dataset_object.get_URM_from_name('URM_train')
-    URM_test = dataset_object.get_URM_from_name('URM_test')
+    URM_test = dataset_object.get_URM_from_name('URM_validation')
     for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
         print(ICM_name)
     ICM_all = []
@@ -112,7 +112,7 @@ if __name__ == '__main__':
             print("Result recap on 95% splits: \n")
             evaluator95.print_map_statistics()
             logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
-            logFile.write("Algorithm: {}, MAP@12 results on 5% splits: {}".format(recommender_class, evaluator5.print_map_statistics()))
+            logFile.write("Algorithm: {}, MAP@12 results on 5% splits: {}".format(recommender_class, evaluator5))
             logFile.flush()
 
         except Exception as e:
