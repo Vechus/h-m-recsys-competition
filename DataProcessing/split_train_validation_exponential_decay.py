@@ -8,7 +8,6 @@ timestamp_column = 't_dat'
 userid_column = 'customer_id'
 itemid_column = 'article_id'
 DATASET_NAME = 'hm-exponential-decay20-Validation_salesWeek-Train_3months'
-EXPONENTIAL_DECAY = 20
 
 
 def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, timestamp_array, columns_name=None):
@@ -36,7 +35,7 @@ def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, ti
     return dropped_timestamp_df, final_df
 
 
-def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation, URM_train='URM_train', URM_validation='URM_validation'):
+def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation, exponential_decay=30, URM_train='URM_train', URM_validation='URM_validation'):
     # Retrieve which users fall in the wanted list of time frames
     print("Preprocessing dataframe...")
     timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
@@ -62,7 +61,7 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
 
     dayDifference_df = (train_interactions[timestamp_column] - finalDate).dt.days
 
-    train_interactions['Data'] = np.exp((dayDifference_df/EXPONENTIAL_DECAY).to_numpy())
+    train_interactions['Data'] = np.exp((dayDifference_df/exponential_decay).to_numpy())
 
     train_interactions.sort_values(by='Data')
 
