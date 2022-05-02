@@ -1,3 +1,4 @@
+from Utils.Logger import Logger
 from bayes_opt import BayesianOptimization
 import os
 from dotenv import load_dotenv
@@ -13,6 +14,8 @@ from Data_manager.Dataset import Dataset
 from DataProcessing.split_train_validation_exponential_decay import *
 
 
+logger = Logger('BO_exponential_decay')
+logger.log('Start BO on exponential decay')
 
 # load .env file
 load_dotenv()
@@ -31,7 +34,7 @@ hypertuning_params = {
     'decay': (5, 60)
 }
 
-n_cases = 10
+n_cases = 100
 n_random_starts = int(n_cases / 3)
 cutoff_list = [12]
 metric_to_optimize = "MAP"
@@ -48,7 +51,8 @@ def BO_func(decay):
     recommender.fit()
 
     evaluator = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list, verbose=False)
-    result_map = evaluator.evaluateRecommender(recommender).to_dict()["MAP"][12]
+    result_map, _ = evaluator.evaluateRecommender(recommender)
+    result_map = result_map.to_dict()["MAP"][12]
     return result_map
 
 optimizer = BayesianOptimization(
@@ -66,3 +70,6 @@ import json
 
 with open('result_experiments/exponential_decay_BO.json', 'w') as fp:
     json.dump(optimizer.max, fp)
+
+logger.log('End BO on exponential decay. Success! Here is the result:')
+logger.log(str(optimizer.max))
