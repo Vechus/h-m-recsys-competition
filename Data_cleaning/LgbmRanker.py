@@ -227,62 +227,63 @@ def create_dataset_faster(df_truth, df_article_feat, df_customer_feat):
     return df_data
 
 
-def prepare_candidates(customers_id, n_candidates = 12):
-  """
+def prepare_candidates(customers_id, n_candidates=12):
+    """
   df - basically, dataframe with customers(customers should be unique)
   """
-  prediction_dict = {}
-  dummy_list = list((df_2w['article_id'].value_counts()).index)[:n_candidates]
+    prediction_dict = {}
+    dummy_list = list((df_2w['article_id'].value_counts()).index)[:n_candidates]
 
-  for i, cust_id in tqdm(enumerate(customers_id)):
-    # comment this for validation
-    if cust_id in purchase_dict_1w:
-#         print(purchase_dict_1w[cust_id])
-        l = sorted((purchase_dict_1w[cust_id]).items(), key=lambda x: x[1], reverse=True)
-#         print(l)
-        l = [y[0] for y in l]
-        if len(l)>n_candidates:
-            s = l[:n_candidates]
+    for i, cust_id in tqdm(enumerate(customers_id)):
+        # comment this for validation
+        if cust_id in purchase_dict_1w:
+            #         print(purchase_dict_1w[cust_id])
+            l = sorted((purchase_dict_1w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            #         print(l)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_1w_new = list(set(dummy_list_1w) - set(l))
+                s = l + dummy_list_1w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_2w:
+            l = sorted((purchase_dict_2w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_2w_new = list(set(dummy_list_2w) - set(l))
+                s = l + dummy_list_2w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_3w:
+            l = sorted((purchase_dict_3w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_3w_new = list(set(dummy_list_3w) - set(l))
+                s = l + dummy_list_3w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_4w:
+            l = sorted((purchase_dict_4w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_4w_new = list(set(dummy_list_4w) - set(l))
+                s = l + dummy_list_4w_new[:(n_candidates - len(l))]
         else:
-            dummy_list_1w=list(set(dummy_list_1w)-set(l))
-            s = l+dummy_list_1w[:(n_candidates-len(l))]
-    elif cust_id in purchase_dict_2w:
-        l = sorted((purchase_dict_2w[cust_id]).items(), key=lambda x: x[1], reverse=True)
-        l = [y[0] for y in l]
-        if len(l)>n_candidates:
-            s = l[:n_candidates]
-        else:
-            dummy_list_2w=list(set(dummy_list_2w)-set(l))
-            s = l+dummy_list_2w[:(n_candidates-len(l))]
-    elif cust_id in purchase_dict_3w:
-        l = sorted((purchase_dict_3w[cust_id]).items(), key=lambda x: x[1], reverse=True)
-        l = [y[0] for y in l]
-        if len(l)>n_candidates:
-            s = l[:n_candidates]
-        else:
-            dummy_list_3w=list(set(dummy_list_3w)-set(l))
-            s = l+dummy_list_3w[:(n_candidates-len(l))]
-    elif cust_id in purchase_dict_4w:
-        l = sorted((purchase_dict_4w[cust_id]).items(), key=lambda x: x[1], reverse=True)
-        l = [y[0] for y in l]
-        if len(l)>n_candidates:
-            s = l[:n_candidates]
-        else:
-            dummy_list_4w=list(set(dummy_list_4w)-set(l))
-            s = l+dummy_list_4w[:(n_candidates-len(l))]
-    else:
-        s = dummy_list
-    prediction_dict[cust_id] = s
+            s = dummy_list
+        prediction_dict[cust_id] = s
 
-  k = list(map(lambda x: x[0], prediction_dict.items()))
-  v = list(map(lambda x: x[1], prediction_dict.items()))
-  negatives_df = pd.DataFrame({'customer_id': k, 'negatives': v})
-  negatives_df = (
-      negatives_df
-      .explode('negatives')
-      .rename(columns = {'negatives': 'article_id'})
-  )
-  return negatives_df
+    k = list(map(lambda x: x[0], prediction_dict.items()))
+    v = list(map(lambda x: x[1], prediction_dict.items()))
+    negatives_df = pd.DataFrame({'customer_id': k, 'negatives': v})
+    negatives_df = (
+        negatives_df
+            .explode('negatives')
+            .rename(columns={'negatives': 'article_id'})
+    )
+    return negatives_df
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -325,7 +326,7 @@ if __name__ == "__main__":
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
     train = transactions_df.loc[(transactions_df.t_dat <= pd.to_datetime('2020-09-15')) & (
-                transactions_df.t_dat >= pd.to_datetime('2020-06-15'))]
+            transactions_df.t_dat >= pd.to_datetime('2020-06-15'))]
     valid = transactions_df.loc[transactions_df.t_dat >= pd.to_datetime('2020-09-16')]
 
     train = (train
@@ -342,7 +343,7 @@ if __name__ == "__main__":
 
     del transactions_df
 
-    print("train shape: ",train.shape,"validation shape: ", valid.shape)
+    print("train shape: ", train.shape, "validation shape: ", valid.shape)
 
     purchase_dict_4w = {}
 
@@ -464,7 +465,7 @@ if __name__ == "__main__":
         #     eval_group= valid_baskets
     )
 
-    sample_sub = pd.read_csv(os.path.join(path,'sample_submission.csv'))
+    sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
     candidates = (
@@ -493,4 +494,4 @@ if __name__ == "__main__":
     )
     preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
 
-    preds.to_csv(os.path.join(path,'submisssion_ranking.csv'), index=False)
+    preds.to_csv(os.path.join(path, 'submisssion_ranking.csv'), index=False)
