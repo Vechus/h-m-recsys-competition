@@ -302,7 +302,7 @@ if __name__ == "__main__":
     df_trans = pd.read_csv(os.path.join(path, transaction_path), dtype={'article_id': str}, parse_dates=['t_dat'])
     df_trans_all = pd.read_parquet(os.path.join(path, "processed_transactions_train.parquet"))
     df_trans = split_transaction(df_trans, start_date_train, end_date_train)
-    df_trans = df_trans[df_trans.columns.difference(['t_dat'])]
+    # df_trans = df_trans[df_trans.columns.difference(['t_dat'])]
     df_trans = reduce_mem_usage(df_trans)
 
     df_article = import_data(path, article_path)

@@ -15,6 +15,7 @@ from collections import Counter
 
 from dotenv import load_dotenv
 from sklearn import preprocessing
+import tqdm
 
 
 def reduce_mem_usage(df):
@@ -280,6 +281,34 @@ def create_dataset_faster(df_truth, df_article_feat, df_customer_feat):
     return df_data
 
 
+
+def inference(df_submission, df_article, df_article_feat, df_customer_feat, models, cols):
+    article_candidates = []
+
+    for customer in tqdm.tqdm(df_submission["customer_id"]):
+        _df = df_article.copy()
+        _df.loc[:, "customer_id"] = customer
+        _df = create_dataset_faster(_df, df_article_feat, df_customer_feat)
+        _df = _df[cols]
+
+        preds = []
+        for _fold in range(n_fold):
+            pred = models[_fold].predict_proba(_df, num_iteration=models[_fold]._best_iteration)[:, 1]
+            preds.append(pred)
+
+        pred = np.mean(preds, axis=0)
+        df_pred = pd.DataFrame({"article_id": df_article["article_id"].tolist(), "score": pred})
+
+        df_pred = df_pred.sort_values("score", ascending=False).reset_index(drop=True)
+        df_pred = df_pred.head(12)
+        pred_str = [str(pred) for pred in df_pred["article_id"].tolist()]
+        article_candidates.append(" ".join(pred_str))
+
+    df_submission.loc[:, "prediction"] = article_candidates
+
+    return df_submission
+
+
 if __name__ == "__main__":
     load_dotenv()
     path = os.getenv('DATASET_PATH')
@@ -384,5 +413,21 @@ if __name__ == "__main__":
 
     df_fea_imp = get_feat_imp(df_data)
     print(df_fea_imp.head(30))
-    #
-    # df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
+
+    sample_submission_path = "sample_submission.csv"
+    df_submission = pd.read_csv(os.path.join(path, sample_submission_path))
+    print(df_submission.head())
+
+    df_article = import_data(article_path)
+    df_article = df_article[["article_id"]]
+
+    models = []
+    for _fold in range(n_fold):
+        with open(f"lgbm_fold_{_fold}_0501_1.joblib", "rb") as f:
+            model = joblib.load(f)
+            models.append(model)
+
+    cols = [col for col in df_data.columns if label != col]
+    df_sub = inference(df_submission.head(10), df_article, df_article_feat_train, df_customer_feat_train, models, cols)
+
+    df_sub.to_csv(os.path.join(path,"submit.csv"), index=None)
