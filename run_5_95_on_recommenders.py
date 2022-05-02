@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorMultipleURMs
 import traceback, os
 
-dataset_name = "processed/hm"
+dataset_name = "hm"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
@@ -31,12 +31,12 @@ if __name__ == '__main__':
 
     # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
 
-    dataset_object = reader.load_data('{}/{}/'.format("dataset", dataset_name))
+    dataset_object = reader.load_data('{}/{}/'.format("processed", dataset_name))
     print("Loaded dataset into memory...")
     # print(dataset_object.AVAILABLE_URM)
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset library
     URM_train = dataset_object.get_URM_from_name('URM_train')
-    URM_test = dataset_object.get_URM_from_name('URM_validation')
+    URM_test = dataset_object.get_URM_from_name('URM_test')
     for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
         print(ICM_name)
     ICM_all_list = [dataset_object.get_ICM_from_name("ICM_cleaned_section_name"),

@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout
 import traceback, os
 
-dataset_name = "hm-exponential-decay60-Validation_salesWeek-Train_restOf2019"
+dataset_name = "hm-exponential-decay20-Validation_salesWeek-Train_3months"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     dataset_object.print_statistics_global()
 
     recommender_class_list = [
-        TopPop
+        explicit_TopPop
     ]
 
     evaluator = EvaluatorHoldout(URM_test, [5, 12], exclude_seen=True)

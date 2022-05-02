@@ -3,6 +3,7 @@
 """
 
 @author: Massimo Quadrana
+@editor: explicit_TopPop Riccardo Pazzi
 """
 
 import numpy as np
@@ -57,7 +58,48 @@ class TopPop(BaseRecommender):
 
         self._print("Saving complete")
 
+class explicit_TopPop(BaseRecommender):
+    """Top Popular recommender which considers explicit values as quantities"""
 
+    RECOMMENDER_NAME = "ExplicitTopPopRecommender"
+
+    def __init__(self, URM_train):
+        super(explicit_TopPop, self).__init__(URM_train)
+
+    def fit(self):
+
+        # Use np.ediff1d and NOT a sum done over the rows as there might be values other than 0/1
+        self.item_pop = self.URM_train.tocsc().sum(axis=0)
+        self.n_items = self.URM_train.shape[1]
+
+    def _compute_item_score(self, user_id_array, items_to_compute=None):
+
+        # Create a single (n_items, ) array with the item score, then copy it for every user
+
+        if items_to_compute is not None:
+            item_pop_to_copy = - np.ones(self.n_items, dtype=np.float32) * np.inf
+            item_pop_to_copy[items_to_compute] = self.item_pop[items_to_compute].copy()
+        else:
+            item_pop_to_copy = self.item_pop.copy()
+
+        item_scores = np.array(item_pop_to_copy, dtype=np.float32).reshape((1, -1))
+        item_scores = np.repeat(item_scores, len(user_id_array), axis=0)
+
+        return item_scores
+
+    def save_model(self, folder_path, file_name=None):
+
+        if file_name is None:
+            file_name = self.RECOMMENDER_NAME
+
+        self._print("Saving model in file '{}'".format(folder_path + file_name))
+
+        data_dict_to_save = {"item_pop": self.item_pop}
+
+        dataIO = DataIO(folder_path=folder_path)
+        dataIO.save_data(file_name=file_name, data_dict_to_save=data_dict_to_save)
+
+        self._print("Saving complete")
 
 class GlobalEffects(BaseRecommender):
     """docstring for GlobalEffects"""

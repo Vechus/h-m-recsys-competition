@@ -12,7 +12,7 @@ Created on 15/04/19
 ##########                  NON PERSONALIZED                ##########
 ##########                                                  ##########
 ######################################################################
-from Recommenders.NonPersonalizedRecommender import TopPop, Random, GlobalEffects
+from Recommenders.NonPersonalizedRecommender import explicit_TopPop, TopPop, Random, GlobalEffects
 
 
 

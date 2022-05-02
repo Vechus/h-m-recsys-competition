@@ -245,6 +245,7 @@ class Dataset(object):
         try:
             URM_all = self.get_URM_all()
         except KeyError:
+            print("No URM_all has been found, trying with URM_train...")
             URM_all = self.get_URM_from_name("URM_train")
 
         n_users, n_items = URM_all.shape

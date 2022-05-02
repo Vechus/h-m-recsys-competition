@@ -14,7 +14,7 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 timestamp_column = 't_dat'
 userid_column = 'customer_id'
 itemid_column = 'article_id'
-DATASET_NAME = 'hm-big-validation'
+DATASET_NAME = 'hm-Sept-2020'
 
 
 def retrieve_timeframe_interactions(timestamp_df, validation_ts_tuple, test_ts_tuple, use_validation_set):
@@ -316,13 +316,12 @@ def split_submission_train_intervals(manager, timestamp_df, timestamp_array_trai
 
 
 if __name__ == "__main__":
-    timestamp_list = [("2018-09-20", "2018-10-1"), ("2019-09-01", "2019-10-01"),
-                      ("2020-09-01", "2020-09-23")]
+    timestamp_list = [("2019-09-01", "2019-09-30")]
     transactions = pd.read_csv('../dataset/transactions_train.csv')
     print("Loaded transaction csv...")
 
     manager = DatasetMapperManager()
-    split_train_test_multiple_intervals(manager, transactions, timestamp_list)
+    split_train_validation_multiple_intervals(manager, transactions, timestamp_list, [("2020-08-01", "2020-08-02")])
 
     # generate dataset with URM (Implicit=True)
     dataset = manager.generate_Dataset(DATASET_NAME, True)

@@ -7,8 +7,8 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 timestamp_column = 't_dat'
 userid_column = 'customer_id'
 itemid_column = 'article_id'
-DATASET_NAME = 'hm-exponential-decay60-Validation_salesWeek-Train_restOf2019'
-EXPONENTIAL_DECAY = 60
+DATASET_NAME = 'hm-exponential-decay20-Validation_salesWeek-Train_3months'
+EXPONENTIAL_DECAY = 20
 
 
 def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, timestamp_array, columns_name=None):
@@ -128,11 +128,11 @@ if __name__ == "__main__":
 
     manager = DatasetMapperManager()
     split_train_validation_multiple_intervals(manager, transactions, timestamp_list, validation_timestamp)
-    split_submission_train_intervals(manager,transactions,timestamp_list_submission)
+    # split_submission_train_intervals(manager,transactions,timestamp_list_submission)
     # generate dataset with URM (Implicit=True)
     dataset = manager.generate_Dataset(DATASET_NAME, False)
-    # print("Done! Saving dataset in processed/{}/".format(DATASET_NAME))
-    # dataset.save_data('../processed/{}/'.format(DATASET_NAME))
+    print("Done! Saving dataset in processed/{}/".format(DATASET_NAME))
+    dataset.save_data('../processed/{}/'.format(DATASET_NAME))
     print("Dataset stats:")
     dataset.print_statistics()
     dataset.print_statistics_global()
