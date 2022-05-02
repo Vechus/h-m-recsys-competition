@@ -36,7 +36,8 @@ def hyperparameter_tuning(recommender_class, recommender1, recommender2):
                                             "topK": Integer(5, 2000)}
 
     hyperparameterSearch = SearchBayesianSkopt(recommender_class,
-                                               evaluator_validation=URM_validation_explicit)
+                                               evaluator_validation=evaluator_validation)
+
 
     recommender_input_args = SearchInputRecommenderArgs(
         CONSTRUCTOR_POSITIONAL_ARGS=[URM_train_explicit, recommender1, recommender2],
