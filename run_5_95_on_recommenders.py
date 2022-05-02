@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorMultipleURMs
 import traceback, os
 
-dataset_name = "hm"
+dataset_name = "hm-exponential-decay30-Validation_salesWeek-Train_3months"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
@@ -39,27 +39,24 @@ if __name__ == '__main__':
     URM_test = dataset_object.get_URM_from_name('URM_test')
     for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
         print(ICM_name)
-    ICM_all_list = [dataset_object.get_ICM_from_name("ICM_cleaned_section_name"),
-                    dataset_object.get_ICM_from_name("ICM_cleaned_graphical_appearance_name"),
-                    dataset_object.get_ICM_from_name("ICM_garment_group_no"),
-                    dataset_object.get_ICM_from_name("ICM_perceived_colour_master_id"),
-                    dataset_object.get_ICM_from_name("ICM_cleaned_department_name")]
+    ICM_all = []
     UCM_all = []
     print(URM_train.shape)
     print(URM_test.shape)
     dataset_object.print_statistics_global()
 
     recommender_class_list = [
-        ItemKNN_CFCBF_Hybrid_Recommender
+        explicit_TopPop
     ]
 
     evaluator = EvaluatorHoldout(URM_test, [5, 12], exclude_seen=True)
 
     # Take random splits of 5% of total validation
-    test_5_95_list = split_multiple_times(URM_test, 5, 0.95, keep_only_test=True)
+    list_5_splits, list_95_splits = split_multiple_times(URM_test, 5, 0.95, keep_only_test=False)
 
     # Evaluate on all splits
-    evaluator5_95 = EvaluatorMultipleURMs(test_5_95_list, [5, 12])
+    evaluator5 = EvaluatorMultipleURMs(list_5_splits, [5, 12])
+    evaluator95 = EvaluatorMultipleURMs(list_95_splits, [5, 12])
 
     # from MatrixFactorization.PyTorch.MF_MSE_PyTorch import MF_MSE_PyTorch
 
@@ -79,23 +76,22 @@ if __name__ == '__main__':
     logFile = open(output_root_path + "result_all_algorithms.txt", "a")
 
     for recommender_class in recommender_class_list:
-        for ICM_iterator in ICM_all_list:
-            try:
+        try:
 
-                print("Algorithm: {}".format(recommender_class))
+            print("Algorithm: {}".format(recommender_class))
 
-                recommender_object = _get_instance(recommender_class, URM_train, ICM_iterator, UCM_all)
+            recommender_object = _get_instance(recommender_class, URM_train, ICM_all, UCM_all)
 
-                if isinstance(recommender_object, Incremental_Training_Early_Stopping):
-                    fit_params = {"epochs": 15, **earlystopping_keywargs}
-                else:
-                    fit_params = {}
+            if isinstance(recommender_object, Incremental_Training_Early_Stopping):
+                fit_params = {"epochs": 15, **earlystopping_keywargs}
+            else:
+                fit_params = {}
 
-                recommender_object.fit(**fit_params)
+            recommender_object.fit(**fit_params)
 
-                results_run_1, results_run_string_1 = evaluator.evaluateRecommender(recommender_object)
-                results_5_95 = evaluator5_95.evaluate_with_statistics(recommender_object)
-
+            results_run_1, results_run_string_1 = evaluator.evaluateRecommender(recommender_object)
+            results_5 = evaluator5.evaluate_with_statistics(recommender_object)
+            results_95 = evaluator95.evaluate_with_statistics(recommender_object)
 
             # recommender_object.save_model(output_root_path, file_name="temp_model.zip")
             #
@@ -108,16 +104,18 @@ if __name__ == '__main__':
             #
             # if recommender_class not in [Random]:
             #     assert results_run_1.equals(results_run_2)
+            print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
+            # print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5[12]["MAP"]))
+            print("Result recap on 5% splits: \n")
+            evaluator5.print_map_statistics()
+            # print("Algorithm: {}, results on 95 splits: {}".format(recommender_class, results_95))
+            print("Result recap on 95% splits: \n")
+            evaluator95.print_map_statistics()
+            logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
+            logFile.write("Algorithm: {}, MAP@12 results on 5% splits: {}".format(recommender_class, evaluator5.print_map_statistics()))
+            logFile.flush()
 
-                print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
-                print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
-                print("Recap of splits: \n")
-                evaluator5_95.print_map_statistics()
-                logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
-                logFile.write("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5_95))
-                logFile.flush()
-
-            except Exception as e:
-                traceback.print_exc()
-                logFile.write("Algorithm: {} - Exception: {}\n".format(recommender_class, str(e)))
-                logFile.flush()
+        except Exception as e:
+            traceback.print_exc()
+            logFile.write("Algorithm: {} - Exception: {}\n".format(recommender_class, str(e)))
+            logFile.flush()
