@@ -53,7 +53,7 @@ if __name__ == '__main__':
     gen_UCM_list(manager, customers)
 
     # generate dataset with URM (Implicit=True)
-    dataset = manager.generate_Dataset(DATASET_NAME, is_implicit=True)
+    dataset = manager.generate_Dataset(DATASET_NAME, is_implicit=False)
 
     # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
     dataset.save_data('{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/{}/'.format(DATASET_PATH, DATASET_NAME))
