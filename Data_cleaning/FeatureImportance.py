@@ -428,6 +428,6 @@ if __name__ == "__main__":
             models.append(model)
 
     cols = [col for col in df_data.columns if label != col]
-    df_sub = inference(df_submission.head(10), df_article, df_article_feat_train, df_customer_feat_train, models, cols)
+    df_sub = inference(df_submission, df_article, df_article_feat_train, df_customer_feat_train, models, cols)
 
     df_sub.to_csv(os.path.join(path,"submit.csv"), index=None)
