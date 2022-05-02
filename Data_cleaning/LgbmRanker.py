@@ -16,6 +16,11 @@ from collections import Counter
 from dotenv import load_dotenv
 from sklearn import preprocessing
 
+from lightgbm.sklearn import LGBMRanker
+from datetime import timedelta
+
+from tqdm import tqdm
+
 
 def reduce_mem_usage(df):
     """ iterate through all the columns of a dataframe and modify the data type
@@ -61,47 +66,6 @@ def import_data(path, file):
     df = pd.read_parquet(os.path.join(path, file))
     df = reduce_mem_usage(df)
     return df
-
-
-def train(df_data, categorical_features):
-    cols = [col for col in df_data.columns if label != col]
-
-    folds = StratifiedKFold(n_splits=n_fold, random_state=seed, shuffle=True)
-    es = early_stopping(20)
-    le = log_evaluation(period=100)
-    f1_scores = []
-    auc_scores = []
-
-    for fold, (train_idx, val_idx) in enumerate(folds.split(df_data, df_data[label])):
-        print(f"=====fold {fold}=======")
-        print(train_idx, val_idx)
-
-        df_train = df_data.loc[train_idx].reset_index(drop=True)
-        df_val = df_data.loc[val_idx].reset_index(drop=True)
-
-        print("train shape", df_train.shape, "test shape", df_val.shape)
-
-        model = LGBMClassifier(random_state=seed, **lgbm)
-
-        # model.set_params(**{"objective": f1_loss})
-
-        model.fit(df_train[cols], df_train[label],
-                  eval_set=(df_val[cols], df_val[label]),
-                  callbacks=[es, le],
-                  eval_metric="auc",
-                  categorical_feature=['age_class_5']
-                  )
-
-        # validation
-        val_pred = model.predict(df_val[cols])
-        val_pred = val_pred.astype(np.int64)
-        val_auc_score = roc_auc_score(df_val[label], val_pred)
-        auc_scores.append(val_auc_score)
-
-        # save_model
-        joblib.dump(model, f"lgbm_fold_{fold}_0501_1.joblib")
-
-    return auc_scores
 
 
 def get_table_feat(df, df_transactions, end_date):
@@ -176,14 +140,14 @@ def get_table_feat(df, df_transactions, end_date):
     return df
 
 
-def create_article_feat(df_article, df_transactions, end_date):
+def create_article_feat(df_article, df_transactions, end_date, path):
     df_article_feat = get_table_feat(df_article, df_transactions, end_date)
-    df_article_feat.to_pickle("C:/Users/hezhitao/Desktop/article_features.pkl")
+    df_article_feat.to_pickle(os.path.join(path, "article_features.pkl"))
 
     return df_article_feat
 
 
-def create_customer_feat(df, df_transactions, end_date):
+def create_customer_feat(df, df_transactions, end_date, path):
     df = df.drop(["rebuy_ratio_customer", "buy_with_discount_ratio_customer"], axis=1)
     df_transactions = df_transactions.query("t_dat<'" + end_date + "'")
     print("max date: ", max(df_transactions['t_dat']))
@@ -227,26 +191,9 @@ def create_customer_feat(df, df_transactions, end_date):
     df = pd.get_dummies(df, columns=customer_dummy_cols)
     df = df.drop(['age', 'age_class_10'], axis=1)
 
-    #df.to_parquet("C:/Users/hezhitao/Desktop/customer_features.parquet")
-    df.to_pickle("C:/Users/hezhitao/Desktop/customer_features.pkl")
+    df.to_pickle(os.path.join(path, "customer_features.pkl"))
 
     return df
-
-
-def get_feat_imp(df_data):
-    imps_list = []
-    cols = [col for col in df_data.columns if label != col]
-    for _fold in range(n_fold):
-        with open(f"lgbm_fold_{_fold}_0501_1.joblib", "rb") as f:
-            model = joblib.load(f)
-        imps = model.feature_importances_
-        imps_list.append(imps)
-
-    imps = np.mean(imps_list, axis=0)
-    df_imps = pd.DataFrame({"columns": df_data[cols].columns.tolist(), "feat_imp": imps})
-    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
-
-    return df_imps
 
 
 def split_transaction(df_trans, start_date=None, end_date=None):
@@ -280,23 +227,75 @@ def create_dataset_faster(df_truth, df_article_feat, df_customer_feat):
     return df_data
 
 
+def prepare_candidates(customers_id, n_candidates = 12):
+  """
+  df - basically, dataframe with customers(customers should be unique)
+  """
+  prediction_dict = {}
+  dummy_list = list((df_2w['article_id'].value_counts()).index)[:n_candidates]
+
+  for i, cust_id in tqdm(enumerate(customers_id)):
+    # comment this for validation
+    if cust_id in purchase_dict_1w:
+#         print(purchase_dict_1w[cust_id])
+        l = sorted((purchase_dict_1w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+#         print(l)
+        l = [y[0] for y in l]
+        if len(l)>n_candidates:
+            s = l[:n_candidates]
+        else:
+            dummy_list_1w=list(set(dummy_list_1w)-set(l))
+            s = l+dummy_list_1w[:(n_candidates-len(l))]
+    elif cust_id in purchase_dict_2w:
+        l = sorted((purchase_dict_2w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+        l = [y[0] for y in l]
+        if len(l)>n_candidates:
+            s = l[:n_candidates]
+        else:
+            dummy_list_2w=list(set(dummy_list_2w)-set(l))
+            s = l+dummy_list_2w[:(n_candidates-len(l))]
+    elif cust_id in purchase_dict_3w:
+        l = sorted((purchase_dict_3w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+        l = [y[0] for y in l]
+        if len(l)>n_candidates:
+            s = l[:n_candidates]
+        else:
+            dummy_list_3w=list(set(dummy_list_3w)-set(l))
+            s = l+dummy_list_3w[:(n_candidates-len(l))]
+    elif cust_id in purchase_dict_4w:
+        l = sorted((purchase_dict_4w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+        l = [y[0] for y in l]
+        if len(l)>n_candidates:
+            s = l[:n_candidates]
+        else:
+            dummy_list_4w=list(set(dummy_list_4w)-set(l))
+            s = l+dummy_list_4w[:(n_candidates-len(l))]
+    else:
+        s = dummy_list
+    prediction_dict[cust_id] = s
+
+  k = list(map(lambda x: x[0], prediction_dict.items()))
+  v = list(map(lambda x: x[1], prediction_dict.items()))
+  negatives_df = pd.DataFrame({'customer_id': k, 'negatives': v})
+  negatives_df = (
+      negatives_df
+      .explode('negatives')
+      .rename(columns = {'negatives': 'article_id'})
+  )
+  return negatives_df
+
 if __name__ == "__main__":
     load_dotenv()
     path = os.getenv('DATASET_PATH')
     transaction_path = "transactions_train.csv"
     customer_path = "processed_customers.parquet"
     article_path = "processed_articles.parquet"
-    # image_feat_path = "../input/h-and-m-swint-image-embedding/swin_tiny_patch4_window7_224_emb.csv.gz"
 
     cwd = os.getcwd()
     output_dir = path
-    # start_date = '2020-08-01'
+
     start_date_train = '2020-09-15'
     end_date_train = '2020-09-23'
-
-    n_fold = 15
-    seed = 2022
-    lgbm = {"n_estimators": 100}
 
     label = "label"
 
@@ -306,83 +305,192 @@ if __name__ == "__main__":
     df_trans = df_trans[df_trans.columns.difference(['t_dat'])]
     df_trans = reduce_mem_usage(df_trans)
 
-    df_truth = df_trans[["customer_id", "article_id"]]
-
-    df_false = df_truth.copy()
-    df_false = df_false.sample(int(df_false.shape[0]))
-    df_false.loc[:, "article_id"] = df_false["article_id"].sample(frac=1).tolist()
-
-    df_truth.loc[:, label] = 1
-    df_false.loc[:, label] = 0
-
-    df_truth = pd.concat([df_truth, df_false])
-
     df_article = import_data(path, article_path)
     df_customer = import_data(path, customer_path)
 
-    df_article_feat_train = create_article_feat(df_article, df_trans_all, end_date_train)
-    df_customer_feat_train = create_customer_feat(df_customer, df_trans_all, end_date_train)
+    df_article_feat_train = create_article_feat(df_article, df_trans_all, end_date_train, path)
+    df_customer_feat_train = create_customer_feat(df_customer, df_trans_all, end_date_train, path)
 
     del df_article
     del df_customer
     del df_trans_all
 
-    df_article_feat_train = df_article_feat_train.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
-    df_customer_feat_train = df_customer_feat_train.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
+    user_features = df_customer_feat_train
+    item_features = df_article_feat_train
+    transactions_df = df_trans
 
-    df_article_feat_train = df_article_feat_train.set_index("article_id")
-    df_customer_feat_train = df_customer_feat_train.set_index("customer_id")
+    df_4w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-08-24')].copy()
+    df_3w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-08-31')].copy()
+    df_2w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-07')].copy()
+    df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
-    df_data = create_dataset_faster(df_truth, df_article_feat_train, df_customer_feat_train)
+    train = transactions_df.loc[(transactions_df.t_dat <= pd.to_datetime('2020-09-15')) & (
+                transactions_df.t_dat >= pd.to_datetime('2020-06-15'))]
+    valid = transactions_df.loc[transactions_df.t_dat >= pd.to_datetime('2020-09-16')]
 
-    # print(df_data.head())
+    train = (train
+             .merge(user_features, on=('customer_id'))
+             .merge(item_features, on=('article_id'))
+             )
+    train.sort_values(['t_dat', 'customer_id'], inplace=True)
 
-    print("#Ture: ", df_data[df_data["label"] == 1].shape,
-          round(df_data[df_data["label"] == 1].shape[0] / df_data.shape[0], 2), "#False: ",
-          df_data[df_data["label"] == 0].shape,
-          round(df_data[df_data["label"] == 0].shape[0] / df_data.shape[0], 2))
+    valid = (valid
+             .merge(user_features, on=('customer_id'))
+             .merge(item_features, on=('article_id'))
+             )
+    valid.sort_values(['t_dat', 'customer_id'], inplace=True)
 
-    print(df_data.columns)
-    #
-    # df_total.to_pickle("{}/feature{}.pkl".format(output_dir, str(start_date)))
-    #
+    del transactions_df
 
-    categorical_features_article = ["article_id",
-                                    # 'product_code',
-                                    # 'product_type_no',
-                                    # 'graphical_appearance_no', 'colour_group_code',
-                                    # 'perceived_colour_value_id', 'perceived_colour_master_id',
-                                    # 'department_no', 'index_group_no', 'section_no',
-                                    # 'garment_group_no',
-                                    # # 'cleaned_detail_desc',
-                                    # 'on_discount', 'sale_periods_months',
-                                    # 'out_of_stock',
-                                    # 'is_for_male_or_female', 'is_for_mama',
-                                    # 'idxgrp_idx_prdtyp',
-                                    # 'product_seasonal_type',
-                                    # # 'cleaned_department_name',
-                                    # 'cleaned_product_type_name',
-                                    # 'cleaned_product_group_name', 'cleaned_graphical_appearance_name',
-                                    # 'cleaned_colour_group_name', 'cleaned_perceived_colour_value_name',
-                                    # 'cleaned_perceived_colour_master_name',  # 'cleaned_department_name',
-                                    # 'cleaned_index_name', 'cleaned_index_group_name',
-                                    # 'transaction_peak_year_month',
-                                    # 'cleaned_section_name', 'cleaned_garment_group_name'
-                                    ]
-    categorical_features_customer = [
-        "customer_id",
-        # "club_member_status", "fashion_news_frequency",
-        # "age", "postal_code", "FN", "Active"
-    ]
+    print("train shape: ",train.shape,"validation shape: ", valid.shape)
 
-    categorical_features = categorical_features_customer + categorical_features_article
+    purchase_dict_4w = {}
 
-    scores = train(df_data, categorical_features)
+    for i, x in enumerate(zip(df_4w['customer_id'], df_4w['article_id'])):
+        cust_id, art_id = x
+        if cust_id not in purchase_dict_4w:
+            purchase_dict_4w[cust_id] = {}
 
-    print("auc_scores: ", scores)
-    print("auc_mean_score: ", np.mean(scores))
+        if art_id not in purchase_dict_4w[cust_id]:
+            purchase_dict_4w[cust_id][art_id] = 0
 
-    df_fea_imp = get_feat_imp(df_data)
-    print(df_fea_imp.head(30))
-    #
-    # df_fea_imp.to_csv("{}/feature_importance_result{}.csv".format(output_dir, str(start_date)))
+        purchase_dict_4w[cust_id][art_id] += 1
+
+    dummy_list_4w = list((df_4w['article_id'].value_counts()).index)[:12]
+
+    purchase_dict_3w = {}
+
+    for i, x in enumerate(zip(df_3w['customer_id'], df_3w['article_id'])):
+        cust_id, art_id = x
+        if cust_id not in purchase_dict_3w:
+            purchase_dict_3w[cust_id] = {}
+
+        if art_id not in purchase_dict_3w[cust_id]:
+            purchase_dict_3w[cust_id][art_id] = 0
+
+        purchase_dict_3w[cust_id][art_id] += 1
+
+    dummy_list_3w = list((df_3w['article_id'].value_counts()).index)[:12]
+
+    purchase_dict_2w = {}
+
+    for i, x in enumerate(zip(df_2w['customer_id'], df_2w['article_id'])):
+        cust_id, art_id = x
+        if cust_id not in purchase_dict_2w:
+            purchase_dict_2w[cust_id] = {}
+
+        if art_id not in purchase_dict_2w[cust_id]:
+            purchase_dict_2w[cust_id][art_id] = 0
+
+        purchase_dict_2w[cust_id][art_id] += 1
+
+    dummy_list_2w = list((df_2w['article_id'].value_counts()).index)[:12]
+
+    purchase_dict_1w = {}
+
+    for i, x in enumerate(zip(df_1w['customer_id'], df_1w['article_id'])):
+        cust_id, art_id = x
+        if cust_id not in purchase_dict_1w:
+            purchase_dict_1w[cust_id] = {}
+
+        if art_id not in purchase_dict_1w[cust_id]:
+            purchase_dict_1w[cust_id][art_id] = 0
+
+        purchase_dict_1w[cust_id][art_id] += 1
+
+    dummy_list_1w = list((df_1w['article_id'].value_counts()).index)[:12]
+
+    # take only last 15 transactions
+    train['rank'] = range(len(train))
+    train = (
+        train
+            .assign(
+            rn=train.groupby(['customer_id'])['rank']
+                .rank(method='first', ascending=False))
+            .query("rn <= 15")
+            .drop(columns=['price', 'sales_channel_id'])
+            .sort_values(['t_dat', 'customer_id'])
+    )
+    train['label'] = 1
+
+    del train['rank']
+    del train['rn']
+
+    valid.sort_values(['t_dat', 'customer_id'], inplace=True)
+
+    last_dates = (
+        train
+            .groupby('customer_id')['t_dat']
+            .max()
+            .to_dict()
+    )
+
+    negatives = prepare_candidates(train['customer_id'].unique(), 15)
+    negatives['t_dat'] = negatives['customer_id'].map(last_dates)
+    trues = train[['customer_id', 'article_id', 't_dat']]
+    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id', 't_dat'], how='inner')
+    negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
+
+    negatives = (
+        negatives_new
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
+    )
+    negatives['label'] = 0
+
+    train = pd.concat([train, negatives])
+    train.sort_values(['customer_id', 't_dat'], inplace=True)
+
+    train = train.drop_duplicates()
+
+    valid_baskets = valid.groupby(['customer_id'])['article_id'].count().values
+    train_baskets = train.groupby(['customer_id'])['article_id'].count().values
+
+    ranker = LGBMRanker(
+        objective="lambdarank",
+        metric="ndcg",
+        boosting_type="dart",
+        max_depth=7,
+        n_estimators=300,
+        importance_type='gain',
+        verbose=10
+    )
+
+    ranker = ranker.fit(
+        train.drop(columns=['t_dat', 'customer_id', 'article_id', 'label']),
+        train.pop('label'),
+        group=train_baskets,
+        #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
+        #     eval_group= valid_baskets
+    )
+
+    sample_sub = pd.read_csv(os.path.join(path,'sample_submission.csv'))
+
+    candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
+    candidates = (
+        candidates
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
+    )
+
+    preds = []
+    batch_size = 1000000
+    for bucket in tqdm(range(0, len(candidates), batch_size)):
+        outputs = ranker.predict(
+            candidates.iloc[bucket: bucket + batch_size]
+                .drop(columns=['customer_id', 'article_id'])
+        )
+        preds.append(outputs)
+
+    preds = np.concatenate(preds)
+    candidates['preds'] = preds
+    preds = candidates[['customer_id', 'article_id', 'preds']]
+    preds.sort_values(['customer_id', 'preds'], ascending=False, inplace=True)
+    preds = (
+        preds
+            .groupby('customer_id')[['article_id']]
+            .aggregate(lambda x: x.tolist())
+    )
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
+
+    preds.to_csv(os.path.join(path,'submisssion_ranking.csv'), index=False)
