@@ -48,7 +48,9 @@ def BO_func(decay):
     recommender.fit()
 
     evaluator = EvaluatorHoldout(URM_validation, cutoff_list=cutoff_list, verbose=False)
-    result_map = evaluator.evaluateRecommender(recommender)['MAP'][12]
+    result_map = evaluator.evaluateRecommender(recommender)
+    print(result_map)
+    print(result_map['MAP'])
     return result_map
 
 optimizer = BayesianOptimization(
