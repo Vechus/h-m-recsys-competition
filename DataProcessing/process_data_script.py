@@ -56,7 +56,7 @@ if __name__ == '__main__':
     dataset = manager.generate_Dataset(DATASET_NAME, is_implicit=True)
 
     # PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset.save_data('{}/processed_train_20190622_20190923_val_20190923_20190930_and_exp/{}/'.format(DATASET_PATH, DATASET_NAME))
+    dataset.save_data('{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/{}/'.format(DATASET_PATH, DATASET_NAME))
 
     dataset.print_statistics()
     dataset.print_statistics_global()
