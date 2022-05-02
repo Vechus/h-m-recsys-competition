@@ -36,30 +36,21 @@ def read_data_split_and_search_hybrid():
     dataset_name = "hm"
     reader = HMDatasetReader(False)
 
-    PROCESSED_PATH = os.getenv('PROCESSED_PATH')
     dataset = reader.load_data(
-        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/hm/'.format(DATASET_PATH))
+        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
     # get URM_train, URM_test, URM_validation
-    URM_train = dataset.get_URM_from_name('URM_train')
-    # URM_test = dataset.get_URM_from_name('URM_test')
-    URM_validation = dataset.get_URM_from_name('URM_validation')
+    # URM_train = dataset.get_URM_from_name('URM_train')
+    # # URM_test = dataset.get_URM_from_name('URM_test')
+    # URM_validation = dataset.get_URM_from_name('URM_validation')
 
-    URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
-    URM_validation_explicit = dataset.get_URM_from_name('URM_validation_explicit')
+    URM_train_explicit = dataset.get_URM_from_name('URM_train')
+    URM_validation_explicit = dataset.get_URM_from_name('URM_validation')
 
-    URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
-    URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
+    # URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
+    # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
-    # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
-    # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
-
-    # output_folder_path = "result_experiments/collaborative_algorithm_URM_2019-06-22_2019-09-23/"
-    #
-    # # If directory does not exist, create
-    # if not os.path.exists(output_folder_path):
-    #     os.makedirs(output_folder_path)
 
     cutoff_list = [12]
     metric_to_optimize = "MAP"
@@ -68,21 +59,18 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    toppop_exp = TopPop(URM_train_exp)
-    toppop_exp.fit()
+    # toppop_exp = TopPop(URM_train_exp)
+    # toppop_exp.fit()
 
     toppop_explicit = TopPop(URM_train_explicit)
     toppop_explicit.fit()
 
-    toppop_normal = TopPop(URM_train)
-    toppop_normal.fit()
+    # toppop_normal = TopPop(URM_train)
+    # toppop_normal.fit()
 
-    # |  74       |  0.003248 |  0.0      |  1.006e-0 |  5.551e-1 |  1.0      |
-    # p3alpha updated 27/04/22
     p3alphaRecommender = P3alphaRecommender(URM_train_explicit)
     p3alphaRecommender.fit(topK=615, alpha=0.4603011612937017, normalize_similarity=True)
 
-    # rp3beta updated 27/04/22
     rp3betaRecommender = RP3betaRecommender(URM_train_explicit)
     rp3betaRecommender.fit(topK=694, alpha=0.3458962138661726, beta=0.07256855505772421, normalize_similarity=True)
 
