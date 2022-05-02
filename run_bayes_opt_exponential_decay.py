@@ -1,4 +1,4 @@
-from logging import Logger
+from Utils.Logger import Logger
 from bayes_opt import BayesianOptimization
 import os
 from dotenv import load_dotenv
