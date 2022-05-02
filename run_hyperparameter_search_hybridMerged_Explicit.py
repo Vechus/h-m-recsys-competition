@@ -25,6 +25,7 @@ from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
 
 import threading
 
+
 def read_data_split_and_search_hybrid():
     load_dotenv()
     DATASET_PATH = os.getenv('DATASET_PATH')
@@ -35,28 +36,21 @@ def read_data_split_and_search_hybrid():
     dataset_name = "hm"
     reader = HMDatasetReader(False)
 
-    PROCESSED_PATH = os.getenv('PROCESSED_PATH')
-    dataset = reader.load_data('{}/processed_train_20190622_20190923_val_20190923_20190930_and_exp/hm/'.format(DATASET_PATH))
+    dataset = reader.load_data(
+        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
     # get URM_train, URM_test, URM_validation
-    URM_train = dataset.get_URM_from_name('URM_train')
-    # URM_test = dataset.get_URM_from_name('URM_test')
-    URM_validation = dataset.get_URM_from_name('URM_validation')
+    # URM_train = dataset.get_URM_from_name('URM_train')
+    # # URM_test = dataset.get_URM_from_name('URM_test')
+    # URM_validation = dataset.get_URM_from_name('URM_validation')
 
-    URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
+    URM_train_explicit = dataset.get_URM_from_name('URM_train')
+    URM_validation_explicit = dataset.get_URM_from_name('URM_validation')
 
-    URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
-    URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
+    # URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
+    # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
-    # URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
-    # URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
-
-    output_folder_path = "result_experiments/collaborative_algorithm_URM_2019-06-22_2019-09-23/"
-
-    # If directory does not exist, create
-    if not os.path.exists(output_folder_path):
-        os.makedirs(output_folder_path)
 
     cutoff_list = [12]
     metric_to_optimize = "MAP"
@@ -65,89 +59,62 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    toppop_exp = TopPop(URM_train_exp)
-    toppop_exp.fit()
+    # toppop_exp = TopPop(URM_train_exp)
+    # toppop_exp.fit()
 
     toppop_explicit = TopPop(URM_train_explicit)
     toppop_explicit.fit()
 
-    toppop_normal = TopPop(URM_train)
-    toppop_normal.fit()
+    # toppop_normal = TopPop(URM_train)
+    # toppop_normal.fit()
 
-    # |  74       |  0.003248 |  0.0      |  1.006e-0 |  5.551e-1 |  1.0      |
-    # p3alpha updated 27/04/22
-    p3alphaRecommender = P3alphaRecommender(URM_train)
-    p3alphaRecommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
+    p3alphaRecommender = P3alphaRecommender(URM_train_explicit)
+    p3alphaRecommender.fit(topK=615, alpha=0.4603011612937017, normalize_similarity=True)
 
-    # rp3beta updated 27/04/22
-    rp3betaRecommender = RP3betaRecommender(URM_train)
-    rp3betaRecommender.fit(topK=626, alpha=0.21827333332714935, beta=0.0, normalize_similarity=True)
+    rp3betaRecommender = RP3betaRecommender(URM_train_explicit)
+    rp3betaRecommender.fit(topK=694, alpha=0.3458962138661726, beta=0.07256855505772421, normalize_similarity=True)
 
-    ItemKNNCBFRecommenders_ICMs = [
-        'ICM_all'
-    ]
-    ItemKNNCBFRecommenders_Filenames = [
-        'ItemKNNCBFRecommender_ICM_all_cosine.zip'
-    ]
-    ItemKNNCBFRecommenders = [
-        ItemKNNCBFRecommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in
-        ItemKNNCBFRecommenders_ICMs
-    ]
-    for i in range(len(ItemKNNCBFRecommenders_ICMs)):
-        ItemKNNCBFRecommenders[i].load_model(
-            folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
-            file_name=ItemKNNCBFRecommenders_Filenames[i])
-
-    ItemKNN_CFCBF_Hybrid_Recommenders_ICMs = [
-        'ICM_mix_top_10_accTo_CBF',
-        'ICM_mix_top_5_accTo_CBF',
-        'ICM_mix_top_15_accTo_CBF'
-    ]
-    ItemKNN_CFCBF_Hybrid_Recommenders_Filenames = [
-        'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_10_asymmetric_best_model_last.zip',
-        'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_5_tversky_best_model_last.zip',
-        'ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_15_asymmetric_best_model_last.zip'
-    ]
-    ItemKNN_CFCBF_Hybrid_Recommenders = [
-        ItemKNN_CFCBF_Hybrid_Recommender(URM_train, ICM_train=dataset.get_ICM_from_name(icm)) for icm in
-        ItemKNN_CFCBF_Hybrid_Recommenders_ICMs
-    ]
-
-    for i in range(len(ItemKNN_CFCBF_Hybrid_Recommenders_ICMs)):
-        ItemKNN_CFCBF_Hybrid_Recommenders[i].load_model(
-            folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
-            file_name=ItemKNN_CFCBF_Hybrid_Recommenders_Filenames[i])
+    itemKNN_CFCBF_Hybrid_Recommenders = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                         dataset.get_loaded_ICM_dict()[
+                                                                             "ICM_mix_top_10_accTo_CBF"])
+    itemKNN_CFCBF_Hybrid_Recommenders.fit(topK=663, shrink=900, similarity='asymmetric', normalize=True,
+                                          asymmetric_alpha=0.03882135719640912, feature_weighting='TF-IDF',
+                                          ICM_weight=0.14382621361392856)
 
     Hybrid_Recommenders_List = [
-        ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
-        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
-        [p3alphaRecommender, rp3betaRecommender],
-        ItemKNNCBFRecommenders + [rp3betaRecommender],
-        [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
-        [toppop_exp, p3alphaRecommender, rp3betaRecommender],
-        [toppop_normal, toppop_explicit, toppop_exp],
-        [p3alphaRecommender, rp3betaRecommender, toppop_explicit],
-        [ItemKNN_CFCBF_Hybrid_Recommenders[2], toppop_explicit],
-        [ ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0], toppop_explicit]
+        # ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
+        # ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        # ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender],
+        # [p3alphaRecommender, rp3betaRecommender],
+        # ItemKNNCBFRecommenders + [rp3betaRecommender],
+        # [toppop_normal, toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        # [toppop_exp, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]],
+        # [toppop_exp, p3alphaRecommender, rp3betaRecommender],
+        # [toppop_normal, toppop_explicit, toppop_exp],
+        # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
+        # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
+        # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
+        [toppop_explicit, p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
+
     ]
-    
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
 
-    hybrid_recommenders = [[GeneralizedMergedHybridRecommender(URM_train.copy(), recommenders=recommenders.copy())] for recommenders in Hybrid_Recommenders_List]
+    hybrid_recommenders = [
+        [GeneralizedMergedHybridRecommender(URM_train_explicit.copy(), recommenders=recommenders.copy())] for
+        recommenders in Hybrid_Recommenders_List]
 
-    def hybrid_parameter_search(hybrid_recommender: list): # list of GeneralizedMergedHybridRecommender
-        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation.copy()], cutoff_list=cutoff_list.copy(), verbose=False)
+    def hybrid_parameter_search(hybrid_recommender: list):  # list of GeneralizedMergedHybridRecommender
+        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation_explicit.copy()], cutoff_list=cutoff_list.copy(),
+                                                    verbose=False)
         results = []
 
         tuning_params = {}
         for i in range(len(hybrid_recommender[0].recommenders)):
-            tuning_params['hybrid{}'.format(i)] = (-1, 1)
+            tuning_params['hybrid{}'.format(i)] = (1e-2, 1)
 
         if len(hybrid_recommender[0].recommenders) == 2:
-            
+
             def BO_func(
                     hybrid0,
                     hybrid1
@@ -177,7 +144,7 @@ def read_data_split_and_search_hybrid():
                 results.append(result)
                 # print(result)
                 return sum(result) / len(result)
-        
+
         elif len(hybrid_recommender[0].recommenders) == 4:
 
             def BO_func(
@@ -232,12 +199,14 @@ def read_data_split_and_search_hybrid():
 
         import json
 
-        with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json", 'w') as json_file:
+        with open("result_experiments/hybrid_Explicit/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json",
+                  'w') as json_file:
             json.dump(optimizer.max, json_file)
 
-        with open("result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json", 'w') as json_file:
+        with open("result_experiments/hybrid_Explicit/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json",
+                  'w') as json_file:
             json.dump(results, json_file)
-    
+
     threads = []
     for recommender in hybrid_recommenders:
         threads.append(threading.Thread(target=hybrid_parameter_search, args=(recommender,)))
@@ -247,6 +216,7 @@ def read_data_split_and_search_hybrid():
 
     for thread in threads:
         thread.join()
+
 
 if __name__ == '__main__':
 

@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 def handle_best_config(bestLine):
     configure = re.search('{(.*)}', bestLine).group(1)
+    if configure == '':
+        return ''
     config = ''
     for i in configure.split(', '):
         i1 = i.split(':')[0].replace('\'', '')
@@ -91,9 +93,10 @@ if __name__ == '__main__':
     load_dotenv()
 
     RESULT_PATH = os.getenv('RESULT_PATH')
-    result_name = '/collaborative_algorithm_URM_2019-06-22_2019-09-23'
-
-    # generate_Item_result()
-    generate_CF_result()
+    # result_name = '/CF_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase'
+    result_name = '/ItemKNNCBF_CFCBF_URM_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase'
+    # result_name = '/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30'
+    generate_Item_result()
+    # generate_CF_result()
 
     print("Completed!!!")
