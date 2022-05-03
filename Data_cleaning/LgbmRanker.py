@@ -296,7 +296,7 @@ if __name__ == "__main__":
     output_dir = path
 
     start_date_train = '2020-09-15'
-    end_date_train = '2020-09-23'
+    end_date_train = '2020-09-16'
 
     label = "label"
 
@@ -326,7 +326,7 @@ if __name__ == "__main__":
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
     train = transactions_df.loc[(transactions_df.t_dat <= pd.to_datetime('2020-09-15')) & (
-            transactions_df.t_dat >= pd.to_datetime('2020-06-15'))]
+            transactions_df.t_dat >= pd.to_datetime('2020-07-15'))]
     valid = transactions_df.loc[transactions_df.t_dat >= pd.to_datetime('2020-09-16')]
 
     train = (train
