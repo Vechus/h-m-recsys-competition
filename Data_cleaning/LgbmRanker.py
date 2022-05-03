@@ -477,9 +477,10 @@ if __name__ == "__main__":
     df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
     df['prediction'] = df['prediction'].str.split(" ")
     df = df.explode('prediction').rename(columns={'prediction': 'article_id'})
-    candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
-    candidates = pd.concat([candidates, df], axis=0)
-    candidates = candidates.drop_duplicates()
+    # candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
+    # candidates = pd.concat([candidates, df], axis=0)
+    candidates = df
+    # candidates = candidates.drop_duplicates()
     candidates = (
         candidates
             .merge(user_features, on=('customer_id'))
