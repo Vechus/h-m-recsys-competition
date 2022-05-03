@@ -3,6 +3,7 @@ import threading
 import traceback
 from datetime import datetime
 
+import numpy as np
 from bayes_opt import BayesianOptimization
 from dotenv import load_dotenv
 
@@ -11,6 +12,7 @@ from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
 from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
 from Recommenders.Recommender_import_list import *
 from Utils.Logger import Logger
+import json
 
 
 def read_data_split_and_search_hybrid():
@@ -27,16 +29,29 @@ def read_data_split_and_search_hybrid():
         '{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
-    # get URM_train, URM_test, URM_validation
-    URM_train = dataset.get_URM_from_name('URM_train')
-    # URM_test = dataset.get_URM_from_name('URM_test')
-    URM_validation = dataset.get_URM_from_name('URM_validation')
+    # # get URM_train, URM_test, URM_validation
+    # URM_train = dataset.get_URM_from_name('URM_train')
+    # # URM_test = dataset.get_URM_from_name('URM_test')
+    # URM_validation = dataset.get_URM_from_name('URM_validation')
 
     URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
     URM_validation_explicit = dataset.get_URM_from_name('URM_validation_explicit')
 
-    URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
-    URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
+    # URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
+    # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
+
+    print("IS nan")
+    print(np.isnan(URM_train_explicit.data).any())
+    print(np.isnan(URM_validation_explicit.data).any())
+
+    print(np.isinf(URM_train_explicit.data).any())
+    print(np.isinf(URM_validation_explicit.data).any())
+
+    ICM = dataset.get_loaded_ICM_dict()[
+        "ICM_mix_top_10_accTo_CBF"]
+    print(np.isnan(ICM.data).any())
+
+    print(np.isinf(ICM.data).any())
 
     cutoff_list = [12]
     metric_to_optimize = "MAP"
@@ -45,14 +60,14 @@ def read_data_split_and_search_hybrid():
     n_cases = 1 
     n_random_starts = int(n_cases / 3)
 
-    toppop_exp = TopPop(URM_train_exp)
-    toppop_exp.fit()
-
-    toppop_explicit = TopPop(URM_train_explicit)
-    toppop_explicit.fit()
-
-    toppop_normal = TopPop(URM_train)
-    toppop_normal.fit()
+    # toppop_exp = TopPop(URM_train_exp)
+    # toppop_exp.fit()
+    #
+    # toppop_explicit = TopPop(URM_train_explicit)
+    # toppop_explicit.fit()
+    #
+    # toppop_normal = TopPop(URM_train)
+    # toppop_normal.fit()
 
     p3alphaRecommender = P3alphaRecommender(URM_train_explicit)
     p3alphaRecommender.fit(topK=615, alpha=0.4603011612937017, normalize_similarity=True)
@@ -81,7 +96,6 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
         [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
-
     ]
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
@@ -171,27 +185,34 @@ def read_data_split_and_search_hybrid():
                 # print(result)
                 return sum(result) / len(result)
 
-        optimizer = BayesianOptimization(
-            f=BO_func,
-            pbounds=tuning_params,
-            verbose=5,
-            random_state=5,
-        )
+        try:
+            optimizer = BayesianOptimization(
+                f=BO_func,
+                pbounds=tuning_params,
+                verbose=5,
+                random_state=5,
+            )
 
-        optimizer.maximize(
-            init_points=n_random_starts,
-            n_iter=n_cases,
-        )
+            optimizer.maximize(
+                init_points=n_random_starts,
+                n_iter=n_cases,
+            )
+        except Exception as e:
+            print(print('Exception: \n{}'.format(str(e))))
 
-        import json
+        output_folder_path = "result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME
 
-        with open("result_experiments/hybrid_Explicit/test/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json",
-                  'w') as json_file:
+        # If directory does not exist, create
+        if not os.path.exists(output_folder_path):
+            os.makedirs(output_folder_path)
+
+        with open(output_folder_path + "_all_logs.json", 'w') as json_file:
+            json.dump(results, json_file)
+
+        with open(output_folder_path + "_logs.json", 'w') as json_file:
             json.dump(optimizer.max, json_file)
 
-        with open("result_experiments/hybrid_Explicit/test/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json",
-                  'w') as json_file:
-            json.dump(results, json_file)
+
 
     threads = []
     for recommender in hybrid_recommenders:
