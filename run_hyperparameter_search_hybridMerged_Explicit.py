@@ -45,14 +45,14 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    toppop_exp = TopPop(URM_train_exp)
-    toppop_exp.fit()
-
-    toppop_explicit = TopPop(URM_train_explicit)
-    toppop_explicit.fit()
-
-    toppop_normal = TopPop(URM_train)
-    toppop_normal.fit()
+    # toppop_exp = TopPop(URM_train_exp)
+    # toppop_exp.fit()
+    #
+    # toppop_explicit = TopPop(URM_train_explicit)
+    # toppop_explicit.fit()
+    #
+    # toppop_normal = TopPop(URM_train)
+    # toppop_normal.fit()
 
     p3alphaRecommender = P3alphaRecommender(URM_train_explicit)
     p3alphaRecommender.fit(topK=615, alpha=0.4603011612937017, normalize_similarity=True)
