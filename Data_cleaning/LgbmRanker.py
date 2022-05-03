@@ -295,14 +295,9 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
 
-<<<<<<< HEAD
-    start_date_train = '2020-09-15'
-    end_date_train = '2020-09-16'
-=======
     start_date_train = '2020-07-15'
     end_date_train = '2020-09-16'
     end_date_validation = '2020-09-23'
->>>>>>> 8dfb04752548ab81b18f807e518ecff1dfe8b7ca
 
     label = "label"
 
@@ -331,16 +326,10 @@ if __name__ == "__main__":
     df_2w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-07')].copy()
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
-<<<<<<< HEAD
-    train = transactions_df.loc[(transactions_df.t_dat <= pd.to_datetime('2020-09-15')) & (
-            transactions_df.t_dat >= pd.to_datetime('2020-07-15'))]
-    valid = transactions_df.loc[transactions_df.t_dat >= pd.to_datetime('2020-09-16')]
-=======
-    train = transactions_df.loc[(transactions_df.t_dat < pd.to_datetime(end_date_train)) & (
-            transactions_df.t_dat >= pd.to_datetime(start_date_train))]
-    valid = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(end_date_train)) & (
-            transactions_df.t_dat < pd.to_datetime(end_date_validation))]
->>>>>>> 8dfb04752548ab81b18f807e518ecff1dfe8b7ca
+    train = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(start_date_train)) &
+    (transactions_df.t_dat < pd.to_datetime(end_date_train))]
+    valid = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(end_date_train)) &
+    (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
 
     train = (train
              .merge(user_features, on=('customer_id'))
