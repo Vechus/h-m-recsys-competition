@@ -484,6 +484,8 @@ if __name__ == "__main__":
     print("end")
 
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
+    print(candidates.shape)
+    print(df.shape)
 
     candidates = (
         candidates
