@@ -296,7 +296,7 @@ if __name__ == "__main__":
     output_dir = path
 
     start_date_train = '2020-08-15'
-    end_date_train = '2020-09-16'
+    end_date_train = '2020-09-23'
     end_date_validation = '2020-09-23'
 
     label = "label"
@@ -466,6 +466,12 @@ if __name__ == "__main__":
         #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
         #     eval_group= valid_baskets
     )
+
+    cols = [col for col in train.columns if col not in ['label', 't_dat', 'customer_id', 'article_id']]
+    imps = ranker.feature_importances_
+    df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
+    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
+    print(df_imps.head)
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
