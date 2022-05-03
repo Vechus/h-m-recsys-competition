@@ -228,7 +228,7 @@ def create_customer_feat(df, df_transactions, end_date):
     df = pd.get_dummies(df, columns=customer_dummy_cols)
     df = df.drop(['age', 'age_class_10'], axis=1)
 
-    #df.to_parquet("C:/Users/hezhitao/Desktop/customer_features.parquet")
+    # df.to_parquet("C:/Users/hezhitao/Desktop/customer_features.parquet")
     df.to_pickle("C:/Users/hezhitao/Desktop/customer_features.pkl")
 
     return df
@@ -279,7 +279,6 @@ def create_dataset_faster(df_truth, df_article_feat, df_customer_feat):
     df_data = df_data.drop(["customer_id", "article_id"], axis=1)
 
     return df_data
-
 
 
 def inference(df_submission, df_article, df_article_feat, df_customer_feat, models, cols):
@@ -418,7 +417,7 @@ if __name__ == "__main__":
     df_submission = pd.read_csv(os.path.join(path, sample_submission_path))
     print(df_submission.head())
 
-    df_article = import_data(article_path)
+    df_article = import_data(path, article_path)
     df_article = df_article[["article_id"]]
 
     models = []
@@ -428,6 +427,6 @@ if __name__ == "__main__":
             models.append(model)
 
     cols = [col for col in df_data.columns if label != col]
-    df_sub = inference(df_submission.head(10), df_article, df_article_feat_train, df_customer_feat_train, models, cols)
+    df_sub = inference(df_submission, df_article, df_article_feat_train, df_customer_feat_train, models, cols)
 
-    df_sub.to_csv(os.path.join(path,"submit.csv"), index=None)
+    df_sub.to_csv(os.path.join(path, "submit.csv"), index=None)
