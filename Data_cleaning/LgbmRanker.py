@@ -455,7 +455,7 @@ if __name__ == "__main__":
         verbose=10
     )
 
-    igonored_cols=['t_dat', 'customer_id', 'article_id', 'label','min_price','max_price']
+    igonored_cols = ['t_dat', 'customer_id', 'article_id', 'label', 'min_price', 'max_price']
     ranker = ranker.fit(
         train.drop(columns=igonored_cols),
         train.pop('label'),
@@ -480,8 +480,12 @@ if __name__ == "__main__":
     df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
     df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
     print(df_imps.head(30))
+<<<<<<< HEAD
     print(df_imps.to_csv(os.path.join(path,"feature_importance.csv")))
 >>>>>>> 92ae33abe6d447b989f76185824de0a0b0c600db
+=======
+    print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
+>>>>>>> fa8d43c7636b24a5187e4cb30d3fdee5a9306e0e
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
