@@ -426,7 +426,7 @@ if __name__ == "__main__":
 
     negatives = prepare_candidates(train['customer_id'].unique(), 15)
     negatives['t_dat'] = negatives['customer_id'].map(last_dates)
-    trues = train[['customer_id', 'article_id', 't_dat']]
+    trues = train[['customer_id', 'article_id']]
     df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id'], how='inner')
     negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
 
@@ -474,18 +474,28 @@ if __name__ == "__main__":
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
-    # df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
-    # df['prediction'] = df['prediction'].str.split(" ")
-    # df = df.explode('prediction').rename(columns={'prediction': 'article_id'})
+    df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
+    df['prediction'] = df['prediction'].str.split(" ")
+    df = (
+        df.explode('prediction')
+            .rename(columns={'prediction': 'article_id'})
+    )
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
-    # candidates = pd.concat([candidates, df], axis=0)
-    # candidates = df
-    # candidates = candidates.drop_duplicates()
+
     candidates = (
         candidates
             .merge(user_features, on=('customer_id'))
             .merge(item_features, on=('article_id'))
     )
+
+    df = (
+        df
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
+    )
+
+    candidates = pd.concat([candidates, df], axis=0)
+    candidates = candidates.drop_duplicates()
 
     preds = []
     batch_size = 1000000
