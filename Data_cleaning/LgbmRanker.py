@@ -529,4 +529,4 @@ if __name__ == "__main__":
             .rename(columns={'article_id': 'prediction'}), how='left')
     preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
 
-    preds.to_csv(os.path.join(path, 'submission_ranking.csv'), index=False)
+    preds.to_csv(os.path.join(path, 'submission_ranking_0504.csv'), index=False)
