@@ -204,6 +204,7 @@ def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, ti
 def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation,
                                               URM_train='URM_train', URM_validation='URM_validation'):
     # Retrieve which users fall in the wanted list of time frames
+    timestamp_df = timestamp_df.copy()
     print("Preprocessing dataframe...")
     timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
 
@@ -237,7 +238,6 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     manager.add_URM(validation_interactions, URM_validation)
 
 
-# TODO
 def split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manager, timestamp_df, timestamp_array_train,
                                                                           timestamp_array_validation,
                                                                           URM_train='URM_train',
