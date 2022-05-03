@@ -64,7 +64,7 @@ def import_data(path, file):
     return df
 
 
-def train(df_data, categorical_features):
+def train(df_data):
     cols = [col for col in df_data.columns if label != col]
 
     folds = StratifiedKFold(n_splits=n_fold, random_state=seed, shuffle=True)
@@ -321,6 +321,7 @@ if __name__ == "__main__":
     # start_date = '2020-08-01'
     start_date_train = '2020-09-15'
     end_date_train = '2020-09-23'
+    end_date_validation = '2020-09-23'
 
     n_fold = 15
     seed = 2022
@@ -330,26 +331,45 @@ if __name__ == "__main__":
 
     df_trans = pd.read_csv(os.path.join(path, transaction_path), dtype={'article_id': str}, parse_dates=['t_dat'])
     df_trans_all = pd.read_parquet(os.path.join(path, "processed_transactions_train.parquet"))
-    df_trans = split_transaction(df_trans, start_date_train, end_date_train)
-    df_trans = df_trans[df_trans.columns.difference(['t_dat'])]
-    df_trans = reduce_mem_usage(df_trans)
+    df_trans_train = split_transaction(df_trans, start_date_train, end_date_train)
+    df_trans_train = df_trans_train[df_trans_train.columns.difference(['t_dat'])]
+    df_trans_train = reduce_mem_usage(df_trans_train)
 
-    df_truth = df_trans[["customer_id", "article_id"]]
+    df_truth_train = df_trans_train[["customer_id", "article_id"]]
 
-    df_false = df_truth.copy()
-    df_false = df_false.sample(int(df_false.shape[0]))
-    df_false.loc[:, "article_id"] = df_false["article_id"].sample(frac=1).tolist()
+    df_false_train = df_truth_train.copy()
+    df_false_train = df_false_train.sample(int(df_false_train.shape[0]))
+    df_false_train.loc[:, "article_id"] = df_false_train["article_id"].sample(frac=1).tolist()
 
-    df_truth.loc[:, label] = 1
-    df_false.loc[:, label] = 0
+    df_truth_train.loc[:, label] = 1
+    df_false_train.loc[:, label] = 0
 
-    df_truth = pd.concat([df_truth, df_false])
+    df_truth_train = pd.concat([df_truth_train, df_false_train])
+
+    df_trans_validation = split_transaction(df_trans, end_date_train, end_date_validation)
+    df_trans_validation = df_trans_validation[df_trans_validation.columns.difference(['t_dat'])]
+    df_trans_validation = reduce_mem_usage(df_trans_validation)
+
+    df_truth_validation = df_trans_validation[["customer_id", "article_id"]]
+
+    df_false_validation = df_truth_validation.copy()
+    df_false_validation = df_false_validation.sample(int(df_false_validation.shape[0]))
+    df_false_validation.loc[:, "article_id"] = df_false_validation["article_id"].sample(frac=1).tolist()
+
+    df_truth_validation.loc[:, label] = 1
+    df_false_validation.loc[:, label] = 0
+
+    df_truth_validation = pd.concat([df_truth_validation, df_false_validation])
+
 
     df_article = import_data(path, article_path)
     df_customer = import_data(path, customer_path)
 
     df_article_feat_train = create_article_feat(df_article, df_trans_all, end_date_train)
     df_customer_feat_train = create_customer_feat(df_customer, df_trans_all, end_date_train)
+
+    df_article_feat_validation = create_article_feat(df_article, df_trans_all, end_date_validation)
+    df_customer_feat_validation = create_customer_feat(df_customer, df_trans_all, end_date_validation)
 
     del df_article
     del df_customer
@@ -361,56 +381,35 @@ if __name__ == "__main__":
     df_article_feat_train = df_article_feat_train.set_index("article_id")
     df_customer_feat_train = df_customer_feat_train.set_index("customer_id")
 
-    df_data = create_dataset_faster(df_truth, df_article_feat_train, df_customer_feat_train)
+    df_data_train = create_dataset_faster(df_truth_train, df_article_feat_train, df_customer_feat_train)
 
     # print(df_data.head())
 
-    print("#Ture: ", df_data[df_data["label"] == 1].shape,
-          round(df_data[df_data["label"] == 1].shape[0] / df_data.shape[0], 2), "#False: ",
-          df_data[df_data["label"] == 0].shape,
-          round(df_data[df_data["label"] == 0].shape[0] / df_data.shape[0], 2))
+    print("#Ture: ", df_data_train[df_data_train["label"] == 1].shape,
+          round(df_data_train[df_data_train["label"] == 1].shape[0] / df_data_train.shape[0], 2), "#False: ",
+          df_data_train[df_data_train["label"] == 0].shape,
+          round(df_data_train[df_data_train["label"] == 0].shape[0] / df_data_train.shape[0], 2))
 
-    print(df_data.columns)
+    print(df_data_train.columns)
     #
     # df_total.to_pickle("{}/feature{}.pkl".format(output_dir, str(start_date)))
     #
 
-    categorical_features_article = ["article_id",
-                                    # 'product_code',
-                                    # 'product_type_no',
-                                    # 'graphical_appearance_no', 'colour_group_code',
-                                    # 'perceived_colour_value_id', 'perceived_colour_master_id',
-                                    # 'department_no', 'index_group_no', 'section_no',
-                                    # 'garment_group_no',
-                                    # # 'cleaned_detail_desc',
-                                    # 'on_discount', 'sale_periods_months',
-                                    # 'out_of_stock',
-                                    # 'is_for_male_or_female', 'is_for_mama',
-                                    # 'idxgrp_idx_prdtyp',
-                                    # 'product_seasonal_type',
-                                    # # 'cleaned_department_name',
-                                    # 'cleaned_product_type_name',
-                                    # 'cleaned_product_group_name', 'cleaned_graphical_appearance_name',
-                                    # 'cleaned_colour_group_name', 'cleaned_perceived_colour_value_name',
-                                    # 'cleaned_perceived_colour_master_name',  # 'cleaned_department_name',
-                                    # 'cleaned_index_name', 'cleaned_index_group_name',
-                                    # 'transaction_peak_year_month',
-                                    # 'cleaned_section_name', 'cleaned_garment_group_name'
-                                    ]
-    categorical_features_customer = [
-        "customer_id",
-        # "club_member_status", "fashion_news_frequency",
-        # "age", "postal_code", "FN", "Active"
-    ]
+    df_article_feat_validation = df_article_feat_validation.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
+    df_customer_feat_validation = df_customer_feat_validation.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
 
-    categorical_features = categorical_features_customer + categorical_features_article
+    df_article_feat_validation = df_article_feat_validation.set_index("article_id")
+    df_customer_feat_validation = df_customer_feat_validation.set_index("customer_id")
 
-    scores = train(df_data, categorical_features)
+    df_data_validation = create_dataset_faster(df_truth_validation, df_article_feat_validation, df_customer_feat_validation)
+
+
+    scores = train(df_data_train)
 
     print("auc_scores: ", scores)
     print("auc_mean_score: ", np.mean(scores))
 
-    df_fea_imp = get_feat_imp(df_data)
+    df_fea_imp = get_feat_imp(df_data_train)
     print(df_fea_imp.head(30))
 
     sample_submission_path = "sample_submission.csv"
@@ -426,7 +425,7 @@ if __name__ == "__main__":
             model = joblib.load(f)
             models.append(model)
 
-    cols = [col for col in df_data.columns if label != col]
+    cols = [col for col in df_data_train.columns if label != col]
     df_sub = inference(df_submission, df_article, df_article_feat_train, df_customer_feat_train, models, cols)
 
     df_sub.to_csv(os.path.join(path, "submit.csv"), index=None)
