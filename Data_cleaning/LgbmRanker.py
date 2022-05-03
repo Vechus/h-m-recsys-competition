@@ -455,14 +455,16 @@ if __name__ == "__main__":
         verbose=10
     )
 
+    igonored_cols=['t_dat', 'customer_id', 'article_id', 'label','min_price','max_price']
     ranker = ranker.fit(
-        train.drop(columns=['t_dat', 'customer_id', 'article_id', 'label','min_price','max_price']),
+        train.drop(columns=igonored_cols),
         train.pop('label'),
         group=train_baskets,
         #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
         #     eval_group= valid_baskets
     )
 
+<<<<<<< HEAD
     cols = [col for col in train.columns if col not in ['label', 't_dat', 'customer_id', 'article_id']]
 <<<<<<< HEAD
     imps = ranker.feature_importances_
@@ -470,6 +472,9 @@ if __name__ == "__main__":
     df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
     print(df_imps.head)
 =======
+=======
+    cols = [col for col in train.columns if col not in igonored_cols]
+>>>>>>> 15d44647be890db28b8b179fbec10de822ed3860
 
     imps = ranker.feature_importances_
     df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
