@@ -476,7 +476,7 @@ if __name__ == "__main__":
 
     df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
     print("start")
-    df['prediction'] = df.apply(lambda x: x.prediction.str.split(" "), axis=1)
+    df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
     df = (
         df.explode('prediction')
             .rename(columns={'prediction': 'article_id'})
