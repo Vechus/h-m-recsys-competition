@@ -464,28 +464,13 @@ if __name__ == "__main__":
         #     eval_group= valid_baskets
     )
 
-<<<<<<< HEAD
-    cols = [col for col in train.columns if col not in ['label', 't_dat', 'customer_id', 'article_id']]
-<<<<<<< HEAD
-    imps = ranker.feature_importances_
-    df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
-    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
-    print(df_imps.head)
-=======
-=======
     cols = [col for col in train.columns if col not in igonored_cols]
->>>>>>> 15d44647be890db28b8b179fbec10de822ed3860
 
     imps = ranker.feature_importances_
     df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
     df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
     print(df_imps.head(30))
-<<<<<<< HEAD
     print(df_imps.to_csv(os.path.join(path,"feature_importance.csv")))
->>>>>>> 92ae33abe6d447b989f76185824de0a0b0c600db
-=======
-    print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
->>>>>>> fa8d43c7636b24a5187e4cb30d3fdee5a9306e0e
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 

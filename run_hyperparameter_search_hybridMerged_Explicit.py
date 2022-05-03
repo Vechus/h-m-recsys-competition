@@ -42,7 +42,7 @@ def read_data_split_and_search_hybrid():
     metric_to_optimize = "MAP"
     cutoff_to_optimize = 12
 
-    n_cases = 50
+    n_cases = 1 
     n_random_starts = int(n_cases / 3)
 
     toppop_exp = TopPop(URM_train_exp)
@@ -80,7 +80,7 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
-        [toppop_explicit, p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
+        [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
 
     ]
 
@@ -185,11 +185,11 @@ def read_data_split_and_search_hybrid():
 
         import json
 
-        with open("result_experiments/hybrid_Explicit/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json",
+        with open("result_experiments/hybrid_Explicit/test/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json",
                   'w') as json_file:
             json.dump(optimizer.max, json_file)
 
-        with open("result_experiments/hybrid_Explicit/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json",
+        with open("result_experiments/hybrid_Explicit/test/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json",
                   'w') as json_file:
             json.dump(results, json_file)
 
