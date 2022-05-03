@@ -150,7 +150,7 @@ def create_article_feat(df_article, df_transactions, end_date, path):
 def create_customer_feat(df, df_transactions, end_date, path):
     df = df.drop(["rebuy_ratio_customer", "buy_with_discount_ratio_customer"], axis=1)
     df_transactions = df_transactions.query("t_dat<'" + end_date + "'")
-    print("max date: ", max(df_transactions['t_dat']))
+    # print("max date: ", max(df_transactions['t_dat']))
     df_customer_group = df_transactions.groupby(['customer_id'])
     list2 = []
     for each in df_customer_group:
@@ -182,14 +182,9 @@ def create_customer_feat(df, df_transactions, end_date, path):
     customer_dummy_cols = ["club_member_status", "fashion_news_frequency"]
 
     df = df.drop(customer_drop_cols, axis=1)
-    #     df.loc[:, "FN"] = df["FN"].fillna(0)
-    #     df.loc[:, "Active"] = df["Active"].fillna(0)
-    #     df.loc[:, "club_member_status"] = df["club_member_status"].fillna("NONE")
-    #     df.loc[:, "fashion_news_frequency"] = df["fashion_news_frequency"].fillna("NONE")
-    #     df.loc[:, "age"] = df["age"].fillna(0)
     df.loc[:, "age"] = np.log1p(df["age"])
     df = pd.get_dummies(df, columns=customer_dummy_cols)
-    df = df.drop(['age', 'age_class_10'], axis=1)
+    # df = df.drop(['age', 'age_class_10'], axis=1)
 
     df.to_pickle(os.path.join(path, "customer_features.pkl"))
 
@@ -318,6 +313,7 @@ if __name__ == "__main__":
     del df_trans_all
 
     user_features = df_customer_feat_train
+    print(user_features)
     item_features = df_article_feat_train
     transactions_df = df_trans
 
@@ -327,9 +323,9 @@ if __name__ == "__main__":
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
     train = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(start_date_train)) &
-    (transactions_df.t_dat < pd.to_datetime(end_date_train))]
+                                (transactions_df.t_dat < pd.to_datetime(end_date_train))]
     valid = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(end_date_train)) &
-    (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
+                                (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
 
     train = (train
              .merge(user_features, on=('customer_id'))
@@ -460,7 +456,7 @@ if __name__ == "__main__":
     )
 
     ranker = ranker.fit(
-        train.drop(columns=['t_dat', 'customer_id', 'article_id', 'label']),
+        train.drop(columns=['t_dat', 'customer_id', 'article_id', 'label','min_price','max_price']),
         train.pop('label'),
         group=train_baskets,
         #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
@@ -468,14 +464,28 @@ if __name__ == "__main__":
     )
 
     cols = [col for col in train.columns if col not in ['label', 't_dat', 'customer_id', 'article_id']]
+<<<<<<< HEAD
     imps = ranker.feature_importances_
     df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
     df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
     print(df_imps.head)
+=======
+
+    imps = ranker.feature_importances_
+    df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
+    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
+    print(df_imps.head(30))
+    print(df_imps.to_csv(os.path.join(path,"feature_importance.csv")))
+>>>>>>> 92ae33abe6d447b989f76185824de0a0b0c600db
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
+    df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
+    df['prediction'] = df['prediction'].str.split(" ")
+    df = df.explode('prediction').rename(columns={'prediction': 'article_id'})
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
+    candidates = pd.concat([candidates, df], axis=0)
+    candidates = candidates.drop_duplicates()
     candidates = (
         candidates
             .merge(user_features, on=('customer_id'))
@@ -500,7 +510,7 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(k) for k in x]))
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(v) for k, v in enumerate(x) if k < 12]))
 
     preds = sample_sub[['customer_id']].merge(
         preds
