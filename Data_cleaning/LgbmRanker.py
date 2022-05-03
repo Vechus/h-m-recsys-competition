@@ -494,12 +494,12 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(k) for k in x]))
 
     preds = sample_sub[['customer_id']].merge(
         preds
             .reset_index()
             .rename(columns={'article_id': 'prediction'}), how='left')
-    preds['prediction'].fillna(' '.join(['0' + str(art) for art in dummy_list_2w]), inplace=True)
+    preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
 
     preds.to_csv(os.path.join(path, 'submission_ranking.csv'), index=False)
