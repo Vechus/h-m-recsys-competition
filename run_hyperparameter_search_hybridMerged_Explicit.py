@@ -24,20 +24,19 @@ def read_data_split_and_search_hybrid():
     reader = HMDatasetReader(False)
 
     dataset = reader.load_data(
-        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/hm/'.format(DATASET_PATH))
+        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
     # get URM_train, URM_test, URM_validation
-    # URM_train = dataset.get_URM_from_name('URM_train')
-    # # URM_test = dataset.get_URM_from_name('URM_test')
-    # URM_validation = dataset.get_URM_from_name('URM_validation')
+    URM_train = dataset.get_URM_from_name('URM_train')
+    # URM_test = dataset.get_URM_from_name('URM_test')
+    URM_validation = dataset.get_URM_from_name('URM_validation')
 
-    URM_train_explicit = dataset.get_URM_from_name('URM_train')
-    URM_validation_explicit = dataset.get_URM_from_name('URM_validation')
+    URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
+    URM_validation_explicit = dataset.get_URM_from_name('URM_validation_explicit')
 
-    # URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
-    # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
-
+    URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
+    URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
     cutoff_list = [12]
     metric_to_optimize = "MAP"
@@ -48,10 +47,10 @@ def read_data_split_and_search_hybrid():
 
     # toppop_exp = TopPop(URM_train_exp)
     # toppop_exp.fit()
-
-    toppop_explicit = TopPop(URM_train_explicit)
-    toppop_explicit.fit()
-
+    #
+    # toppop_explicit = TopPop(URM_train_explicit)
+    # toppop_explicit.fit()
+    #
     # toppop_normal = TopPop(URM_train)
     # toppop_normal.fit()
 
@@ -81,7 +80,7 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
-        [toppop_explicit, p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
+        [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
 
     ]
 
