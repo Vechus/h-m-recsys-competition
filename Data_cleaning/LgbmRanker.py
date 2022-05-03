@@ -455,16 +455,16 @@ if __name__ == "__main__":
         verbose=10
     )
 
-    ignored_cols = ['t_dat', 'customer_id', 'article_id', 'label', 'min_price', 'max_price']
+    igonored_cols = ['t_dat', 'customer_id', 'article_id', 'label', 'min_price', 'max_price','median_price']
     ranker = ranker.fit(
-        train.drop(columns=ignored_cols),
+        train.drop(columns=igonored_cols),
         train.pop('label'),
         group=train_baskets,
         #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
         #     eval_group= valid_baskets
     )
 
-    cols = [col for col in train.columns if col not in ignored_cols]
+    cols = [col for col in train.columns if col not in igonored_cols]
 
     imps = ranker.feature_importances_
     df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
@@ -502,7 +502,7 @@ if __name__ == "__main__":
     for bucket in tqdm(range(0, len(candidates), batch_size)):
         outputs = ranker.predict(
             candidates.iloc[bucket: bucket + batch_size]
-                .drop(columns=ignored_cols)
+                .drop(columns=['customer_id', 'article_id', 'min_price', 'max_price', 'median_price'])
         )
         preds.append(outputs)
 
