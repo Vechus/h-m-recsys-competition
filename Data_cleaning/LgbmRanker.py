@@ -295,7 +295,7 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
 
-    start_date_train = '2020-07-15'
+    start_date_train = '2020-08-15'
     end_date_train = '2020-09-16'
     end_date_validation = '2020-09-23'
 
