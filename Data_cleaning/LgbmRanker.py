@@ -455,7 +455,7 @@ if __name__ == "__main__":
         verbose=10
     )
 
-    igonored_cols = ['t_dat', 'customer_id', 'article_id', 'label', 'min_price', 'max_price','median_price']
+    igonored_cols = ['t_dat', 'customer_id', 'article_id', 'label']
     ranker = ranker.fit(
         train.drop(columns=igonored_cols),
         train.pop('label'),
@@ -474,12 +474,15 @@ if __name__ == "__main__":
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
-    # df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
-    # df['prediction'] = df['prediction'].str.split(" ")
-    # df = (
-    #     df.explode('prediction')
-    #         .rename(columns={'prediction': 'article_id'})
-    # )
+    df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
+    print("start")
+    df['prediction'] = df.apply(df.prediction.str.split(" "), axis=1)
+    df = (
+        df.explode('prediction')
+            .rename(columns={'prediction': 'article_id'})
+    )
+    print("end")
+
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
 
     candidates = (
@@ -488,21 +491,21 @@ if __name__ == "__main__":
             .merge(item_features, on=('article_id'))
     )
 
-    # df = (
-    #     df
-    #         .merge(user_features, on=('customer_id'))
-    #         .merge(item_features, on=('article_id'))
-    # )
-    #
-    # candidates = pd.concat([candidates, df], axis=0)
-    # candidates = candidates.drop_duplicates()
+    df = (
+        df
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
+    )
+
+    candidates = pd.concat([candidates, df], axis=0)
+    candidates = candidates.drop_duplicates()
 
     preds = []
     batch_size = 1000000
     for bucket in tqdm(range(0, len(candidates), batch_size)):
         outputs = ranker.predict(
             candidates.iloc[bucket: bucket + batch_size]
-                .drop(columns=['customer_id', 'article_id', 'min_price', 'max_price', 'median_price'])
+                .drop(columns=['customer_id', 'article_id'])
         )
         preds.append(outputs)
 
