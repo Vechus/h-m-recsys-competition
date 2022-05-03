@@ -295,8 +295,9 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
 
-    start_date_train = '2020-09-15'
-    end_date_train = '2020-09-23'
+    start_date_train = '2020-07-15'
+    end_date_train = '2020-09-16'
+    end_date_validation = '2020-09-23'
 
     label = "label"
 
@@ -325,9 +326,10 @@ if __name__ == "__main__":
     df_2w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-07')].copy()
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
-    train = transactions_df.loc[(transactions_df.t_dat <= pd.to_datetime('2020-09-15')) & (
-            transactions_df.t_dat >= pd.to_datetime('2020-06-15'))]
-    valid = transactions_df.loc[transactions_df.t_dat >= pd.to_datetime('2020-09-16')]
+    train = transactions_df.loc[(transactions_df.t_dat < pd.to_datetime(end_date_train)) & (
+            transactions_df.t_dat >= pd.to_datetime(start_date_train))]
+    valid = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(end_date_train)) & (
+            transactions_df.t_dat < pd.to_datetime(end_date_validation))]
 
     train = (train
              .merge(user_features, on=('customer_id'))
@@ -442,7 +444,7 @@ if __name__ == "__main__":
     train = pd.concat([train, negatives])
     train.sort_values(['customer_id', 't_dat'], inplace=True)
 
-    train = train.drop_duplicates()
+    # train = train.drop_duplicates()
 
     valid_baskets = valid.groupby(['customer_id'])['article_id'].count().values
     train_baskets = train.groupby(['customer_id'])['article_id'].count().values
@@ -494,4 +496,10 @@ if __name__ == "__main__":
     )
     preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
 
-    preds.to_csv(os.path.join(path, 'submisssion_ranking.csv'), index=False)
+    preds = sample_sub[['customer_id']].merge(
+        preds
+            .reset_index()
+            .rename(columns={'article_id': 'prediction'}), how='left')
+    preds['prediction'].fillna(' '.join(['0' + str(art) for art in dummy_list_2w]), inplace=True)
+
+    preds.to_csv(os.path.join(path, 'submission_ranking.csv'), index=False)
