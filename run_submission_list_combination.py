@@ -26,12 +26,9 @@ def parallelize_dataframe(func):
     num_partitions = num_cores
     df_split = np.array_split(csv_b, num_partitions)
     pool = multiprocessing.Pool(num_cores)
-    df = pd.concat(pool.map(func, df_split))
+    pool.map(func, df_split)
     pool.close()
     pool.join()
-    return df
-
-
 
 
 if __name__ == '__main__':
