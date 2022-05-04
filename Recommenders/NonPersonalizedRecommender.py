@@ -3,10 +3,13 @@
 """
 
 @author: Massimo Quadrana
-@editor: explicit_TopPop Riccardo Pazzi
+@additions: explicit_TopPop, ExplicitTopPopAgeClustered Riccardo Pazzi
 """
 
 import numpy as np
+import pandas as pd
+
+from Data_manager.HMDatasetReader import HMDatasetReader
 from Recommenders.BaseRecommender import BaseRecommender
 from Recommenders.Recommender_utils import check_matrix
 from Recommenders.DataIO import DataIO
@@ -20,31 +23,28 @@ class TopPop(BaseRecommender):
     def __init__(self, URM_train):
         super(TopPop, self).__init__(URM_train)
 
-
     def fit(self):
 
         # Use np.ediff1d and NOT a sum done over the rows as there might be values other than 0/1
         self.item_pop = np.ediff1d(self.URM_train.tocsc().indptr)
         self.n_items = self.URM_train.shape[1]
 
-
-    def _compute_item_score(self, user_id_array, items_to_compute = None):
+    def _compute_item_score(self, user_id_array, items_to_compute=None):
 
         # Create a single (n_items, ) array with the item score, then copy it for every user
 
         if items_to_compute is not None:
-            item_pop_to_copy = - np.ones(self.n_items, dtype=np.float32)*np.inf
+            item_pop_to_copy = - np.ones(self.n_items, dtype=np.float32) * np.inf
             item_pop_to_copy[items_to_compute] = self.item_pop[items_to_compute].copy()
         else:
             item_pop_to_copy = self.item_pop.copy()
 
         item_scores = np.array(item_pop_to_copy, dtype=np.float32).reshape((1, -1))
-        item_scores = np.repeat(item_scores, len(user_id_array), axis = 0)
+        item_scores = np.repeat(item_scores, len(user_id_array), axis=0)
 
         return item_scores
 
-
-    def save_model(self, folder_path, file_name = None):
+    def save_model(self, folder_path, file_name=None):
 
         if file_name is None:
             file_name = self.RECOMMENDER_NAME
@@ -54,9 +54,10 @@ class TopPop(BaseRecommender):
         data_dict_to_save = {"item_pop": self.item_pop}
 
         dataIO = DataIO(folder_path=folder_path)
-        dataIO.save_data(file_name=file_name, data_dict_to_save = data_dict_to_save)
+        dataIO.save_data(file_name=file_name, data_dict_to_save=data_dict_to_save)
 
         self._print("Saving complete")
+
 
 class explicit_TopPop(BaseRecommender):
     """Top Popular recommender which considers explicit values as quantities"""
@@ -101,6 +102,75 @@ class explicit_TopPop(BaseRecommender):
 
         self._print("Saving complete")
 
+
+class ExplicitTopPopAgeClustered(BaseRecommender):
+    """
+    Top
+    Popular
+    recommender
+    which
+    considers
+    explicit
+    values as quantities
+    """
+
+    RECOMMENDER_NAME = "ExplicitClusteredTopPopRecommender"
+
+    def __init__(self, URM_list, dataset_object, age_cluster_mapper):
+        super(ExplicitTopPopAgeClustered, self).__init__(URM_list[0])
+        self.user_original_ID_to_index_mapper = dataset_object.get_user_original_ID_to_index_mapper()
+        self.URM_list = URM_list
+        self.item_pop = []
+        self.n_items = []
+        self.age_cluster_mapper = age_cluster_mapper  # HM User ID -> age_group
+
+    def fit(self):
+        # Use np.ediff1d and NOT a sum done over the rows as there might be values other than 0/1
+        for URM_train in self.URM_list:
+            self.item_pop.append(URM_train.tocsc().sum(axis=0))
+            self.n_items.append(URM_train.shape[1])
+
+    def _compute_item_score(self, user_id_array, items_to_compute=None):
+        initialized = False
+        mapper_inv = {value: key for key, value in self.user_original_ID_to_index_mapper.items()}
+        # First I check mappings and see which group user_id belongs to
+        for user_id in user_id_array:
+            HM_user_id = mapper_inv[user_id]
+            age_cluster_number = int(self.age_cluster_mapper.loc[HM_user_id]["age_cluster"])
+            age_cluster_index = age_cluster_number - 1
+            # The age cluster number starts from 1
+
+            if items_to_compute is not None:
+                item_pop_to_copy = - np.ones(self.n_items, dtype=np.float32) * np.inf
+                item_pop_to_copy[items_to_compute] = self.item_pop[age_cluster_index][items_to_compute].copy()
+            else:
+                item_pop_to_copy = self.item_pop[age_cluster_index].copy()
+
+            item_scores = np.array(item_pop_to_copy, dtype=np.float32).reshape((1, -1))
+            if not initialized:
+                total_scores = item_scores
+                initialized = True
+            else:
+                total_scores = np.vstack((total_scores, item_scores))
+        # item_scores = np.repeat(item_scores, len(user_id_array), axis=0)
+
+        return total_scores
+
+    def save_model(self, folder_path, file_name=None):
+
+        if file_name is None:
+            file_name = self.RECOMMENDER_NAME
+
+        self._print("Saving model in file '{}'".format(folder_path + file_name))
+
+        data_dict_to_save = {"item_pop": self.item_pop}
+
+        dataIO = DataIO(folder_path=folder_path)
+        dataIO.save_data(file_name=file_name, data_dict_to_save=data_dict_to_save)
+
+        self._print("Saving complete")
+
+
 class GlobalEffects(BaseRecommender):
     """docstring for GlobalEffects"""
 
@@ -109,13 +179,11 @@ class GlobalEffects(BaseRecommender):
     def __init__(self, URM_train):
         super(GlobalEffects, self).__init__(URM_train)
 
-
     def fit(self, lambda_user=10, lambda_item=25):
 
         self.lambda_user = lambda_user
         self.lambda_item = lambda_item
         self.n_items = self.URM_train.shape[1]
-
 
         # convert to csc matrix for faster column-wise sum
         self.URM_train = check_matrix(self.URM_train, 'csc', dtype=np.float32)
@@ -153,28 +221,26 @@ class GlobalEffects(BaseRecommender):
 
         # 4) precompute the item ranking by using the item bias only
         # the global average and user bias won't change the ranking, so there is no need to use them
-        #self.item_ranking = np.argsort(self.bi)[::-1]
+        # self.item_ranking = np.argsort(self.bi)[::-1]
 
         self.URM_train = check_matrix(self.URM_train, 'csr', dtype=np.float32)
-
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
 
         # Create a single (n_items, ) array with the item score, then copy it for every user
 
         if items_to_compute is not None:
-            item_bias_to_copy = - np.ones(self.n_items, dtype=np.float32)*np.inf
+            item_bias_to_copy = - np.ones(self.n_items, dtype=np.float32) * np.inf
             item_bias_to_copy[items_to_compute] = self.item_bias[items_to_compute].copy()
         else:
             item_bias_to_copy = self.item_bias.copy()
 
         item_scores = np.array(item_bias_to_copy, dtype=np.float).reshape((1, -1))
-        item_scores = np.repeat(item_scores, len(user_id_array), axis = 0)
+        item_scores = np.repeat(item_scores, len(user_id_array), axis=0)
 
         return item_scores
 
-
-    def save_model(self, folder_path, file_name = None):
+    def save_model(self, folder_path, file_name=None):
 
         if file_name is None:
             file_name = self.RECOMMENDER_NAME
@@ -184,10 +250,9 @@ class GlobalEffects(BaseRecommender):
         data_dict_to_save = {"item_bias": self.item_bias}
 
         dataIO = DataIO(folder_path=folder_path)
-        dataIO.save_data(file_name=file_name, data_dict_to_save = data_dict_to_save)
+        dataIO.save_data(file_name=file_name, data_dict_to_save=data_dict_to_save)
 
         self._print("Saving complete")
-
 
 
 class Random(BaseRecommender):
@@ -198,18 +263,16 @@ class Random(BaseRecommender):
     def __init__(self, URM_train):
         super(Random, self).__init__(URM_train)
 
-
     def fit(self, random_seed=42):
         np.random.seed(random_seed)
         self.n_items = self.URM_train.shape[1]
 
-
-    def _compute_item_score(self, user_id_array, items_to_compute = None):
+    def _compute_item_score(self, user_id_array, items_to_compute=None):
 
         # Create a random block (len(user_id_array), n_items) array with the item score
 
         if items_to_compute is not None:
-            item_scores = - np.ones((len(user_id_array), self.n_items), dtype=np.float32)*np.inf
+            item_scores = - np.ones((len(user_id_array), self.n_items), dtype=np.float32) * np.inf
             item_scores[:, items_to_compute] = np.random.rand(len(user_id_array), len(items_to_compute))
 
         else:
@@ -217,9 +280,7 @@ class Random(BaseRecommender):
 
         return item_scores
 
-
-
-    def save_model(self, folder_path, file_name = None):
+    def save_model(self, folder_path, file_name=None):
 
         if file_name is None:
             file_name = self.RECOMMENDER_NAME
@@ -229,7 +290,6 @@ class Random(BaseRecommender):
         data_dict_to_save = {}
 
         dataIO = DataIO(folder_path=folder_path)
-        dataIO.save_data(file_name=file_name, data_dict_to_save = data_dict_to_save)
+        dataIO.save_data(file_name=file_name, data_dict_to_save=data_dict_to_save)
 
         self._print("Saving complete")
-
