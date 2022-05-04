@@ -470,22 +470,22 @@ if __name__ == "__main__":
             .to_dict()
     )
 
-    negatives_validation = prepare_candidates(valid['customer_id'].unique(), 15)
-    negatives_validation['t_dat'] = negatives_validation['customer_id'].map(last_dates_validation)
-    trues_validation = valid[['customer_id', 'article_id']]
-    df_common_validation = pd.merge(trues_validation, negatives_validation, on=['customer_id', 'article_id'],
-                                    how='inner')
-    negatives_new_validation = negatives_validation.append(df_common_validation).drop_duplicates(keep=False)
-
-    negatives_validation = (
-        negatives_new_validation
-            .merge(user_features_validation, on=('customer_id'))
-            .merge(item_features_validation, on=('article_id'))
-    )
-    negatives_validation['label'] = 0
-
-    valid = pd.concat([valid, negatives_validation])
-    valid.sort_values(['customer_id', 't_dat'], inplace=True)
+    # negatives_validation = prepare_candidates(valid['customer_id'].unique(), 15)
+    # negatives_validation['t_dat'] = negatives_validation['customer_id'].map(last_dates_validation)
+    # trues_validation = valid[['customer_id', 'article_id']]
+    # df_common_validation = pd.merge(trues_validation, negatives_validation, on=['customer_id', 'article_id'],
+    #                                 how='inner')
+    # negatives_new_validation = negatives_validation.append(df_common_validation).drop_duplicates(keep=False)
+    #
+    # negatives_validation = (
+    #     negatives_new_validation
+    #         .merge(user_features_validation, on=('customer_id'))
+    #         .merge(item_features_validation, on=('article_id'))
+    # )
+    # negatives_validation['label'] = 0
+    #
+    # valid = pd.concat([valid, negatives_validation])
+    # valid.sort_values(['customer_id', 't_dat'], inplace=True)
 
     valid_baskets = valid.groupby(['customer_id'])['article_id'].count().values
     train_baskets = train.groupby(['customer_id'])['article_id'].count().values
