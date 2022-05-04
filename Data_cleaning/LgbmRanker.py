@@ -290,8 +290,8 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
 
-    start_date_train = '2020-07-15'
-    end_date_train = '2020-09-16'
+    start_date_train = '2020-08-15'
+    end_date_train = '2020-09-23'
     end_date_validation = '2020-09-23'
 
     label = "label"
@@ -505,8 +505,8 @@ if __name__ == "__main__":
         train.drop(columns=ignored_cols),
         train.pop('label'),
         group=train_baskets,
-        eval_set=[(valid.drop(columns=ignored_cols), valid.pop('label'))],
-        eval_group=[valid_baskets], early_stopping_rounds=20
+        # eval_set=[(valid.drop(columns=ignored_cols), valid.pop('label'))],
+        # eval_group=[valid_baskets], early_stopping_rounds=20
     )
 
     cols = [col for col in train.columns if col not in ignored_cols]
