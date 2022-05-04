@@ -351,7 +351,6 @@ def split_submission_train_intervals_explicit(manager, timestamp_df, timestamp_a
     print(submission_explicit_interactions.tail())
 
     submission_explicit_interactions.drop(timestamp_column, inplace=True, axis=1)
-    submission_explicit_interactions.drop(timestamp_column, inplace=True, axis=1)
 
     manager.add_URM(submission_explicit_interactions, 'URM_submission_explicit_train')
 
