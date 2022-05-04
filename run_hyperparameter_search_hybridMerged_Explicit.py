@@ -57,7 +57,7 @@ def read_data_split_and_search_hybrid():
     metric_to_optimize = "MAP"
     cutoff_to_optimize = 12
 
-    n_cases = 1 
+    n_cases = 50
     n_random_starts = int(n_cases / 3)
 
     # toppop_exp = TopPop(URM_train_exp)
@@ -75,12 +75,27 @@ def read_data_split_and_search_hybrid():
     rp3betaRecommender = RP3betaRecommender(URM_train_explicit)
     rp3betaRecommender.fit(topK=694, alpha=0.3458962138661726, beta=0.07256855505772421, normalize_similarity=True)
 
-    itemKNN_CFCBF_Hybrid_Recommenders = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
-                                                                         dataset.get_loaded_ICM_dict()[
-                                                                             "ICM_mix_top_10_accTo_CBF"])
-    itemKNN_CFCBF_Hybrid_Recommenders.fit(topK=663, shrink=900, similarity='asymmetric', normalize=True,
-                                          asymmetric_alpha=0.03882135719640912, feature_weighting='TF-IDF',
-                                          ICM_weight=0.14382621361392856)
+    itemKNN_CFCBF_Hybrid_Recommenders_Top10 = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                               dataset.get_loaded_ICM_dict()[
+                                                                                   "ICM_mix_top_10_accTo_CBF"])
+    itemKNN_CFCBF_Hybrid_Recommenders_Top10.fit(topK=663, shrink=900, similarity='asymmetric', normalize=True,
+                                                asymmetric_alpha=0.03882135719640912, feature_weighting='TF-IDF',
+                                                ICM_weight=0.14382621361392856)
+
+    itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                                                 dataset.get_loaded_ICM_dict()[
+                                                                                                     "ICM_cleaned_department_name"])
+    itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name.fit(topK=953, shrink=829, similarity='asymmetric',
+                                                                  normalize=True, asymmetric_alpha=0.0,
+                                                                  feature_weighting='TF-IDF',
+                                                                  ICM_weight=0.815779773585588)
+
+    itemKNN_CFCBF_Hybrid_Recommenders_ALL = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                             dataset.get_loaded_ICM_dict()[
+                                                                                 "ICM_all"])
+    itemKNN_CFCBF_Hybrid_Recommenders_ALL.fit(topK=1000, shrink=895, similarity='asymmetric', normalize=True,
+                                              asymmetric_alpha=0.0, feature_weighting='TF-IDF',
+                                              ICM_weight=0.06434559204631396)
 
     Hybrid_Recommenders_List = [
         # ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
@@ -95,7 +110,9 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
-        [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
+        [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders_Top10,
+         itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name,
+         itemKNN_CFCBF_Hybrid_Recommenders_ALL],
     ]
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
@@ -211,8 +228,6 @@ def read_data_split_and_search_hybrid():
 
         with open(output_folder_path + "_logs.json", 'w') as json_file:
             json.dump(optimizer.max, json_file)
-
-
 
     threads = []
     for recommender in hybrid_recommenders:
