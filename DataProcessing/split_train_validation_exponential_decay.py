@@ -7,7 +7,7 @@ from Data_manager.DatasetMapperManager import DatasetMapperManager
 timestamp_column = 't_dat'
 userid_column = 'customer_id'
 itemid_column = 'article_id'
-DATASET_NAME = 'hm-exponential-decay20-Validation_salesWeek-Train_3months'
+DATASET_NAME = 'hm-exponential-decay15-Validation_salesWeek-Train_3months'
 
 
 def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, timestamp_array, columns_name=None):
@@ -85,6 +85,46 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     manager.add_URM(train_interactions, URM_train)
     manager.add_URM(validation_interactions, URM_validation)
 
+
+def exponential_decayed_result(timestamp_df, train_timestamp_array, val_timestamp_array, exp_decay):
+    # Retrieve which users fall in the wanted list of time frames
+    print("Preprocessing dataframe...")
+    timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
+
+    timestamp_df.drop('price', inplace=True, axis=1)
+    timestamp_df.drop('sales_channel_id', inplace=True, axis=1)
+    timestamp_df.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
+    timestamp_df['ItemID'] = timestamp_df['ItemID'].astype(str)
+    timestamp_df['Data'] = 1.0
+
+    timestamp_df = timestamp_df[[timestamp_column, 'UserID', 'ItemID', 'Data']]
+
+    # Create splits
+    rest_interactions, train_interactions = merge_splits_without_overwrite_origin_dataset(timestamp_df,
+                                                                                          train_timestamp_array)
+
+    rest_interactions2, validation_interactions = merge_splits_without_overwrite_origin_dataset(timestamp_df,
+                                                                                                val_timestamp_array)
+    # Look through the timestamp array to find the last date
+    # Assuming the last date is at the end
+    finalDate = pd.to_datetime(train_timestamp_array[-1][1])
+
+    dayDifference_df = (train_interactions[timestamp_column] - finalDate).dt.days
+
+    train_interactions['Data'] = np.exp((dayDifference_df / exp_decay).to_numpy())
+
+    train_interactions.sort_values(by='Data')
+
+    train_interactions.drop(timestamp_column, inplace=True, axis=1)
+
+    validation_interactions.drop(timestamp_column, inplace=True, axis=1)
+
+    # I keep only the last interaction between a user and a particular item
+    train_interactions.drop_duplicates(subset=['UserID', 'ItemID'], keep='last', inplace=True)
+    validation_interactions.drop_duplicates(inplace=True)
+
+    return train_interactions, validation_interactions
+
 def split_submission_train_intervals(manager, timestamp_df, timestamp_array_train):
     # Retrieve which users fall in the wanted list of time frames
     print("Preprocessing URM_submission dataframe...")
@@ -127,7 +167,8 @@ if __name__ == "__main__":
     timestamp_list_submission = [("2019-06-22", "2019-09-23")]
 
     manager = DatasetMapperManager()
-    split_train_validation_multiple_intervals(manager, transactions, timestamp_list, validation_timestamp)
+    split_train_validation_multiple_intervals(manager, transactions, timestamp_list, validation_timestamp,
+                                              exponential_decay=16)
     # split_submission_train_intervals(manager,transactions,timestamp_list_submission)
     # generate dataset with URM (Implicit=True)
     dataset = manager.generate_Dataset(DATASET_NAME, False)
