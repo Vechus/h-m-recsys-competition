@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     #recommender = P3alphaRecommender(URM_submission_train)
     #recommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
-    rec1 = ItemKNNCBFRecommender(URM_submission_train, ICM_train=dataset.get_ICM_from_name('all'))
+    rec1 = ItemKNNCBFRecommender(URM_submission_train, ICM_train=dataset.get_ICM_from_name('ICM_all'))
     rec1.load_model(
             folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
             file_name='ItemKNNCBFRecommender_ICM_all_cosine.zip')
