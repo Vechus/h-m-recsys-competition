@@ -8,7 +8,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorMultipleURMs
 import traceback, os
 
-dataset_name = "hm-exponential-decay30-Validation_salesWeek-Train_restOf2019"
+dataset_name = "hm-exponential-decay15-Validation_salesWeek-Train_3months"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
