@@ -52,11 +52,11 @@ if __name__ == '__main__':
         0.89899546618579
     ])
 
-    # recommender_random = Random(URM_submission_train)
-    # recommender_random.fit()
+    recommender_random = Random(URM_submission_train)
+    recommender_random.fit()
 
-    # recommender_pop_weight = TopPop_weight_decayed()
-    # recommender_pop_weight.fit()
+    recommender_pop_weight = TopPop_weight_decayed()
+    recommender_pop_weight.fit()
 
     path = os.getenv('DATASET_PATH')
     df_sample_submission = pd.read_csv(os.path.join(path, "sample_submission.csv"))
@@ -93,11 +93,15 @@ if __name__ == '__main__':
         f.write(f"{i}, {well_formatted}\n")
         print("%s:%s" % (i, well_formatted))
 
-    # recommender_pop_weight.recommend(remaining_customer_list, f)
-    # for i in remaining_customer_list:
-    #     recommended_items = recommender_random.recommend(i, cutoff=12, remove_seen_flag=False)
-    #     well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
-    #     f.write(f"{i}, {well_formatted}\n")
-    #     print("%s:%s" % (i, recommended_items))
+
+
+
+
+    recommender_pop_weight.recommend(remaining_customer_list, f)
+    for i in remaining_customer_list:
+        recommended_items = recommender_random.recommend(i, cutoff=12, remove_seen_flag=False)
+        well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
+        f.write(f"{i}, {well_formatted}\n")
+        print("%s:%s" % (i, recommended_items))
     f.close()
     print("save complete")
