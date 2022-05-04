@@ -470,7 +470,7 @@ if __name__ == "__main__":
     df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
     df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
     print(df_imps.head(30))
-    print(df_imps.to_csv(os.path.join(path,"feature_importance.csv")))
+    print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
@@ -484,17 +484,17 @@ if __name__ == "__main__":
     )
     print("end")
 
-    candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
-    print(candidates.shape)
-    print(df.shape)
-
-    candidates = (
-        candidates
-            .merge(user_features, on=('customer_id'))
-            .merge(item_features, on=('article_id'))
-    )
-
-    print("candidates merged.")
+    # candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
+    # print(candidates.shape)
+    # print(df.shape)
+    #
+    # candidates = (
+    #     candidates
+    #         .merge(user_features, on=('customer_id'))
+    #         .merge(item_features, on=('article_id'))
+    # )
+    #
+    # print("candidates merged.")
 
     df = (
         df
@@ -503,10 +503,10 @@ if __name__ == "__main__":
     )
 
     print("df merged.")
+    candidates = df
 
-    del  df
-
-    candidates = pd.concat([candidates, df], axis=0)
+    # candidates = pd.concat([candidates, df], axis=0)
+    # del df
     print("concat.")
     # candidates = candidates.drop_duplicates()
 
@@ -530,7 +530,8 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(v) for k, v in enumerate(set(x)) if k < 12]))
+    preds['article_id'] = preds['article_id'].apply(
+        lambda x: ' '.join([str(v) for k, v in enumerate(set(x)) if k < 12]))
 
     print("select 12 done.")
 
