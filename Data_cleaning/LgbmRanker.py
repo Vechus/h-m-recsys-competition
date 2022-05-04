@@ -477,6 +477,7 @@ if __name__ == "__main__":
     df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
     print("start")
     df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
+    df['prediction'] = df.apply(lambda x: x.prediction[:12], axis=1)
     df = (
         df.explode('prediction')
             .rename(columns={'prediction': 'article_id'})
@@ -493,14 +494,21 @@ if __name__ == "__main__":
             .merge(item_features, on=('article_id'))
     )
 
+    print("candidates merged.")
+
     df = (
         df
             .merge(user_features, on=('customer_id'))
             .merge(item_features, on=('article_id'))
     )
 
+    print("df merged.")
+
+    del  df
+
     candidates = pd.concat([candidates, df], axis=0)
-    candidates = candidates.drop_duplicates()
+    print("concat.")
+    # candidates = candidates.drop_duplicates()
 
     preds = []
     batch_size = 1000000
@@ -511,6 +519,8 @@ if __name__ == "__main__":
         )
         preds.append(outputs)
 
+    print("pred done.")
+
     preds = np.concatenate(preds)
     candidates['preds'] = preds
     preds = candidates[['customer_id', 'article_id', 'preds']]
@@ -520,7 +530,9 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(v) for k, v in enumerate(x) if k < 12]))
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(v) for k, v in enumerate(set(x)) if k < 12]))
+
+    print("select 12 done.")
 
     preds = sample_sub[['customer_id']].merge(
         preds
@@ -528,4 +540,6 @@ if __name__ == "__main__":
             .rename(columns={'article_id': 'prediction'}), how='left')
     preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
 
-    preds.to_csv(os.path.join(path, 'submission_ranking.csv'), index=False)
+    print("add customer_id done.")
+
+    preds.to_csv(os.path.join(path, 'submission_ranking_0504.csv'), index=False)
