@@ -48,6 +48,7 @@ if __name__ == '__main__':
     # URM_train for submission
     timestamp_list_submission = [("2020-06-22", "2020-09-23")]
     split_submission_train_intervals(manager, transactions, timestamp_list_submission)
+    split_submission_train_intervals_explicit(manager, transactions, timestamp_list_submission)
 
     # generate UCMs
     gen_UCM_list(manager, customers)
