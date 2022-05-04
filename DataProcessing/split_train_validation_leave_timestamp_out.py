@@ -204,6 +204,7 @@ def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, ti
 def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation,
                                               URM_train='URM_train', URM_validation='URM_validation'):
     # Retrieve which users fall in the wanted list of time frames
+    timestamp_df = timestamp_df.copy()
     print("Preprocessing dataframe...")
     timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
 
@@ -237,7 +238,6 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
     manager.add_URM(validation_interactions, URM_validation)
 
 
-# TODO
 def split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manager, timestamp_df, timestamp_array_train,
                                                                           timestamp_array_validation,
                                                                           URM_train='URM_train',
@@ -291,6 +291,7 @@ def split_train_validation_multiple_intervals_Explicit_By_Repeat_Purchase(manage
 
 
 def split_submission_train_intervals(manager, timestamp_df, timestamp_array_train):
+    timestamp_df = timestamp_df.copy()
     # Retrieve which users fall in the wanted list of time frames
     print("Preprocessing URM_submission dataframe...")
     timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
@@ -313,6 +314,45 @@ def split_submission_train_intervals(manager, timestamp_df, timestamp_array_trai
     print(df_submission_train.head())
 
     manager.add_URM(df_submission_train, 'URM_submission_train')
+
+
+def split_submission_train_intervals_explicit(manager, timestamp_df, timestamp_array_submission_explicit):
+    # Retrieve which users fall in the wanted list of time frames
+    timestamp_df = timestamp_df.copy()
+    print("Preprocessing dataframe...")
+    timestamp_df[timestamp_column] = pd.to_datetime(timestamp_df[timestamp_column], format='%Y-%m-%d')
+
+    timestamp_df.rename(columns={"customer_id": "UserID", "article_id": "ItemID"}, inplace=True)
+    timestamp_df['ItemID'] = timestamp_df['ItemID'].astype(str)
+
+    timestamp_df.drop_duplicates()
+
+    timestamp_df_with_timestamp = timestamp_df.copy()
+
+    timestamp_df = timestamp_df[['UserID', 'ItemID']]
+
+    timestamp_df = timestamp_df.groupby(['UserID', 'ItemID']).size().reset_index(name='Data')
+
+    # Drop the abnormal data
+    timestamp_df['Data'] = timestamp_df['Data'].apply(lambda x: 20 if x >= 20 else x)
+
+    # Normalization
+    max_value = timestamp_df['Data'].max()
+    timestamp_df['Data'] = timestamp_df['Data'].apply(lambda x: x / max_value)
+
+    timestamp_df = pd.merge(left=timestamp_df_with_timestamp, right=timestamp_df, how='left', on=['UserID', 'ItemID'])
+
+    print(timestamp_df.head())
+    # Create test/train splits
+    rest_interactions, submission_explicit_interactions = merge_splits_without_overwrite_origin_dataset(timestamp_df,
+                                                                                                        timestamp_array_submission_explicit)
+
+    print(submission_explicit_interactions.head())
+    print(submission_explicit_interactions.tail())
+
+    submission_explicit_interactions.drop(timestamp_column, inplace=True, axis=1)
+
+    manager.add_URM(submission_explicit_interactions, 'URM_submission_explicit_train')
 
 
 if __name__ == "__main__":

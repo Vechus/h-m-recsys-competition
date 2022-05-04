@@ -3,6 +3,7 @@ import threading
 import traceback
 from datetime import datetime
 
+import numpy as np
 from bayes_opt import BayesianOptimization
 from dotenv import load_dotenv
 
@@ -11,6 +12,7 @@ from Evaluation.K_Fold_Evaluator import K_Fold_Evaluator_MAP
 from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
 from Recommenders.Recommender_import_list import *
 from Utils.Logger import Logger
+import json
 
 
 def read_data_split_and_search_hybrid():
@@ -24,20 +26,32 @@ def read_data_split_and_search_hybrid():
     reader = HMDatasetReader(False)
 
     dataset = reader.load_data(
-        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explict_By_Repeat_Purchase/hm/'.format(DATASET_PATH))
+        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
-    # get URM_train, URM_test, URM_validation
+    # # get URM_train, URM_test, URM_validation
     # URM_train = dataset.get_URM_from_name('URM_train')
     # # URM_test = dataset.get_URM_from_name('URM_test')
     # URM_validation = dataset.get_URM_from_name('URM_validation')
 
-    URM_train_explicit = dataset.get_URM_from_name('URM_train')
-    URM_validation_explicit = dataset.get_URM_from_name('URM_validation')
+    URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
+    URM_validation_explicit = dataset.get_URM_from_name('URM_validation_explicit')
 
     # URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
     # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
+    print("IS nan")
+    print(np.isnan(URM_train_explicit.data).any())
+    print(np.isnan(URM_validation_explicit.data).any())
+
+    print(np.isinf(URM_train_explicit.data).any())
+    print(np.isinf(URM_validation_explicit.data).any())
+
+    ICM = dataset.get_loaded_ICM_dict()[
+        "ICM_mix_top_10_accTo_CBF"]
+    print(np.isnan(ICM.data).any())
+
+    print(np.isinf(ICM.data).any())
 
     cutoff_list = [12]
     metric_to_optimize = "MAP"
@@ -48,10 +62,10 @@ def read_data_split_and_search_hybrid():
 
     # toppop_exp = TopPop(URM_train_exp)
     # toppop_exp.fit()
-
-    toppop_explicit = TopPop(URM_train_explicit)
-    toppop_explicit.fit()
-
+    #
+    # toppop_explicit = TopPop(URM_train_explicit)
+    # toppop_explicit.fit()
+    #
     # toppop_normal = TopPop(URM_train)
     # toppop_normal.fit()
 
@@ -61,12 +75,27 @@ def read_data_split_and_search_hybrid():
     rp3betaRecommender = RP3betaRecommender(URM_train_explicit)
     rp3betaRecommender.fit(topK=694, alpha=0.3458962138661726, beta=0.07256855505772421, normalize_similarity=True)
 
-    itemKNN_CFCBF_Hybrid_Recommenders = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
-                                                                         dataset.get_loaded_ICM_dict()[
-                                                                             "ICM_mix_top_10_accTo_CBF"])
-    itemKNN_CFCBF_Hybrid_Recommenders.fit(topK=663, shrink=900, similarity='asymmetric', normalize=True,
-                                          asymmetric_alpha=0.03882135719640912, feature_weighting='TF-IDF',
-                                          ICM_weight=0.14382621361392856)
+    itemKNN_CFCBF_Hybrid_Recommenders_Top10 = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                               dataset.get_loaded_ICM_dict()[
+                                                                                   "ICM_mix_top_10_accTo_CBF"])
+    itemKNN_CFCBF_Hybrid_Recommenders_Top10.fit(topK=663, shrink=900, similarity='asymmetric', normalize=True,
+                                                asymmetric_alpha=0.03882135719640912, feature_weighting='TF-IDF',
+                                                ICM_weight=0.14382621361392856)
+
+    itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                                                 dataset.get_loaded_ICM_dict()[
+                                                                                                     "ICM_cleaned_department_name"])
+    itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name.fit(topK=953, shrink=829, similarity='asymmetric',
+                                                                  normalize=True, asymmetric_alpha=0.0,
+                                                                  feature_weighting='TF-IDF',
+                                                                  ICM_weight=0.815779773585588)
+
+    itemKNN_CFCBF_Hybrid_Recommenders_ALL = ItemKNN_CFCBF_Hybrid_Recommender(URM_train_explicit,
+                                                                             dataset.get_loaded_ICM_dict()[
+                                                                                 "ICM_all"])
+    itemKNN_CFCBF_Hybrid_Recommenders_ALL.fit(topK=1000, shrink=895, similarity='asymmetric', normalize=True,
+                                              asymmetric_alpha=0.0, feature_weighting='TF-IDF',
+                                              ICM_weight=0.06434559204631396)
 
     Hybrid_Recommenders_List = [
         # ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
@@ -81,8 +110,9 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
-        [toppop_explicit, p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders],
-
+        [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders_Top10,
+         itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name,
+         itemKNN_CFCBF_Hybrid_Recommenders_ALL],
     ]
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
@@ -172,27 +202,32 @@ def read_data_split_and_search_hybrid():
                 # print(result)
                 return sum(result) / len(result)
 
-        optimizer = BayesianOptimization(
-            f=BO_func,
-            pbounds=tuning_params,
-            verbose=5,
-            random_state=5,
-        )
+        try:
+            optimizer = BayesianOptimization(
+                f=BO_func,
+                pbounds=tuning_params,
+                verbose=5,
+                random_state=5,
+            )
 
-        optimizer.maximize(
-            init_points=n_random_starts,
-            n_iter=n_cases,
-        )
+            optimizer.maximize(
+                init_points=n_random_starts,
+                n_iter=n_cases,
+            )
+        except Exception as e:
+            print(print('Exception: \n{}'.format(str(e))))
 
-        import json
+        output_folder_path = "result_experiments/hybrid/" + hybrid_recommender[0].RECOMMENDER_NAME
 
-        with open("result_experiments/hybrid_Explicit/" + hybrid_recommender[0].RECOMMENDER_NAME + "_logs.json",
-                  'w') as json_file:
-            json.dump(optimizer.max, json_file)
+        # If directory does not exist, create
+        if not os.path.exists(output_folder_path):
+            os.makedirs(output_folder_path)
 
-        with open("result_experiments/hybrid_Explicit/" + hybrid_recommender[0].RECOMMENDER_NAME + "_all_logs.json",
-                  'w') as json_file:
+        with open(output_folder_path + "_all_logs.json", 'w') as json_file:
             json.dump(results, json_file)
+
+        with open(output_folder_path + "_logs.json", 'w') as json_file:
+            json.dump(optimizer.max, json_file)
 
     threads = []
     for recommender in hybrid_recommenders:

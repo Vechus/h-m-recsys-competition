@@ -40,7 +40,7 @@ class P3alphaRecommender(BaseItemSimilarityMatrixRecommender):
         self.normalize_similarity = normalize_similarity
 
 
-        #
+
         # if X.dtype != np.float32:
         #     print("P3ALPHA fit: For memory usage reasons, we suggest to use np.float32 as dtype for the dataset")
 
