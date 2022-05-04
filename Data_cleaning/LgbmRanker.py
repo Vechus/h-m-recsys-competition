@@ -308,13 +308,19 @@ if __name__ == "__main__":
     df_article_feat_train = create_article_feat(df_article, df_trans_all, end_date_train, path)
     df_customer_feat_train = create_customer_feat(df_customer, df_trans_all, end_date_train, path)
 
+    df_article_feat_validation = create_article_feat(df_article, df_trans_all, end_date_validation, path)
+    df_customer_feat_validation = create_customer_feat(df_customer, df_trans_all, end_date_validation, path)
+
     del df_article
     del df_customer
     del df_trans_all
 
-    user_features = df_customer_feat_train
-    print(user_features)
-    item_features = df_article_feat_train
+    user_features_train = df_customer_feat_train
+    item_features_train = df_article_feat_train
+
+    user_features_validation = df_customer_feat_validation
+    item_features_validation = df_article_feat_validation
+
     transactions_df = df_trans
 
     df_4w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-08-24')].copy()
@@ -328,14 +334,14 @@ if __name__ == "__main__":
                                 (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
 
     train = (train
-             .merge(user_features, on=('customer_id'))
-             .merge(item_features, on=('article_id'))
+             .merge(user_features_train, on=('customer_id'))
+             .merge(item_features_train, on=('article_id'))
              )
     train.sort_values(['t_dat', 'customer_id'], inplace=True)
 
     valid = (valid
-             .merge(user_features, on=('customer_id'))
-             .merge(item_features, on=('article_id'))
+             .merge(user_features_validation, on=('customer_id'))
+             .merge(item_features_validation, on=('article_id'))
              )
     valid.sort_values(['t_dat', 'customer_id'], inplace=True)
 
@@ -432,8 +438,8 @@ if __name__ == "__main__":
 
     negatives = (
         negatives_new
-            .merge(user_features, on=('customer_id'))
-            .merge(item_features, on=('article_id'))
+            .merge(user_features_train, on=('customer_id'))
+            .merge(item_features_train, on=('article_id'))
     )
     negatives['label'] = 0
 
@@ -458,8 +464,8 @@ if __name__ == "__main__":
 
     negatives_validation = (
         negatives_new_validation
-            .merge(user_features, on=('customer_id'))
-            .merge(item_features, on=('article_id'))
+            .merge(user_features_validation, on=('customer_id'))
+            .merge(item_features_validation, on=('article_id'))
     )
     negatives_validation['label'] = 0
 
@@ -480,6 +486,7 @@ if __name__ == "__main__":
     )
 
     ignored_cols = ['t_dat', 'customer_id', 'article_id', 'label']
+    print(train.columns == valid.columns)
     ranker = ranker.fit(
         train.drop(columns=ignored_cols),
         train.pop('label'),
@@ -501,7 +508,6 @@ if __name__ == "__main__":
     # df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
     # print("start")
     # df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
-    # df['prediction'] = df.apply(lambda x: x.prediction[:12], axis=1)
     # df = (
     #     df.explode('prediction')
     #         .rename(columns={'prediction': 'article_id'})
