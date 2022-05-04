@@ -504,9 +504,9 @@ if __name__ == "__main__":
 
     print("df merged.")
 
-    del  df
 
     candidates = pd.concat([candidates, df], axis=0)
+    del df
     print("concat.")
     # candidates = candidates.drop_duplicates()
 
