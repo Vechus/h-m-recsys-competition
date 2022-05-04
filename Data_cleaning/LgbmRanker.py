@@ -484,8 +484,8 @@ if __name__ == "__main__":
         train.drop(columns=ignored_cols),
         train.pop('label'),
         group=train_baskets,
-        eval_set=[(valid.drop(columns=ignored_cols), valid['label'])],
-        eval_group=[valid_baskets], eval_at=[1, 2, 3, 4, 5, 10, 12]
+        eval_set=[(valid.drop(columns=ignored_cols), valid.pop('label'))],
+        eval_group=[valid_baskets], eval_at=[1, 2, 5, 10, 12]
     )
 
     cols = [col for col in train.columns if col not in ignored_cols]
