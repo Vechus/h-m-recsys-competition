@@ -15,7 +15,9 @@ if __name__ == '__main__':
     DATASET_PATH = os.getenv('DATASET_PATH')
     PROCESSED_PATH = os.getenv('PROCESSED_PATH')
 
-    dataset = reader.load_data('{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/{}/'.format(DATASET_PATH, dataset_name))
+    dataset = reader.load_data(
+        '{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/{}/'.format(DATASET_PATH,
+                                                                                                 dataset_name))
 
     item_original_ID_to_index_mapper = dataset.get_item_original_ID_to_index_mapper()
     user_original_ID_to_index_mapper = dataset.get_user_original_ID_to_index_mapper()
@@ -52,11 +54,13 @@ if __name__ == '__main__':
         0.89899546618579
     ])
 
-    recommender_random = Random(URM_submission_train)
-    recommender_random.fit()
+    # recommender_random = Random(URM_submission_train)
+    # recommender_random.fit()
+    #
+    # recommender_pop_weight = TopPop_weight_decayed()
 
-    recommender_pop_weight = TopPop_weight_decayed()
-    recommender_pop_weight.fit()
+    toppop = TopPop(URM_submission_train)
+    toppop.fit()
 
     path = os.getenv('DATASET_PATH')
     df_sample_submission = pd.read_csv(os.path.join(path, "sample_submission.csv"))
@@ -88,18 +92,14 @@ if __name__ == '__main__':
 
     for i in df_train.customer_id.unique():
         i_index = user_original_ID_to_index_mapper[i]
-        recommended_items = recommender.recommend(i_index, cutoff=12, remove_seen_flag=False,remove_custom_items_flag=True)
+        recommended_items = recommender.recommend(i_index, cutoff=12, remove_seen_flag=False,
+                                                  remove_custom_items_flag=True)
         well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
         f.write(f"{i}, {well_formatted}\n")
         print("%s:%s" % (i, well_formatted))
 
-
-
-
-
-    recommender_pop_weight.recommend(remaining_customer_list, f)
     for i in remaining_customer_list:
-        recommended_items = recommender_random.recommend(i, cutoff=12, remove_seen_flag=False)
+        recommended_items = toppop.recommend(i, cutoff=12, remove_seen_flag=False)
         well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
         f.write(f"{i}, {well_formatted}\n")
         print("%s:%s" % (i, recommended_items))
