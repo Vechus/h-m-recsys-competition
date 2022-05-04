@@ -485,7 +485,7 @@ if __name__ == "__main__":
         train.pop('label'),
         group=train_baskets,
         eval_set=[valid.drop(columns=['t_dat', 'customer_id', 'article_id', 'label']), valid['label']],
-        eval_group=valid_baskets
+        eval_group=[valid_baskets],eval_at=[1,2,3,4,5,10,12]
     )
 
     cols = [col for col in train.columns if col not in igonored_cols]
