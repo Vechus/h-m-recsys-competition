@@ -291,7 +291,7 @@ if __name__ == "__main__":
     output_dir = path
 
     start_date_train = '2020-08-15'
-    end_date_train = '2020-09-23'
+    end_date_train = '2020-09-16'
     end_date_validation = '2020-09-23'
 
     label = "label"
@@ -442,6 +442,30 @@ if __name__ == "__main__":
 
     # train = train.drop_duplicates()
 
+    last_dates_validation = (
+        valid
+            .groupby('customer_id')['t_dat']
+            .max()
+            .to_dict()
+    )
+
+    negatives_validation = prepare_candidates(valid['customer_id'].unique(), 15)
+    negatives_validation['t_dat'] = negatives_validation['customer_id'].map(last_dates_validation)
+    trues_validation = valid[['customer_id', 'article_id']]
+    df_common_validation = pd.merge(trues_validation, negatives_validation, on=['customer_id', 'article_id'],
+                                    how='inner')
+    negatives_new_validation = negatives_validation.append(df_common_validation).drop_duplicates(keep=False)
+
+    negatives_validation = (
+        negatives_new_validation
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
+    )
+    negatives_validation['label'] = 0
+
+    valid = pd.concat([valid, negatives_validation])
+    valid.sort_values(['customer_id', 't_dat'], inplace=True)
+
     valid_baskets = valid.groupby(['customer_id'])['article_id'].count().values
     train_baskets = train.groupby(['customer_id'])['article_id'].count().values
 
@@ -460,8 +484,8 @@ if __name__ == "__main__":
         train.drop(columns=igonored_cols),
         train.pop('label'),
         group=train_baskets,
-        #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
-        #     eval_group= valid_baskets
+        eval_set=[valid.drop(columns=['t_dat', 'customer_id', 'article_id', 'label']), valid['label']],
+        eval_group=valid_baskets
     )
 
     cols = [col for col in train.columns if col not in igonored_cols]
@@ -472,17 +496,17 @@ if __name__ == "__main__":
     print(df_imps.head(30))
     print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
 
-    sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
-
-    df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
-    print("start")
-    df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
-    df['prediction'] = df.apply(lambda x: x.prediction[:12], axis=1)
-    df = (
-        df.explode('prediction')
-            .rename(columns={'prediction': 'article_id'})
-    )
-    print("end")
+    # sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
+    #
+    # df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
+    # print("start")
+    # df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
+    # df['prediction'] = df.apply(lambda x: x.prediction[:12], axis=1)
+    # df = (
+    #     df.explode('prediction')
+    #         .rename(columns={'prediction': 'article_id'})
+    # )
+    # print("end")
 
     # candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
     # print(candidates.shape)
@@ -496,51 +520,51 @@ if __name__ == "__main__":
     #
     # print("candidates merged.")
 
-    df = (
-        df
-            .merge(user_features, on=('customer_id'))
-            .merge(item_features, on=('article_id'))
-    )
-
-    print("df merged.")
-    candidates = df
-
-    # candidates = pd.concat([candidates, df], axis=0)
-    # del df
-    print("concat.")
-    # candidates = candidates.drop_duplicates()
-
-    preds = []
-    batch_size = 1000000
-    for bucket in tqdm(range(0, len(candidates), batch_size)):
-        outputs = ranker.predict(
-            candidates.iloc[bucket: bucket + batch_size]
-                .drop(columns=['customer_id', 'article_id'])
-        )
-        preds.append(outputs)
-
-    print("pred done.")
-
-    preds = np.concatenate(preds)
-    candidates['preds'] = preds
-    preds = candidates[['customer_id', 'article_id', 'preds']]
-    preds.sort_values(['customer_id', 'preds'], ascending=False, inplace=True)
-    preds = (
-        preds
-            .groupby('customer_id')[['article_id']]
-            .aggregate(lambda x: x.tolist())
-    )
-    preds['article_id'] = preds['article_id'].apply(
-        lambda x: ' '.join([str(v) for k, v in enumerate(set(x)) if k < 12]))
-
-    print("select 12 done.")
-
-    preds = sample_sub[['customer_id']].merge(
-        preds
-            .reset_index()
-            .rename(columns={'article_id': 'prediction'}), how='left')
-    preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
-
-    print("add customer_id done.")
-
-    preds.to_csv(os.path.join(path, 'submission_ranking_0504.csv'), index=False)
+    # df = (
+    #     df
+    #         .merge(user_features, on=('customer_id'))
+    #         .merge(item_features, on=('article_id'))
+    # )
+    #
+    # print("df merged.")
+    # candidates = df
+    #
+    # # candidates = pd.concat([candidates, df], axis=0)
+    # # del df
+    # print("concat.")
+    # # candidates = candidates.drop_duplicates()
+    #
+    # preds = []
+    # batch_size = 1000000
+    # for bucket in tqdm(range(0, len(candidates), batch_size)):
+    #     outputs = ranker.predict(
+    #         candidates.iloc[bucket: bucket + batch_size]
+    #             .drop(columns=['customer_id', 'article_id'])
+    #     )
+    #     preds.append(outputs)
+    #
+    # print("pred done.")
+    #
+    # preds = np.concatenate(preds)
+    # candidates['preds'] = preds
+    # preds = candidates[['customer_id', 'article_id', 'preds']]
+    # preds.sort_values(['customer_id', 'preds'], ascending=False, inplace=True)
+    # preds = (
+    #     preds
+    #         .groupby('customer_id')[['article_id']]
+    #         .aggregate(lambda x: x.tolist())
+    # )
+    # preds['article_id'] = preds['article_id'].apply(
+    #     lambda x: ' '.join([str(v) for k, v in enumerate(set(x)) if k < 12]))
+    #
+    # print("select 12 done.")
+    #
+    # preds = sample_sub[['customer_id']].merge(
+    #     preds
+    #         .reset_index()
+    #         .rename(columns={'article_id': 'prediction'}), how='left')
+    # preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
+    #
+    # print("add customer_id done.")
+    #
+    # preds.to_csv(os.path.join(path, 'submission_ranking_0504.csv'), index=False)
