@@ -413,7 +413,7 @@ if __name__ == "__main__":
             rn=train.groupby(['customer_id'])['rank']
                 .rank(method='first', ascending=False))
             .query("rn <= 15")
-            .drop(columns=['price', 'sales_channel_id'])
+            # .drop(columns=['price', 'sales_channel_id'])
             .sort_values(['t_dat', 'customer_id'])
     )
     train['label'] = 1
