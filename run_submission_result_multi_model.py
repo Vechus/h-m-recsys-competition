@@ -2,9 +2,12 @@ import pandas as pd
 import os
 from Data_manager.HMDatasetReader import HMDatasetReader
 from Recommenders.GraphBased.P3alphaRecommender import P3alphaRecommender
+from Recommenders.GraphBased.RP3betaRecommender import RP3betaRecommender
+from Recommenders.KNN.ItemKNNCBFRecommender import ItemKNNCBFRecommender
 from Recommenders.KNN.ItemKNN_CFCBF_Hybrid_Recommender import ItemKNN_CFCBF_Hybrid_Recommender
 from Recommenders.NonPersonalizedRecommender import TopPop,Random
 from Recommenders.TopPop_weight_decayed import TopPop_weight_decayed
+from Recommenders.Hybrid.GeneralizedMergedHybridRecommender import GeneralizedMergedHybridRecommender
 
 if __name__ == '__main__':
     dataset_name = "hm"
@@ -29,8 +32,32 @@ if __name__ == '__main__':
 
     URM_submission_train = dataset.get_URM_from_name('URM_submission_train')
 
-    recommender = P3alphaRecommender(URM_submission_train)
-    recommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
+    #recommender = P3alphaRecommender(URM_submission_train)
+    #recommender.fit(topK=537, alpha=0.0, normalize_similarity=True)
+    rec1 = ItemKNNCBFRecommender(URM_submission_train, ICM_train=dataset.get_ICM_from_name('all'))
+    rec1.load_model(
+            folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
+            file_name='ItemKNNCBFRecommender_ICM_all_cosine.zip')
+
+    rec2 = P3alphaRecommender(URM_submission_train)
+    rec2.fit(topK=537, alpha=0.0, normalize_similarity=True)
+
+    rec3 = RP3betaRecommender(URM_submission_train)
+    rec3.fit(topK=626, alpha=0.21827333332714935, beta=0.0, normalize_similarity=True)
+
+    rec4 = ItemKNN_CFCBF_Hybrid_Recommender(URM_submission_train, ICM_train=dataset.get_ICM_from_name('ICM_mix_top_15_accTo_CBF'))
+    rec4.load_model(
+            folder_path='result_experiments/ItemKNNCBF_CFCBF_URM_Train_2019-06-22_2019-09-23_Val_2019-09-23_2019-09-30/',
+            file_name='ItemKNN_CFCBF_HybridRecommender_ICM_mix_top_15_asymmetric_best_model_last.zip')
+
+    recommender = GeneralizedMergedHybridRecommender(URM_submission_train, recommenders=[rec1, rec2, rec3, rec4])
+    recommender.fit(alphas=[
+        -0.10273359815285003,
+        -1,
+        -1,
+        0.3452207933768322
+    ])
+
 
     # recommender_random = Random(URM_submission_train)
     # recommender_random.fit()
