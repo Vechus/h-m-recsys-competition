@@ -413,7 +413,7 @@ if __name__ == "__main__":
             rn=train.groupby(['customer_id'])['rank']
                 .rank(method='first', ascending=False))
             .query("rn <= 15")
-            # .drop(columns=['price', 'sales_channel_id'])
+            .drop(columns=['price', 'sales_channel_id'])
             .sort_values(['t_dat', 'customer_id'])
     )
     train['label'] = 1
@@ -447,6 +447,21 @@ if __name__ == "__main__":
     train.sort_values(['customer_id', 't_dat'], inplace=True)
 
     # train = train.drop_duplicates()
+
+    valid['rank'] = range(len(valid))
+    valid = (
+        valid
+            .assign(
+            rn=valid.groupby(['customer_id'])['rank']
+                .rank(method='first', ascending=False))
+            .query("rn <= 15")
+            .drop(columns=['price', 'sales_channel_id'])
+            .sort_values(['t_dat', 'customer_id'])
+    )
+    valid['label'] = 1
+
+    del valid['rank']
+    del valid['rn']
 
     last_dates_validation = (
         valid
@@ -486,13 +501,12 @@ if __name__ == "__main__":
     )
 
     ignored_cols = ['t_dat', 'customer_id', 'article_id', 'label']
-    print(train.columns == valid.columns)
     ranker = ranker.fit(
         train.drop(columns=ignored_cols),
         train.pop('label'),
         group=train_baskets,
         eval_set=[(valid.drop(columns=ignored_cols), valid.pop('label'))],
-        eval_group=[valid_baskets], eval_at=[1, 2, 5, 10, 12]
+        eval_group=[valid_baskets], early_stopping_rounds=20
     )
 
     cols = [col for col in train.columns if col not in ignored_cols]
