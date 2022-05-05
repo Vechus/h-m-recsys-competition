@@ -15,16 +15,19 @@ def func(csv_b):
         prediction_a = csv_a[csv_a['customer_id'] == row['customer_id']]['prediction'].values[0]
         prediction_b = row['prediction']
         prediction_list = " ".join(prediction_a.split(' ')[:2] + prediction_b.split(' ')[1:11])
-        print(prediction_list)
+        # print(prediction_list)
 
         csv_a.loc[csv_a['customer_id'] == row['customer_id'], 'prediction'] = prediction_list
+
+        print(csv_a[csv_a['customer_id'] == row['customer_id']])
 
 
 def parallelize_dataframe(func):
     csv_b = pd.read_csv(DATASET_PATH + '/P3alphaRP3betaItemKNN_CFCBF_HybridHybridRecommender-submission-final.csv')
     num_cores = multiprocessing.cpu_count() - 5
     num_partitions = num_cores
-    df_split = np.array_split(csv_b, num_partitions)
+    df_split = np.array_split(csv_b[0:10], num_partitions)
+    print(df_split)
     pool = multiprocessing.Pool(num_cores)
     pool.map(func, df_split)
     pool.close()
@@ -36,7 +39,7 @@ if __name__ == '__main__':
     # current date and time
     start = datetime.now()
 
-    log_for_telegram_group = True
+    log_for_telegram_group = False
     logger = Logger('Hybrid - Start time:' + str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning. Hybrid recsys')
@@ -46,7 +49,7 @@ if __name__ == '__main__':
         DATASET_PATH = os.getenv('DATASET_PATH')
         csv_a = pd.read_csv(DATASET_PATH + '/test.csv')
         parallelize_dataframe(func)
-        csv_a.to_csv(DATASET_PATH + "/new.csv")
+        csv_a.to_csv(DATASET_PATH + "/new.csv",index=False)
     except Exception as e:
         if log_for_telegram_group:
             logger.log('We got an exception! Check log and turn off the machine.')
