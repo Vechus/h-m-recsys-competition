@@ -463,6 +463,13 @@ if __name__ == "__main__":
         #     eval_group= valid_baskets
     )
 
+    cols = [col for col in train.columns if col not in ['t_dat', 'customer_id', 'article_id', 'label']]
+    imps = ranker.feature_importances_
+    df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
+    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
+    print(df_imps.head(30))
+    print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
+
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
@@ -490,12 +497,12 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(k) for k in x]))
 
     preds = sample_sub[['customer_id']].merge(
         preds
             .reset_index()
             .rename(columns={'article_id': 'prediction'}), how='left')
-    preds['prediction'].fillna(' '.join(['0' + str(art) for art in dummy_list_2w]), inplace=True)
+    preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
 
     preds.to_csv(os.path.join(path, 'submission_ranking_0505.csv'), index=False)
