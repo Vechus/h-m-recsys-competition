@@ -246,7 +246,12 @@ class Dataset(object):
             URM_all = self.get_URM_all()
         except KeyError:
             print("No URM_all has been found, trying with URM_train...")
-            URM_all = self.get_URM_from_name("URM_train")
+            try:
+                URM_all = self.get_URM_from_name("URM_train")
+            except KeyError:
+                print("Neither URM_all nor URM_train, using global statistics...")
+                self.print_statistics_global()
+                return
 
         n_users, n_items = URM_all.shape
 
@@ -411,7 +416,27 @@ class Dataset(object):
         try:
             URM_all = self.get_URM_all()
         except KeyError:
-            URM_all = self.get_URM_from_name("URM_train")
+            try:
+                URM_all = self.get_URM_from_name("URM_train")
+            except KeyError:
+                for URM_name, URM_object in self.AVAILABLE_URM.items():
+                    URM_all = URM_object
+                    n_interactions = URM_all.nnz
+
+                    assert n_interactions != 0, print_preamble + "Number of interactions in URM is 0"
+
+                    if self.is_implicit():
+                        assert np.all(
+                            URM_all.data == 1.0), print_preamble + "The DataReader is stated to be implicit but the main URM is not"
+                        assert_URM_ICM_mapper_consistency(URM_DICT=self.AVAILABLE_URM,
+                                                          user_original_ID_to_index=self.user_original_ID_to_index,
+                                                          item_original_ID_to_index=self.item_original_ID_to_index,
+                                                          ICM_DICT=self.AVAILABLE_ICM,
+                                                          ICM_MAPPER_DICT=self.AVAILABLE_ICM_feature_mapper,
+                                                          UCM_DICT=self.AVAILABLE_UCM,
+                                                          UCM_MAPPER_DICT=self.AVAILABLE_UCM_feature_mapper,
+                                                          DATA_SPLITTER_NAME=self.DATASET_NAME)
+                        return
 
         n_interactions = URM_all.nnz
 

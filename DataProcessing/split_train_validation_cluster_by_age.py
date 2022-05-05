@@ -51,11 +51,13 @@ if __name__ == "__main__":
     join_result.reset_index(inplace=True)
     print(join_result)
 
-    for k in range(1, len(age_clusters) - 1):
+    for k in range(1, len(age_clusters)):
+        print("Creating {} cluster...".format(k))
         current_cluster = join_result[join_result["age_cluster"] == k]
         # print(set(current_cluster.columns))
         manager.add_URM(current_cluster, "URM_train_cluster_{}".format(k))
 
+    manager.add_URM(validation_df, "URM_validation")
     dataset = manager.generate_Dataset(DATASET_NAME, False)
     print("Done! Saving dataset in processed/{}/".format(DATASET_NAME))
     dataset.save_data('../processed/{}/'.format(DATASET_NAME))

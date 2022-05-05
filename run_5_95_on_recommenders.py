@@ -1,3 +1,6 @@
+import pandas as pd
+
+import Recommenders.NonPersonalizedRecommender
 from Recommenders.Recommender_import_list import *
 
 from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
@@ -8,7 +11,7 @@ from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFR
 from Evaluation.Evaluator import EvaluatorHoldout, EvaluatorMultipleURMs
 import traceback, os
 
-dataset_name = "hm-exponential-decay15-Validation_salesWeek-Train_3months"
+dataset_name = "hm-exponential-age-clustered"
 """
 Name of the folder inside processed where the dataset was saved with Dataset.save_data()
 """
@@ -19,7 +22,18 @@ def _get_instance(recommender_class, URM_train, ICM_all, UCM_all):
         recommender_object = recommender_class(URM_train, ICM_all)
     elif issubclass(recommender_class, BaseUserCBFRecommender):
         recommender_object = recommender_class(URM_train, UCM_all)
+    elif recommender_class == Recommenders.NonPersonalizedRecommender.ExplicitTopPopAgeClustered:
+        list_of_URMs = []
+        print("Reading mapper for age_groups...")
+        customer_mapper_df = pd.read_csv("customers_age_group.csv")
+        customer_mapper_df.set_index("UserID", inplace=True)
+        print(customer_mapper_df)
+        for URM_name, URM in dataset_object.AVAILABLE_URM.items():
+            if URM_name != "URM_validation":
+                list_of_URMs.append(URM)
+        recommender_object = recommender_class(list_of_URMs, dataset_object, customer_mapper_df)
     else:
+        print(recommender_class)
         recommender_object = recommender_class(URM_train)
 
     return recommender_object
@@ -35,18 +49,19 @@ if __name__ == '__main__':
     print("Loaded dataset into memory...")
     # print(dataset_object.AVAILABLE_URM)
     # Here all URMs and ICMs must be loaded, if no URM_all is present an error will occur in Dataset library
-    URM_train = dataset_object.get_URM_from_name('URM_train')
+    # URM_train = dataset_object.get_URM_from_name('URM_train')
     URM_test = dataset_object.get_URM_from_name('URM_validation')
     for ICM_name, ICM_object in dataset_object.get_loaded_ICM_dict().items():
         print(ICM_name)
     ICM_all = []
     UCM_all = []
-    print(URM_train.shape)
+    URM_train = []
+    print(URM_train)
     print(URM_test.shape)
     dataset_object.print_statistics_global()
 
     recommender_class_list = [
-        explicit_TopPop
+        ExplicitTopPopAgeClustered
     ]
 
     evaluator = EvaluatorHoldout(URM_test, [5, 12], exclude_seen=True)
@@ -90,6 +105,7 @@ if __name__ == '__main__':
             recommender_object.fit(**fit_params)
 
             results_run_1, results_run_string_1 = evaluator.evaluateRecommender(recommender_object)
+            print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
             results_5 = evaluator5.evaluate_with_statistics(recommender_object)
             results_95 = evaluator95.evaluate_with_statistics(recommender_object)
 
@@ -104,7 +120,6 @@ if __name__ == '__main__':
             #
             # if recommender_class not in [Random]:
             #     assert results_run_1.equals(results_run_2)
-            print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
             # print("Algorithm: {}, results on 5 splits: {}".format(recommender_class, results_5[12]["MAP"]))
             print("Result recap on 5% splits: \n")
             evaluator5.print_map_statistics()
