@@ -8,18 +8,21 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from Utils.Logger import Logger
+from multiprocessing import Manager
+
 
 
 def func(csv_b):
+
     for index, row in csv_b.iterrows():
-        prediction_a = csv_a[csv_a['customer_id'] == row['customer_id']]['prediction'].values[0]
+        prediction_a = ns.df[ns.df['customer_id'] == row['customer_id']]['prediction'].values[0]
         prediction_b = row['prediction']
         prediction_list = " ".join(prediction_a.split(' ')[:2] + prediction_b.split(' ')[1:11])
         # print(prediction_list)
 
-        csv_a.loc[csv_a['customer_id'] == row['customer_id'], 'prediction'] = prediction_list
+        ns.df.loc[ns.df['customer_id'] == row['customer_id'], 'prediction'] = prediction_list
 
-        print(csv_a[csv_a['customer_id'] == row['customer_id']])
+        print(ns.df[ns.df['customer_id'] == row['customer_id']])
 
 
 def parallelize_dataframe(func):
@@ -29,8 +32,7 @@ def parallelize_dataframe(func):
     df_split = np.array_split(csv_b[0:1000], num_partitions)
     pool = multiprocessing.Pool(num_cores)
     pool.map(func, df_split)
-    csv_a.to_csv(DATASET_PATH + "/new.csv", index=False)
-    print("Save file to "+DATASET_PATH + "/new.csv")
+
     pool.close()
     pool.join()
 
@@ -49,7 +51,12 @@ if __name__ == '__main__':
         load_dotenv()
         DATASET_PATH = os.getenv('DATASET_PATH')
         csv_a = pd.read_csv(DATASET_PATH + '/test.csv')
+        mgr = Manager()
+        ns = mgr.Namespace()
+        ns.df = csv_a
         parallelize_dataframe(func)
+        ns.df.to_csv(DATASET_PATH + "/new.csv", index=False)
+        print("Save file to " + DATASET_PATH + "/new.csv")
     except Exception as e:
         if log_for_telegram_group:
             logger.log('We got an exception! Check log and turn off the machine.')
