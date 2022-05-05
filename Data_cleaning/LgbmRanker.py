@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 import os
 import joblib
 import re
@@ -289,11 +288,9 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
 
-
     start_date_train = '2020-08-15'
     end_date_train = '2020-09-23'
     end_date_validation = '2020-09-23'
-
 
     label = "label"
 
@@ -323,9 +320,9 @@ if __name__ == "__main__":
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
     train = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(start_date_train)) &
-    (transactions_df.t_dat < pd.to_datetime(end_date_train))]
+                                (transactions_df.t_dat < pd.to_datetime(end_date_train))]
     valid = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(end_date_train)) &
-    (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
+                                (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
 
     train = (train
              .merge(user_features, on=('customer_id'))
@@ -426,8 +423,8 @@ if __name__ == "__main__":
 
     negatives = prepare_candidates(train['customer_id'].unique(), 15)
     negatives['t_dat'] = negatives['customer_id'].map(last_dates)
-    trues = train[['customer_id', 'article_id', 't_dat']]
-    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id', 't_dat'], how='inner')
+    trues = train[['customer_id', 'article_id']]  # , 't_dat'
+    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id'], how='inner')
     negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
 
     negatives = (
@@ -463,14 +460,38 @@ if __name__ == "__main__":
         #     eval_group= valid_baskets
     )
 
+    cols = [col for col in train.columns if col not in ['t_dat', 'customer_id', 'article_id', 'label']]
+    imps = ranker.feature_importances_
+    df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
+    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
+    print(df_imps.head(30))
+    print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
+
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
-    candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
-    candidates = (
-        candidates
+    # candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
+    # candidates = (
+    #     candidates
+    #         .merge(user_features, on=('customer_id'))
+    #         .merge(item_features, on=('article_id'))
+    # )
+
+    df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
+    print("start")
+    df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
+    df = (
+        df.explode('prediction')
+            .rename(columns={'prediction': 'article_id'})
+    )
+    print("end")
+
+    df = (
+        df
             .merge(user_features, on=('customer_id'))
             .merge(item_features, on=('article_id'))
     )
+
+    candidates = df
 
     preds = []
     batch_size = 1000000
@@ -490,12 +511,12 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join([str(k) for k in x]))
 
     preds = sample_sub[['customer_id']].merge(
         preds
             .reset_index()
             .rename(columns={'article_id': 'prediction'}), how='left')
-    preds['prediction'].fillna(' '.join(['0' + str(art) for art in dummy_list_2w]), inplace=True)
+    preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
 
     preds.to_csv(os.path.join(path, 'submission_ranking_0505.csv'), index=False)
