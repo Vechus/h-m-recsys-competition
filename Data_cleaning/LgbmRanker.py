@@ -426,8 +426,8 @@ if __name__ == "__main__":
 
     negatives = prepare_candidates(train['customer_id'].unique(), 15)
     negatives['t_dat'] = negatives['customer_id'].map(last_dates)
-    trues = train[['customer_id', 'article_id', 't_dat']]
-    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id', 't_dat'], how='inner')
+    trues = train[['customer_id', 'article_id']] #, 't_dat'
+    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id'], how='inner')
     negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
 
     negatives = (
