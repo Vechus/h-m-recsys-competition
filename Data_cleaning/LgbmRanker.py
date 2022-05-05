@@ -1,12 +1,6 @@
 import pandas as pd
 import numpy as np
-import gc
 
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import f1_score
-from lightgbm import LGBMClassifier, early_stopping, log_evaluation
-from lightgbm import LGBMRanker
 
 import os
 import joblib
@@ -150,7 +144,7 @@ def create_article_feat(df_article, df_transactions, end_date, path):
 def create_customer_feat(df, df_transactions, end_date, path):
     df = df.drop(["rebuy_ratio_customer", "buy_with_discount_ratio_customer"], axis=1)
     df_transactions = df_transactions.query("t_dat<'" + end_date + "'")
-    # print("max date: ", max(df_transactions['t_dat']))
+    print("max date: ", max(df_transactions['t_dat']))
     df_customer_group = df_transactions.groupby(['customer_id'])
     list2 = []
     for each in df_customer_group:
@@ -182,9 +176,14 @@ def create_customer_feat(df, df_transactions, end_date, path):
     customer_dummy_cols = ["club_member_status", "fashion_news_frequency"]
 
     df = df.drop(customer_drop_cols, axis=1)
+    #     df.loc[:, "FN"] = df["FN"].fillna(0)
+    #     df.loc[:, "Active"] = df["Active"].fillna(0)
+    #     df.loc[:, "club_member_status"] = df["club_member_status"].fillna("NONE")
+    #     df.loc[:, "fashion_news_frequency"] = df["fashion_news_frequency"].fillna("NONE")
+    #     df.loc[:, "age"] = df["age"].fillna(0)
     df.loc[:, "age"] = np.log1p(df["age"])
     df = pd.get_dummies(df, columns=customer_dummy_cols)
-    # df = df.drop(['age', 'age_class_10'], axis=1)
+    df = df.drop(['age', 'age_class_10'], axis=1)
 
     df.to_pickle(os.path.join(path, "customer_features.pkl"))
 
@@ -290,9 +289,11 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     output_dir = path
 
+
     start_date_train = '2020-08-15'
     end_date_train = '2020-09-23'
     end_date_validation = '2020-09-23'
+
 
     label = "label"
 
@@ -308,19 +309,12 @@ if __name__ == "__main__":
     df_article_feat_train = create_article_feat(df_article, df_trans_all, end_date_train, path)
     df_customer_feat_train = create_customer_feat(df_customer, df_trans_all, end_date_train, path)
 
-    df_article_feat_validation = create_article_feat(df_article, df_trans_all, end_date_validation, path)
-    df_customer_feat_validation = create_customer_feat(df_customer, df_trans_all, end_date_validation, path)
-
     del df_article
     del df_customer
     del df_trans_all
 
-    user_features_train = df_customer_feat_train
-    item_features_train = df_article_feat_train
-
-    user_features_validation = df_customer_feat_validation
-    item_features_validation = df_article_feat_validation
-
+    user_features = df_customer_feat_train
+    item_features = df_article_feat_train
     transactions_df = df_trans
 
     df_4w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-08-24')].copy()
@@ -329,19 +323,19 @@ if __name__ == "__main__":
     df_1w = transactions_df[transactions_df['t_dat'] >= pd.to_datetime('2020-09-15')].copy()
 
     train = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(start_date_train)) &
-                                (transactions_df.t_dat < pd.to_datetime(end_date_train))]
+    (transactions_df.t_dat < pd.to_datetime(end_date_train))]
     valid = transactions_df.loc[(transactions_df.t_dat >= pd.to_datetime(end_date_train)) &
-                                (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
+    (transactions_df.t_dat < pd.to_datetime(end_date_validation))]
 
     train = (train
-             .merge(user_features_train, on=('customer_id'))
-             .merge(item_features_train, on=('article_id'))
+             .merge(user_features, on=('customer_id'))
+             .merge(item_features, on=('article_id'))
              )
     train.sort_values(['t_dat', 'customer_id'], inplace=True)
 
     valid = (valid
-             .merge(user_features_validation, on=('customer_id'))
-             .merge(item_features_validation, on=('article_id'))
+             .merge(user_features, on=('customer_id'))
+             .merge(item_features, on=('article_id'))
              )
     valid.sort_values(['t_dat', 'customer_id'], inplace=True)
 
@@ -432,14 +426,14 @@ if __name__ == "__main__":
 
     negatives = prepare_candidates(train['customer_id'].unique(), 15)
     negatives['t_dat'] = negatives['customer_id'].map(last_dates)
-    trues = train[['customer_id', 'article_id']]
-    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id'], how='inner')
+    trues = train[['customer_id', 'article_id', 't_dat']]
+    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id', 't_dat'], how='inner')
     negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
 
     negatives = (
         negatives_new
-            .merge(user_features_train, on=('customer_id'))
-            .merge(item_features_train, on=('article_id'))
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
     )
     negatives['label'] = 0
 
@@ -447,45 +441,6 @@ if __name__ == "__main__":
     train.sort_values(['customer_id', 't_dat'], inplace=True)
 
     # train = train.drop_duplicates()
-
-    valid['rank'] = range(len(valid))
-    valid = (
-        valid
-            .assign(
-            rn=valid.groupby(['customer_id'])['rank']
-                .rank(method='first', ascending=False))
-            .query("rn <= 15")
-            .drop(columns=['price', 'sales_channel_id'])
-            .sort_values(['t_dat', 'customer_id'])
-    )
-    valid['label'] = 1
-
-    del valid['rank']
-    del valid['rn']
-
-    last_dates_validation = (
-        valid
-            .groupby('customer_id')['t_dat']
-            .max()
-            .to_dict()
-    )
-
-    # negatives_validation = prepare_candidates(valid['customer_id'].unique(), 15)
-    # negatives_validation['t_dat'] = negatives_validation['customer_id'].map(last_dates_validation)
-    # trues_validation = valid[['customer_id', 'article_id']]
-    # df_common_validation = pd.merge(trues_validation, negatives_validation, on=['customer_id', 'article_id'],
-    #                                 how='inner')
-    # negatives_new_validation = negatives_validation.append(df_common_validation).drop_duplicates(keep=False)
-    #
-    # negatives_validation = (
-    #     negatives_new_validation
-    #         .merge(user_features_validation, on=('customer_id'))
-    #         .merge(item_features_validation, on=('article_id'))
-    # )
-    # negatives_validation['label'] = 0
-    #
-    # valid = pd.concat([valid, negatives_validation])
-    # valid.sort_values(['customer_id', 't_dat'], inplace=True)
 
     valid_baskets = valid.groupby(['customer_id'])['article_id'].count().values
     train_baskets = train.groupby(['customer_id'])['article_id'].count().values
@@ -500,70 +455,31 @@ if __name__ == "__main__":
         verbose=10
     )
 
-    ignored_cols = ['t_dat', 'customer_id', 'article_id', 'label']
     ranker = ranker.fit(
-        train.drop(columns=ignored_cols),
+        train.drop(columns=['t_dat', 'customer_id', 'article_id', 'label']),
         train.pop('label'),
         group=train_baskets,
-        # eval_set=[(valid.drop(columns=ignored_cols), valid.pop('label'))],
-        # eval_group=[valid_baskets], early_stopping_rounds=20
+        #     eval_set=[valid.drop(columns = ['t_dat', 'customer_id', 'article_id', 'label']),valid['label']],
+        #     eval_group= valid_baskets
     )
-
-    cols = [col for col in train.columns if col not in ignored_cols]
-
-    imps = ranker.feature_importances_
-    df_imps = pd.DataFrame({"columns": train[cols].columns.tolist(), "feat_imp": imps})
-    df_imps = df_imps.sort_values("feat_imp", ascending=False).reset_index(drop=True)
-    print(df_imps.head(30))
-    print(df_imps.to_csv(os.path.join(path, "feature_importance.csv")))
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
-    #
-    # df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
-    # print("start")
-    # df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
-    # df = (
-    #     df.explode('prediction')
-    #         .rename(columns={'prediction': 'article_id'})
-    # )
-    # print("end")
 
     candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
-    # print(candidates.shape)
-    # print(df.shape)
-    #
     candidates = (
         candidates
-            .merge(user_features_validation, on=('customer_id'))
-            .merge(item_features_validation, on=('article_id'))
+            .merge(user_features, on=('customer_id'))
+            .merge(item_features, on=('article_id'))
     )
-    #
-    # print("candidates merged.")
 
-    # df = (
-    #     df
-    #         .merge(user_features, on=('customer_id'))
-    #         .merge(item_features, on=('article_id'))
-    # )
-    #
-    # print("df merged.")
-    # candidates = df
-    #
-    # # candidates = pd.concat([candidates, df], axis=0)
-    # # del df
-    # print("concat.")
-    # # candidates = candidates.drop_duplicates()
-    #
     preds = []
     batch_size = 1000000
     for bucket in tqdm(range(0, len(candidates), batch_size)):
         outputs = ranker.predict(
             candidates.iloc[bucket: bucket + batch_size]
-                .drop(columns=['customer_id', 'article_id']), num_iteration=ranker.best_iteration_
+                .drop(columns=['customer_id', 'article_id'])
         )
         preds.append(outputs)
-
-    print("pred done.")
 
     preds = np.concatenate(preds)
     candidates['preds'] = preds
@@ -574,17 +490,12 @@ if __name__ == "__main__":
             .groupby('customer_id')[['article_id']]
             .aggregate(lambda x: x.tolist())
     )
-    preds['article_id'] = preds['article_id'].apply(
-        lambda x: ' '.join([str(v) for k, v in enumerate(set(x)) if k < 12]))
-
-    print("select 12 done.")
+    preds['article_id'] = preds['article_id'].apply(lambda x: ' '.join(['0' + str(k) for k in x]))
 
     preds = sample_sub[['customer_id']].merge(
         preds
             .reset_index()
             .rename(columns={'article_id': 'prediction'}), how='left')
-    preds['prediction'].fillna(' '.join([str(art) for art in dummy_list_2w]), inplace=True)
+    preds['prediction'].fillna(' '.join(['0' + str(art) for art in dummy_list_2w]), inplace=True)
 
-    print("add customer_id done.")
-
-    preds.to_csv(os.path.join(path, 'submission_ranking_0504.csv'), index=False)
+    preds.to_csv(os.path.join(path, 'submission_ranking_0505.csv'), index=False)
