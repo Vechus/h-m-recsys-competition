@@ -40,18 +40,18 @@ def read_data_split_and_search_hybrid():
     URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
     URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
-    print("IS nan")
-    print(np.isnan(URM_train_explicit.data).any())
-    print(np.isnan(URM_validation_explicit.data).any())
-
-    print(np.isinf(URM_train_explicit.data).any())
-    print(np.isinf(URM_validation_explicit.data).any())
-
-    ICM = dataset.get_loaded_ICM_dict()[
-        "ICM_mix_top_10_accTo_CBF"]
-    print(np.isnan(ICM.data).any())
-
-    print(np.isinf(ICM.data).any())
+    # print("IS nan")
+    # print(np.isnan(URM_train_explicit.data).any())
+    # print(np.isnan(URM_validation_explicit.data).any())
+    #
+    # print(np.isinf(URM_train_explicit.data).any())
+    # print(np.isinf(URM_validation_explicit.data).any())
+    #
+    # ICM = dataset.get_loaded_ICM_dict()[
+    #     "ICM_mix_top_10_accTo_CBF"]
+    # print(np.isnan(ICM.data).any())
+    #
+    # print(np.isinf(ICM.data).any())
 
     cutoff_list = [12]
     metric_to_optimize = "MAP"
@@ -97,9 +97,6 @@ def read_data_split_and_search_hybrid():
                                               asymmetric_alpha=0.0, feature_weighting='TF-IDF',
                                               ICM_weight=0.06434559204631396)
 
-
-
-
     Hybrid_Recommenders_List = [
         # ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
         # ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
@@ -113,7 +110,7 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         [toppop_normal, toppop_exp, itemKNN_CFCBF_Hybrid_Recommenders_Top10],
-        [toppop_explicit,itemKNN_CFCBF_Hybrid_Recommenders_Top10,itemKNN_CFCBF_Hybrid_Recommenders_ALL],
+        [toppop_explicit, itemKNN_CFCBF_Hybrid_Recommenders_Top10, itemKNN_CFCBF_Hybrid_Recommenders_ALL],
         # [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders_Top10,
         #  itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name,
         #  itemKNN_CFCBF_Hybrid_Recommenders_ALL],
@@ -121,28 +118,26 @@ def read_data_split_and_search_hybrid():
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
 
-    hybrid_recommenders = [
-        [GeneralizedMergedHybridRecommender(URM_train_explicit.copy(), recommenders=recommenders.copy())] for
-        recommenders in Hybrid_Recommenders_List]
+    hybrid_recommenders = [[GeneralizedMergedHybridRecommender(URM_train.copy(), recommenders=recommenders.copy())] for
+                           recommenders in Hybrid_Recommenders_List]
 
     def hybrid_parameter_search(hybrid_recommender: list):  # list of GeneralizedMergedHybridRecommender
-        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation_explicit.copy()], cutoff_list=cutoff_list.copy(),
+        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation.copy()], cutoff_list=cutoff_list.copy(),
                                                     verbose=False)
         results = []
 
         tuning_params = {}
-        for i in range(len(hybrid_recommender[0].recommenders)):
-            tuning_params['hybrid{}'.format(i)] = (-1, 1)
+        for i in range(len(hybrid_recommender[0].recommenders) - 1):
+            tuning_params['hybrid{}'.format(i)] = (0, 1)
 
         if len(hybrid_recommender[0].recommenders) == 2:
 
             def BO_func(
-                    hybrid0,
-                    hybrid1
+                    hybrid0
             ):
                 hybrid_recommender[0].fit(alphas=[
                     hybrid0,
-                    hybrid1
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
@@ -153,13 +148,12 @@ def read_data_split_and_search_hybrid():
 
             def BO_func(
                     hybrid0,
-                    hybrid1,
-                    hybrid2
+                    hybrid1
             ):
                 hybrid_recommender[0].fit(alphas=[
-                    hybrid0,
-                    hybrid1,
-                    hybrid2
+                    hybrid0 * hybrid1,
+                    hybrid0 * (1 - hybrid1),
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
@@ -171,14 +165,13 @@ def read_data_split_and_search_hybrid():
             def BO_func(
                     hybrid0,
                     hybrid1,
-                    hybrid2,
-                    hybrid3
+                    hybrid2
             ):
                 hybrid_recommender[0].fit(alphas=[
-                    hybrid0,
-                    hybrid1,
-                    hybrid2,
-                    hybrid3
+                    hybrid0 * hybrid1 * hybrid2,
+                    hybrid0 * hybrid1 * (1 - hybrid2),
+                    hybrid0 * (1 - hybrid1),
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
@@ -191,15 +184,14 @@ def read_data_split_and_search_hybrid():
                     hybrid0,
                     hybrid1,
                     hybrid2,
-                    hybrid3,
-                    hybrid4
+                    hybrid3
             ):
                 hybrid_recommender[0].fit(alphas=[
-                    hybrid0,
-                    hybrid1,
-                    hybrid2,
-                    hybrid3,
-                    hybrid4
+                    hybrid0 * hybrid1 * hybrid2 * hybrid3,
+                    hybrid0 * hybrid1 * hybrid2 * (1 - hybrid3),
+                    hybrid0 * hybrid1 * (1 - hybrid2),
+                    hybrid0 * (1 - hybrid1),
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
