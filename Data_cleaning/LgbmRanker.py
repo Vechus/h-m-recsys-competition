@@ -317,13 +317,6 @@ def prepare_candidates_new(customers_id, n_candidates=12):
     prediction_dict = {}
     # dummy_list = list((df_2w['article_id'].value_counts()).index)[:n_candidates]
 
-    ####New########################################################################
-    population = ['a', 'b', 'c']
-    weights = [np.exp(1 / (i + 1)) for i, j in enumerate(population)]
-    weighted_sample(population, weights, k=2)
-
-    ####New########################################################################
-
     for i, cust_id in tqdm(enumerate(customers_id)):
         # comment this for validation
         if cust_id in purchase_dict_1w:
@@ -331,8 +324,7 @@ def prepare_candidates_new(customers_id, n_candidates=12):
             l = [y[0] for y in l]
             dummy_list_1w_new = list(set(dummy_list_1w) - set(l))
             weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_1w_new)]
-            supplement_list = weighted_sample(dummy_list_1w_new, weights, k=n_candidates - len(l))
-            s = l + supplement_list
+            s = weighted_sample(dummy_list_1w_new, weights, k=n_candidates)
             # if len(l) > n_candidates:
             #     s = l[:n_candidates]
             # else:
@@ -346,8 +338,7 @@ def prepare_candidates_new(customers_id, n_candidates=12):
             l = [y[0] for y in l]
             dummy_list_2w_new = list(set(dummy_list_2w) - set(l))
             weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_2w_new)]
-            supplement_list = weighted_sample(dummy_list_2w_new, weights, k=n_candidates - len(l))
-            s = l + supplement_list
+            s = weighted_sample(dummy_list_2w_new, weights, k=n_candidates)
             # if len(l) > n_candidates:
             #     s = l[:n_candidates]
             # else:
@@ -357,10 +348,8 @@ def prepare_candidates_new(customers_id, n_candidates=12):
             l = sorted((purchase_dict_3w[cust_id]).items(), key=lambda x: x[1], reverse=True)
             l = [y[0] for y in l]
             dummy_list_3w_new = list(set(dummy_list_3w) - set(l))
-            s = dummy_list_3w_new[:(n_candidates - len(l))]
             weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_3w_new)]
-            supplement_list = weighted_sample(dummy_list_3w_new, weights, k=n_candidates - len(l))
-            s = l + supplement_list
+            s = weighted_sample(dummy_list_3w_new, weights, k=n_candidates)
             # if len(l) > n_candidates:
             #     s = l[:n_candidates]
             # else:
@@ -370,10 +359,8 @@ def prepare_candidates_new(customers_id, n_candidates=12):
             l = sorted((purchase_dict_4w[cust_id]).items(), key=lambda x: x[1], reverse=True)
             l = [y[0] for y in l]
             dummy_list_4w_new = list(set(dummy_list_4w) - set(l))
-            s = dummy_list_4w_new[:(n_candidates - len(l))]
             weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_4w_new)]
-            supplement_list = weighted_sample(dummy_list_4w_new, weights, k=n_candidates - len(l))
-            s = l + supplement_list
+            s = weighted_sample(dummy_list_4w_new, weights, k=n_candidates)
             # if len(l) > n_candidates:
             #     s = l[:n_candidates]
             # else:
