@@ -29,16 +29,16 @@ def read_data_split_and_search_hybrid():
         '{}/processed_train_20190622_20190923_val_20190923_20190930_Explicit_and_exp/hm/'.format(DATASET_PATH))
     print("Loaded dataset into memory...")
 
-    # # get URM_train, URM_test, URM_validation
-    # URM_train = dataset.get_URM_from_name('URM_train')
-    # # URM_test = dataset.get_URM_from_name('URM_test')
-    # URM_validation = dataset.get_URM_from_name('URM_validation')
+    # get URM_train, URM_test, URM_validation
+    URM_train = dataset.get_URM_from_name('URM_train')
+    # URM_test = dataset.get_URM_from_name('URM_test')
+    URM_validation = dataset.get_URM_from_name('URM_validation')
 
     URM_train_explicit = dataset.get_URM_from_name('URM_train_explicit')
     URM_validation_explicit = dataset.get_URM_from_name('URM_validation_explicit')
 
-    # URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
-    # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
+    URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
+    URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
     print("IS nan")
     print(np.isnan(URM_train_explicit.data).any())
@@ -60,14 +60,14 @@ def read_data_split_and_search_hybrid():
     n_cases = 50
     n_random_starts = int(n_cases / 3)
 
-    # toppop_exp = TopPop(URM_train_exp)
-    # toppop_exp.fit()
-    #
-    # toppop_explicit = TopPop(URM_train_explicit)
-    # toppop_explicit.fit()
-    #
-    # toppop_normal = TopPop(URM_train)
-    # toppop_normal.fit()
+    toppop_exp = TopPop(URM_train_exp)
+    toppop_exp.fit()
+
+    toppop_explicit = TopPop(URM_train_explicit)
+    toppop_explicit.fit()
+
+    toppop_normal = TopPop(URM_train)
+    toppop_normal.fit()
 
     p3alphaRecommender = P3alphaRecommender(URM_train_explicit)
     p3alphaRecommender.fit(topK=615, alpha=0.4603011612937017, normalize_similarity=True)
@@ -97,6 +97,9 @@ def read_data_split_and_search_hybrid():
                                               asymmetric_alpha=0.0, feature_weighting='TF-IDF',
                                               ICM_weight=0.06434559204631396)
 
+
+
+
     Hybrid_Recommenders_List = [
         # ItemKNNCBFRecommenders + ItemKNN_CFCBF_Hybrid_Recommenders,
         # ItemKNNCBFRecommenders + [p3alphaRecommender, rp3betaRecommender, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
@@ -109,10 +112,11 @@ def read_data_split_and_search_hybrid():
         # [toppop_normal, toppop_explicit, toppop_exp],
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
-        # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2], ItemKNNCBFRecommenders[0]]
-        [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders_Top10,
-         itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name,
-         itemKNN_CFCBF_Hybrid_Recommenders_ALL],
+        [toppop_normal, toppop_exp, itemKNN_CFCBF_Hybrid_Recommenders_Top10],
+        [toppop_explicit,itemKNN_CFCBF_Hybrid_Recommenders_Top10,itemKNN_CFCBF_Hybrid_Recommenders_ALL],
+        # [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders_Top10,
+        #  itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name,
+        #  itemKNN_CFCBF_Hybrid_Recommenders_ALL],
     ]
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
@@ -128,7 +132,7 @@ def read_data_split_and_search_hybrid():
 
         tuning_params = {}
         for i in range(len(hybrid_recommender[0].recommenders)):
-            tuning_params['hybrid{}'.format(i)] = (1e-2, 1)
+            tuning_params['hybrid{}'.format(i)] = (-1, 1)
 
         if len(hybrid_recommender[0].recommenders) == 2:
 
