@@ -634,7 +634,7 @@ if __name__ == "__main__":
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
-    candidates = prepare_candidates_for_submission(sample_sub.customer_id.unique(), 50)
+    candidates = prepare_candidates_for_submission(sample_sub.customer_id.unique(), 30)
     candidates = (
         candidates
             .merge(user_features, on=('customer_id'))
