@@ -143,18 +143,17 @@ def read_data_split_and_search_hybrid():
         results = []
 
         tuning_params = {}
-        for i in range(len(hybrid_recommender[0].recommenders)):
-            tuning_params['hybrid{}'.format(i)] = (-1, 1)
+        for i in range(len(hybrid_recommender[0].recommenders) - 1):
+            tuning_params['hybrid{}'.format(i)] = (0, 1)
 
         if len(hybrid_recommender[0].recommenders) == 2:
             
             def BO_func(
-                    hybrid0,
-                    hybrid1
+                    hybrid0
             ):
                 hybrid_recommender[0].fit(alphas=[
                     hybrid0,
-                    hybrid1
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
@@ -165,13 +164,12 @@ def read_data_split_and_search_hybrid():
 
             def BO_func(
                     hybrid0,
-                    hybrid1,
-                    hybrid2
+                    hybrid1
             ):
                 hybrid_recommender[0].fit(alphas=[
-                    hybrid0,
-                    hybrid1,
-                    hybrid2
+                    hybrid0 * hybrid1,
+                    hybrid0 * (1 - hybrid1),
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
@@ -183,14 +181,13 @@ def read_data_split_and_search_hybrid():
             def BO_func(
                     hybrid0,
                     hybrid1,
-                    hybrid2,
-                    hybrid3
+                    hybrid2
             ):
                 hybrid_recommender[0].fit(alphas=[
-                    hybrid0,
-                    hybrid1,
-                    hybrid2,
-                    hybrid3
+                    hybrid0 * hybrid1 * hybrid2,
+                    hybrid0 * hybrid1 * (1 - hybrid2),
+                    hybrid0 * (1 - hybrid1),
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
@@ -203,15 +200,14 @@ def read_data_split_and_search_hybrid():
                     hybrid0,
                     hybrid1,
                     hybrid2,
-                    hybrid3,
-                    hybrid4
+                    hybrid3
             ):
                 hybrid_recommender[0].fit(alphas=[
-                    hybrid0,
-                    hybrid1,
-                    hybrid2,
-                    hybrid3,
-                    hybrid4
+                    hybrid0 * hybrid1 * hybrid2 * hybrid3,
+                    hybrid0 * hybrid1 * hybrid2 * (1 - hybrid3),
+                    hybrid0 * hybrid1 * (1 - hybrid2),
+                    hybrid0 * (1 - hybrid1),
+                    1 - hybrid0
                 ])
                 result = evaluator_validation.evaluateRecommender(hybrid_recommender)
                 results.append(result)
