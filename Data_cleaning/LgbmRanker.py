@@ -11,6 +11,7 @@ from sklearn import preprocessing
 
 from lightgbm.sklearn import LGBMRanker
 from datetime import timedelta
+import random, itertools, bisect
 
 from tqdm import tqdm
 
@@ -220,6 +221,37 @@ def create_dataset_faster(df_truth, df_article_feat, df_customer_feat):
     return df_data
 
 
+def weighted_sample(population, weights, k=1):
+    """Like random.sample, but add weights.
+    """
+    n = len(population)
+    if n == 0:
+        return []
+    if not 0 <= k <= n:
+        raise ValueError("Sample larger than population or is negative")
+    if len(weights) != n:
+        raise ValueError('The number of weights does not match the population')
+
+    cum_weights = list(itertools.accumulate(weights))
+    total = cum_weights[-1]
+    if total <= 0:  # prevent weight errors
+        return random.sample(population, k=k)
+    hi = len(cum_weights) - 1
+
+    selected = set()
+    _bisect = bisect.bisect
+    _random = random.random
+    selected_add = selected.add
+    result = [None] * k
+    for i in range(k):
+        j = _bisect(cum_weights, _random() * total, 0, hi)
+        while j in selected:
+            j = _bisect(cum_weights, _random() * total, 0, hi)
+        selected_add(j)
+        result[i] = population[j]
+    return result
+
+
 def prepare_candidates(customers_id, n_candidates=12):
     """
   df - basically, dataframe with customers(customers should be unique)
@@ -233,6 +265,148 @@ def prepare_candidates(customers_id, n_candidates=12):
             #         print(purchase_dict_1w[cust_id])
             l = sorted((purchase_dict_1w[cust_id]).items(), key=lambda x: x[1], reverse=True)
             #         print(l)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_1w_new = list(set(dummy_list_1w) - set(l))
+                s = l + dummy_list_1w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_2w:
+            l = sorted((purchase_dict_2w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_2w_new = list(set(dummy_list_2w) - set(l))
+                s = l + dummy_list_2w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_3w:
+            l = sorted((purchase_dict_3w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_3w_new = list(set(dummy_list_3w) - set(l))
+                s = l + dummy_list_3w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_4w:
+            l = sorted((purchase_dict_4w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            if len(l) > n_candidates:
+                s = l[:n_candidates]
+            else:
+                dummy_list_4w_new = list(set(dummy_list_4w) - set(l))
+                s = l + dummy_list_4w_new[:(n_candidates - len(l))]
+        else:
+            s = dummy_list
+        prediction_dict[cust_id] = s
+
+    k = list(map(lambda x: x[0], prediction_dict.items()))
+    v = list(map(lambda x: x[1], prediction_dict.items()))
+    negatives_df = pd.DataFrame({'customer_id': k, 'negatives': v})
+    negatives_df = (
+        negatives_df
+            .explode('negatives')
+            .rename(columns={'negatives': 'article_id'})
+    )
+    return negatives_df
+
+
+def prepare_candidates_new(customers_id, n_candidates=12):
+    """
+  df - basically, dataframe with customers(customers should be unique)
+  """
+    prediction_dict = {}
+    # dummy_list = list((df_2w['article_id'].value_counts()).index)[:n_candidates]
+
+    ####New########################################################################
+    population = ['a', 'b', 'c']
+    weights = [np.exp(1 / (i + 1)) for i, j in enumerate(population)]
+    weighted_sample(population, weights, k=2)
+
+    ####New########################################################################
+
+    for i, cust_id in tqdm(enumerate(customers_id)):
+        # comment this for validation
+        if cust_id in purchase_dict_1w:
+            l = sorted((purchase_dict_1w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            dummy_list_1w_new = list(set(dummy_list_1w) - set(l))
+            weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_1w_new)]
+            supplement_list = weighted_sample(dummy_list_1w_new, weights, k=n_candidates - len(l))
+            s = l + supplement_list
+            # if len(l) > n_candidates:
+            #     s = l[:n_candidates]
+            # else:
+            #     dummy_list_1w_new = list(set(dummy_list_1w) - set(l))
+            # weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_1w_new)]
+            # supplement_list = weighted_sample(dummy_list_1w_new, weights, k=n_candidates - len(l))
+            # s = l + supplement_list
+            # s = l + dummy_list_1w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_2w:
+            l = sorted((purchase_dict_2w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            dummy_list_2w_new = list(set(dummy_list_2w) - set(l))
+            weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_2w_new)]
+            supplement_list = weighted_sample(dummy_list_2w_new, weights, k=n_candidates - len(l))
+            s = l + supplement_list
+            # if len(l) > n_candidates:
+            #     s = l[:n_candidates]
+            # else:
+            #     dummy_list_2w_new = list(set(dummy_list_2w) - set(l))
+            #     s = l + dummy_list_2w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_3w:
+            l = sorted((purchase_dict_3w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            dummy_list_3w_new = list(set(dummy_list_3w) - set(l))
+            s = dummy_list_3w_new[:(n_candidates - len(l))]
+            weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_3w_new)]
+            supplement_list = weighted_sample(dummy_list_3w_new, weights, k=n_candidates - len(l))
+            s = l + supplement_list
+            # if len(l) > n_candidates:
+            #     s = l[:n_candidates]
+            # else:
+            #     dummy_list_3w_new = list(set(dummy_list_3w) - set(l))
+            #     s = l + dummy_list_3w_new[:(n_candidates - len(l))]
+        elif cust_id in purchase_dict_4w:
+            l = sorted((purchase_dict_4w[cust_id]).items(), key=lambda x: x[1], reverse=True)
+            l = [y[0] for y in l]
+            dummy_list_4w_new = list(set(dummy_list_4w) - set(l))
+            s = dummy_list_4w_new[:(n_candidates - len(l))]
+            weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list_4w_new)]
+            supplement_list = weighted_sample(dummy_list_4w_new, weights, k=n_candidates - len(l))
+            s = l + supplement_list
+            # if len(l) > n_candidates:
+            #     s = l[:n_candidates]
+            # else:
+            #     dummy_list_4w_new = list(set(dummy_list_4w) - set(l))
+            #     s = l + dummy_list_4w_new[:(n_candidates - len(l))]
+        else:
+            dummy_list = list((df_2w['article_id'].value_counts()).index)[:50]
+            weights = [np.exp(1 / (i + 1)) for i, j in enumerate(dummy_list)]
+            s = weighted_sample(dummy_list, weights, k=n_candidates)
+        prediction_dict[cust_id] = s
+
+    k = list(map(lambda x: x[0], prediction_dict.items()))
+    v = list(map(lambda x: x[1], prediction_dict.items()))
+    negatives_df = pd.DataFrame({'customer_id': k, 'negatives': v})
+    negatives_df = (
+        negatives_df
+            .explode('negatives')
+            .rename(columns={'negatives': 'article_id'})
+    )
+    return negatives_df
+
+
+def prepare_candidates_for_submission(customers_id, n_candidates=12):
+    """
+  df - basically, dataframe with customers(customers should be unique)
+  """
+    prediction_dict = {}
+    dummy_list = list((df_2w['article_id'].value_counts()).index)[:n_candidates]
+
+    for i, cust_id in tqdm(enumerate(customers_id)):
+        # comment this for validation
+        if cust_id in purchase_dict_1w:
+            l = sorted((purchase_dict_1w[cust_id]).items(), key=lambda x: x[1], reverse=True)
             l = [y[0] for y in l]
             if len(l) > n_candidates:
                 s = l[:n_candidates]
@@ -352,7 +526,7 @@ if __name__ == "__main__":
 
         purchase_dict_4w[cust_id][art_id] += 1
 
-    dummy_list_4w = list((df_4w['article_id'].value_counts()).index)[:12]
+    dummy_list_4w = list((df_4w['article_id'].value_counts()).index)[:50]
 
     purchase_dict_3w = {}
 
@@ -366,7 +540,7 @@ if __name__ == "__main__":
 
         purchase_dict_3w[cust_id][art_id] += 1
 
-    dummy_list_3w = list((df_3w['article_id'].value_counts()).index)[:12]
+    dummy_list_3w = list((df_3w['article_id'].value_counts()).index)[:50]
 
     purchase_dict_2w = {}
 
@@ -380,7 +554,7 @@ if __name__ == "__main__":
 
         purchase_dict_2w[cust_id][art_id] += 1
 
-    dummy_list_2w = list((df_2w['article_id'].value_counts()).index)[:12]
+    dummy_list_2w = list((df_2w['article_id'].value_counts()).index)[:50]
 
     purchase_dict_1w = {}
 
@@ -394,7 +568,7 @@ if __name__ == "__main__":
 
         purchase_dict_1w[cust_id][art_id] += 1
 
-    dummy_list_1w = list((df_1w['article_id'].value_counts()).index)[:12]
+    dummy_list_1w = list((df_1w['article_id'].value_counts()).index)[:50]
 
     # take only last 15 transactions
     train['rank'] = range(len(train))
@@ -421,14 +595,18 @@ if __name__ == "__main__":
             .to_dict()
     )
 
-    negatives = prepare_candidates(train['customer_id'].unique(), 15)
+    # negatives = prepare_candidates(train['customer_id'].unique(), 15)
+    # negatives['t_dat'] = negatives['customer_id'].map(last_dates)
+    # trues = train[['customer_id', 'article_id']]  # , 't_dat'
+    # df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id'], how='inner')
+    # negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
+
+    negatives = prepare_candidates_new(train['customer_id'].unique(), 15)
     negatives['t_dat'] = negatives['customer_id'].map(last_dates)
-    trues = train[['customer_id', 'article_id']]  # , 't_dat'
-    df_common = pd.merge(trues, negatives, on=['customer_id', 'article_id'], how='inner')
-    negatives_new = negatives.append(df_common).drop_duplicates(keep=False)
 
     negatives = (
-        negatives_new
+        # negatives_new
+        negatives
             .merge(user_features, on=('customer_id'))
             .merge(item_features, on=('article_id'))
     )
@@ -469,29 +647,29 @@ if __name__ == "__main__":
 
     sample_sub = pd.read_csv(os.path.join(path, 'sample_submission.csv'))
 
-    # candidates = prepare_candidates(sample_sub.customer_id.unique(), 12)
-    # candidates = (
-    #     candidates
-    #         .merge(user_features, on=('customer_id'))
-    #         .merge(item_features, on=('article_id'))
-    # )
-
-    df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
-    print("start")
-    df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
-    df = (
-        df.explode('prediction')
-            .rename(columns={'prediction': 'article_id'})
-    )
-    print("end")
-
-    df = (
-        df
+    candidates = prepare_candidates_for_submission(sample_sub.customer_id.unique(), 50)
+    candidates = (
+        candidates
             .merge(user_features, on=('customer_id'))
             .merge(item_features, on=('article_id'))
     )
 
-    candidates = df
+    # df = pd.read_csv(os.path.join(path, "submission_toppop_weight_decay.csv"))
+    # print("start")
+    # df['prediction'] = df.apply(lambda x: x.prediction.split(" "), axis=1)
+    # df = (
+    #     df.explode('prediction')
+    #         .rename(columns={'prediction': 'article_id'})
+    # )
+    # print("end")
+    #
+    # df = (
+    #     df
+    #         .merge(user_features, on=('customer_id'))
+    #         .merge(item_features, on=('article_id'))
+    # )
+    #
+    # candidates = df
 
     preds = []
     batch_size = 1000000
