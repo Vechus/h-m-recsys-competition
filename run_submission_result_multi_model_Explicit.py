@@ -30,6 +30,7 @@ if __name__ == '__main__':
     df_train = transactions.query(
         "'" + timestamp_submission_train[0][0] + "'<=t_dat<'" + timestamp_submission_train[0][1] + "'")
 
+
     URM_submission_train = dataset.get_URM_from_name('URM_submission_explicit_train')
 
     p3alphaRecommender = P3alphaRecommender(URM_submission_train)

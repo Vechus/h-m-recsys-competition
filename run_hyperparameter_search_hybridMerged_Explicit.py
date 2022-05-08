@@ -110,7 +110,7 @@ def read_data_split_and_search_hybrid():
         # [toppop_explicit, p3alphaRecommender, rp3betaRecommender],
         # [toppop_explicit, ItemKNN_CFCBF_Hybrid_Recommenders[2]],
         [toppop_normal, toppop_exp, itemKNN_CFCBF_Hybrid_Recommenders_Top10],
-        [toppop_explicit, itemKNN_CFCBF_Hybrid_Recommenders_Top10, itemKNN_CFCBF_Hybrid_Recommenders_ALL],
+        # [toppop_explicit, itemKNN_CFCBF_Hybrid_Recommenders_Top10, itemKNN_CFCBF_Hybrid_Recommenders_ALL],
         # [p3alphaRecommender, rp3betaRecommender, itemKNN_CFCBF_Hybrid_Recommenders_Top10,
         #  itemKNN_CFCBF_Hybrid_Recommenders_cleaned_department_name,
         #  itemKNN_CFCBF_Hybrid_Recommenders_ALL],
@@ -118,11 +118,11 @@ def read_data_split_and_search_hybrid():
 
     print('There are {} recommenders to hybridize'.format(len(Hybrid_Recommenders_List)))
 
-    hybrid_recommenders = [[GeneralizedMergedHybridRecommender(URM_train.copy(), recommenders=recommenders.copy())] for
+    hybrid_recommenders = [[GeneralizedMergedHybridRecommender(URM_train_explicit.copy(), recommenders=recommenders.copy())] for
                            recommenders in Hybrid_Recommenders_List]
 
     def hybrid_parameter_search(hybrid_recommender: list):  # list of GeneralizedMergedHybridRecommender
-        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation.copy()], cutoff_list=cutoff_list.copy(),
+        evaluator_validation = K_Fold_Evaluator_MAP([URM_validation_explicit.copy()], cutoff_list=cutoff_list.copy(),
                                                     verbose=False)
         results = []
 

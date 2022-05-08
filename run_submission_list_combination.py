@@ -22,14 +22,14 @@ def run_list_combination():
     csv_b = csv_b.join(csv_b['prediction'].str.split(' ', expand=True).add_prefix('top'))
 
     csv_a = csv_a.merge(csv_b, on=['customer_id'], how='left')
-    csv_a['Top_2_x'] = csv_a['top0_x'].map(str) + ' ' + csv_a['top1_x'].map(str)
-    csv_a['Top_3_12'] = csv_a[csv_a.columns[4:14]].apply(
-        lambda x: ' '.join(x.astype(str)), axis=1)
-    csv_a['Top_10_y'] = csv_a[csv_a.columns[16:26]].apply(
-        lambda x: ' '.join(x.astype(str)), axis=1)
+    csv_a['Top_6_x'] = csv_a['top0_x'].map(str) + ' ' + csv_a['top1_x'].map(str) + ' ' + \
+                       csv_a['top2_x'].map(str) + ' ' + csv_a['top3_x'].map(str) + ' ' + \
+                       csv_a['top4_x'].map(str) + ' ' + csv_a['top5_x'].map(str)
+    csv_a['Top_7_12'] = csv_a[csv_a.columns[8:14]].apply(lambda x: ' '.join(x.astype(str)), axis=1)
+    csv_a['Top_6_y'] = csv_a[csv_a.columns[16:22]].apply(lambda x: ' '.join(x.astype(str)), axis=1)
     # csv_a = csv_a[['customer_id', 'Top_2_x', 'Top_3_12', 'Top_10_y']]
-    csv_a.loc[csv_a['Top_10_y'].str.contains('nan'), 'Top_10_y'] = csv_a['Top_3_12']
-    csv_a['prediction'] = csv_a['Top_2_x'].map(str) + ' ' + csv_a['Top_10_y'].map(str)
+    csv_a.loc[csv_a['Top_6_y'].str.contains('nan'), 'Top_6_y'] = csv_a['Top_7_12']
+    csv_a['prediction'] = csv_a['Top_6_x'].map(str) + ' ' + csv_a['Top_6_y'].map(str)
     csv_a = csv_a[['customer_id', 'prediction']]
     csv_a.to_csv(DATASET_PATH + "/new.csv", index=False)
 
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # current date and time
     start = datetime.now()
 
-    log_for_telegram_group = False
+    log_for_telegram_group = True
     logger = Logger('Hybrid - Start time:' + str(start))
     if log_for_telegram_group:
         logger.log('Started Hyper-parameter tuning. Hybrid recsys')
