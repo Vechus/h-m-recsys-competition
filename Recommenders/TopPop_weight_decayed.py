@@ -14,7 +14,7 @@ class TopPop_weight_decayed:
     # recommend last week most popular items as alternatives to current week
 
     def get_alternate_most_popular(self, df_data, factor, return_orig=False):
-        path = 'D:/Polimi/M2-S2/'
+        path = 'dataset/'
         dataset_dict = {"articles": "articles.csv", "customers": "customers.csv",
                         "transactions": "transactions_train.csv",
                         "sample_submission": "sample_submission.csv"}
@@ -80,7 +80,7 @@ class TopPop_weight_decayed:
             return more_popular_alt_list, more_popular_alternatives
 
     def recommend(self, df_customers, file):
-        path = 'D:/Polimi/M2-S2/'
+        path = 'dataset/'
         dataset_dict = {"articles": "articles.csv", "customers": "customers.csv",
                         "transactions": "transactions_train.csv",
                         "sample_submission": "sample_submission.csv"}
