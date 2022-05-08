@@ -43,6 +43,9 @@ if __name__ == '__main__':
     URM_train_exp = dataset.get_URM_from_name('URM_train_exp')
     # URM_validation_exp = dataset.get_URM_from_name('URM_validation_exp')
 
+    toppop = TopPop(URM_submission_train)
+    toppop.fit()
+
     toppop_exp = TopPop(URM_train_exp)
     toppop_exp.fit()
 
@@ -88,7 +91,7 @@ if __name__ == '__main__':
     path = os.getenv('DATASET_PATH')
     df_sample_submission = pd.read_csv(os.path.join(path, "sample_submission.csv"))
 
-    save_path = os.path.join(path, "{}-submission-final-withTopWD_20220508.csv".format(
+    save_path = os.path.join(path, "{}-submission-final-withTopWD_20220508_control_group.csv".format(
         recommender.RECOMMENDER_NAME))
 
     f = open(save_path, "w")
@@ -122,10 +125,10 @@ if __name__ == '__main__':
         f.write(f"{i}, {well_formatted}\n")
         print("%s:%s" % (i, well_formatted))
 
-    # for i in remaining_customer_list:
-    #     recommended_items = toppop_exp.recommend(i, cutoff=12, remove_seen_flag=False)
-    #     well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
-    #     f.write(f"{i}, {well_formatted}\n")
-    #     print("%s:%s" % (i, recommended_items))
+    for i in remaining_customer_list:
+        recommended_items = toppop.recommend(i, cutoff=12, remove_seen_flag=False)
+        well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
+        f.write(f"{i}, {well_formatted}\n")
+        print("%s:%s" % (i, recommended_items))
     f.close()
     print("save complete")
