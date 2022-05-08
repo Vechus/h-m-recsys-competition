@@ -129,6 +129,6 @@ if __name__ == '__main__':
         recommended_items = toppop.recommend(i, cutoff=12, remove_seen_flag=False)
         well_formatted = " ".join([str(mapper_inv[x]) for x in recommended_items])
         f.write(f"{i}, {well_formatted}\n")
-        print("%s:%s" % (i, recommended_items))
+        print("%s:%s" % (i, well_formatted))
     f.close()
     print("save complete")
