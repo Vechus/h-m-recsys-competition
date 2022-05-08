@@ -35,7 +35,9 @@ def merge_splits_without_overwrite_origin_dataset(timestamp_df: pd.DataFrame, ti
     return dropped_timestamp_df, final_df
 
 
-def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation, exponential_decay=30, URM_train='URM_train', URM_validation='URM_validation'):
+def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_array_train, timestamp_array_validation,
+                                              exponential_decay=30, URM_train='URM_train',
+                                              URM_validation='URM_validation'):
     # Retrieve which users fall in the wanted list of time frames
     timestamp_df = timestamp_df.copy()
     print("Preprocessing dataframe...")
@@ -54,7 +56,7 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
                                                                                           timestamp_array_train)
 
     rest_interactions2, validation_interactions = merge_splits_without_overwrite_origin_dataset(timestamp_df,
-                                                                                             timestamp_array_validation)
+                                                                                                timestamp_array_validation)
 
     # Look through the timestamp array to find the last date
     # Assuming the last date is at the end
@@ -62,7 +64,7 @@ def split_train_validation_multiple_intervals(manager, timestamp_df, timestamp_a
 
     dayDifference_df = (train_interactions[timestamp_column] - finalDate).dt.days
 
-    train_interactions['Data'] = np.exp((dayDifference_df/exponential_decay).to_numpy())
+    train_interactions['Data'] = np.exp((dayDifference_df / exponential_decay).to_numpy())
 
     train_interactions.sort_values(by='Data')
 
@@ -125,6 +127,7 @@ def exponential_decayed_result(timestamp_df, train_timestamp_array, val_timestam
 
     return train_interactions, validation_interactions
 
+
 def split_submission_train_intervals(manager, timestamp_df, timestamp_array_train):
     # Retrieve which users fall in the wanted list of time frames
     print("Preprocessing URM_submission dataframe...")
@@ -138,7 +141,8 @@ def split_submission_train_intervals(manager, timestamp_df, timestamp_array_trai
 
     timestamp_df = timestamp_df[[timestamp_column, 'UserID', 'ItemID', 'Data']]
 
-    df_submission_train = timestamp_df.query("'" + timestamp_array_train[0][0] + "'<=t_dat<'" + timestamp_array_train[0][1] + "'")
+    df_submission_train = timestamp_df.query(
+        "'" + timestamp_array_train[0][0] + "'<=t_dat<'" + timestamp_array_train[0][1] + "'")
 
     finalDate = pd.to_datetime(timestamp_array_train[0][1])
 

@@ -15,6 +15,7 @@ class GeneralizedMergedHybridRecommender(BaseRecommender):
             recommenders: list,
             verbose=True
     ):
+        self.alphas = None
         self.RECOMMENDER_NAME = ''
         for recommender in recommenders:
             self.RECOMMENDER_NAME = self.RECOMMENDER_NAME + recommender.RECOMMENDER_NAME[:-11]
@@ -28,21 +29,27 @@ class GeneralizedMergedHybridRecommender(BaseRecommender):
         self.recommenders = recommenders
 
     def fit(self, alphas=None):
-        self.alphas = alphas
+        hybrid0 = alphas[0]
+        hybrid1 = alphas[1]
+        self.alphas = [
+            hybrid0 * hybrid1,
+            hybrid0 * (1 - hybrid1),
+            1 - hybrid0
+        ]
 
     def save_model(self, folder_path, file_name=None):
         pass
 
     def _compute_item_score(self, user_id_array, items_to_compute=None):
-        item_score = self.recommenders[0]._compute_item_score(user_id_array,items_to_compute)
-        #print('item_score[0]: \tmin {}\tmax {}\tmean {}\tstd {}'.format(item_score.min(), item_score.max(), item_score.mean(), item_score.std()))
-        #max_item_score = np.max(item_score)
-        #item_score = item_score / max_item_score
-        result = self.alphas[0]*item_score
-        for index in range(1,len(self.alphas)):
-            item_score = self.recommenders[index]._compute_item_score(user_id_array,items_to_compute)
-            #print('item_score[{}]: \tmin {}\tmax {}\tmean {}\tstd {}'.format(index, item_score.min(), item_score.max(), item_score.mean(), item_score.std()))
-            #max_item_score = np.max(item_score)
-            #item_score = item_score / max_item_score
-            result = result + self.alphas[index]*item_score
+        item_score = self.recommenders[0]._compute_item_score(user_id_array, items_to_compute)
+        # print('item_score[0]: \tmin {}\tmax {}\tmean {}\tstd {}'.format(item_score.min(), item_score.max(), item_score.mean(), item_score.std()))
+        # max_item_score = np.max(item_score)
+        # item_score = item_score / max_item_score
+        result = self.alphas[0] * item_score
+        for index in range(1, len(self.alphas)):
+            item_score = self.recommenders[index]._compute_item_score(user_id_array, items_to_compute)
+            # print('item_score[{}]: \tmin {}\tmax {}\tmean {}\tstd {}'.format(index, item_score.min(), item_score.max(), item_score.mean(), item_score.std()))
+            # max_item_score = np.max(item_score)
+            # item_score = item_score / max_item_score
+            result = result + self.alphas[index] * item_score
         return result
