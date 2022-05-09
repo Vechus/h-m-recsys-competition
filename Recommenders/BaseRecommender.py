@@ -152,7 +152,7 @@ class BaseRecommender(object):
             user_id = user_id_array[user_index]
 
             if remove_seen_flag:
-                scores_batch[user_index,:] = self._remove_seen_on_scores(user_id, scores_batch[user_index, :])
+                scores_batch[user_index, :] = self._remove_seen_on_scores(user_id, scores_batch[user_index, :])
 
             # Sorting is done in three steps. Faster then plain np.argsort for higher number of items
             # - Partition the data to extract the set of relevant items

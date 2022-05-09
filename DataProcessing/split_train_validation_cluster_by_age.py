@@ -1,20 +1,25 @@
+import numpy as np
 import pandas as pd
 from DataProcessing.split_train_validation_exponential_decay import exponential_decayed_result
 from Data_manager.DatasetMapperManager import DatasetMapperManager
 
-DATASET_NAME = 'hm-exponential-age-clustered'
+DATASET_NAME = 'hm-exponential-age-clustered-2020Train'
 
 if __name__ == "__main__":
 
     manager = DatasetMapperManager()
 
-    timestamp_df = pd.read_csv('../dataset/transactions_train.csv')
+    timestamp_df = pd.read_csv('../dataset/transactions_train.csv', dtype={'t_dat': object, 'customer_id': str,
+                                                                           'article_id': str,
+                                                                           'price': np.float64,
+                                                                           'sales_channel_id': np.int32})
+    print(timestamp_df.dtypes)
     customers_df = pd.read_csv('../dataset/customers.csv')
 
     print("Loaded transactions and customers...")
 
-    timestamp_list = [("2019-06-22", "2019-09-23")]
-    validation_timestamp = [("2019-09-23", "2019-09-30")]
+    timestamp_list = [("2020-06-22", "2020-09-23")]
+    validation_timestamp = [("2018-09-29", "2018-09-30")]
 
     # Cleanup customer dataframe
     customers_df.drop(["FN", "Active", "club_member_status", "fashion_news_frequency", "postal_code"], axis=1,
@@ -44,8 +49,8 @@ if __name__ == "__main__":
 
     print("Saving customers mappings...")
     # Save age cluster mapping
-    customers_df.to_csv("customers_age_group.csv")
-    print("Saved!")
+    # customers_df.to_csv("customers_age_group.csv")
+    # print("Saved!")
 
     join_result = customers_df.join(train_df, how="left")
     join_result.reset_index(inplace=True)
